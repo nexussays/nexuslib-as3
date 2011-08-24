@@ -24,8 +24,9 @@
 package dna.utils.serialization
 {
 
-import dna.Debug;
+import dna.errors.NotImplementedError;
 import dna.utils.reflection.Reflection;
+import dna.utils.Parse;
 
 import flash.utils.*;
 
@@ -63,12 +64,14 @@ public class XmlSerializer implements ISerializer
 	
 	public function serialize(sourceObject:Object, elementName:String = null, getReadOnlyProperties:Boolean = false):Object
 	{
-		return XmlSerializer.serialize(sourceObject, elementName, getReadOnlyProperties);
+		throw new NotImplementedError();
+		//return XmlSerializer.serialize(sourceObject, elementName, getReadOnlyProperties);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		return XmlSerializer.deserialize(serializedObject, classType);
+		throw new NotImplementedError();
+		//return XmlSerializer.deserialize(serializedObject, classType);
 	}
 	
 	public function toString(verbose:Boolean = false):String
@@ -89,6 +92,7 @@ public class XmlSerializer implements ISerializer
 	 */
 	public static function serialize(sourceObject:Object, elementName:String = null, getReadOnlyProperties:Boolean = false):XML
 	{
+		/*
 		var type:String = getQualifiedClassName(sourceObject);
 		var xml:XML = new XML("<" + (elementName || type.toLowerCase().substring(type.lastIndexOf(":") + 1)) + " />");
 		xml.@type = type;
@@ -105,6 +109,8 @@ public class XmlSerializer implements ISerializer
 			}
 		}
 		return xml;
+		//*/
+		throw new NotImplementedError();
 	}
 	
 	/**
@@ -115,6 +121,7 @@ public class XmlSerializer implements ISerializer
 	 */
 	public static function deserialize(sourceXML:XML, classType:Class = null):*
 	{
+		/*
 		classType = classType || Class(getDefinitionByName(sourceXML.@type));
 		var result:* = new classType();
 		var props:Object = Reflection.getPublicPropertyValues(result);
@@ -146,16 +153,18 @@ public class XmlSerializer implements ISerializer
 			}
 		}
 		return result;
+		//*/
+		throw new NotImplementedError();
 	}
 	
 	//--------------------------------------
 	//	PRIVATE INSTANCE METHODS
 	//--------------------------------------
 	
-	private final function trace(... params):void
-	{
-		Debug.debug(XmlSerializer, params);
-	}
+	//private final function trace(... params):void
+	//{
+		//Debug.debug(XmlSerializer, params);
+	//}
 }
 
 }

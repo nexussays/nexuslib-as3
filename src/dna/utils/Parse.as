@@ -24,8 +24,6 @@
 package dna.utils
 {
 
-import dna.display.AdvancedSprite;
-import dna.Enum;
 import flash.geom.Point;
 import flash.utils.Dictionary;
 

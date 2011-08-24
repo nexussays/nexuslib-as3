@@ -146,26 +146,29 @@ public class Reflection
 			addFields(type, true, false, xml.variable, reflectedType);
 			addFields(type, false, true, xml.factory.constant, reflectedType);
 			addFields(type, false, false, xml.factory.variable, reflectedType);
+			reflectedType.fields.sort(sortMemberInfoOnPosition);
 			
 			//add methods
 			addMethods(type, true, xml.method, reflectedType);
 			addMethods(type, false, xml.factory.method, reflectedType);
+			reflectedType.methods.sort(sortMemberInfoOnPosition);
 			
 			//add properties
 			addProperties(type, true, xml.accessor, reflectedType);
 			addProperties(type, false, xml.factory.accessor, reflectedType);
+			reflectedType.properties.sort(sortMemberInfoOnPosition);
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
 				reflectedType.extendedClasses.push(getClassForReflection(extendedClassXml.@type));
 			}
-			trace(reflectedType.extendedClasses);
+			//trace(reflectedType.extendedClasses);
 			
 			for each(var implementedInterfacesXml:XML in xml.factory.implementsInterface)
 			{
 				reflectedType.implementedInterfaces.push(getClassForReflection(implementedInterfacesXml.@type));
 			}
-			trace(reflectedType.implementedInterfaces);
+			//trace(reflectedType.implementedInterfaces);
 			
 			s_reflectedTypes[type] = reflectedType;
 			
@@ -185,7 +188,7 @@ public class Reflection
 			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, reflectedType, xmlItem.metadata.length());
 			addMetadata(xmlItem, field);
 			info.addField(field);
-			trace(field);
+			//trace(field);
 		}
 	}
 	
@@ -200,7 +203,7 @@ public class Reflection
 			}
 			addMetadata(xmlItem, method);
 			info.addMethod(method);
-			trace(method);
+			//trace(method);
 		}
 	}
 	
@@ -215,7 +218,7 @@ public class Reflection
 				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), reflectedType, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
 				addMetadata(xmlItem, property);
 				info.addProperty(property);
-				trace(property);
+				//trace(property);
 			}
 			else
 			{
@@ -245,6 +248,11 @@ public class Reflection
 				item.addMetadata(metadata);
 			}
 		}
+	}
+	
+	private static function sortMemberInfoOnPosition(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
+	{
+		return l.position < r.position ? -1 : (r.position < l.position ? 1 : 0);
 	}
 	
 	///returns a type for use in the reflection framework
