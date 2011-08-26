@@ -87,10 +87,13 @@ public class Reflection
 	 * @param	className	The fully qualified class name or Class to parse
 	 * @return
 	 */
-	public static function getUnqualifiedClassName(className:Object):String
+	public static function getUnqualifiedClassName(object:Object):String
 	{
-		var str:String = className + "";
-		str = str.substring(str.indexOf(" ") + 1, str.lastIndexOf("]"));
+		var str:String = String(object + "");
+		//parse out class when in format "package.package.package::ClassName"
+		str = str.substring(str.lastIndexOf(":") + 1);
+		//parse out class when in format "[class ClassName]"
+		str = str.substring(str.lastIndexOf(" ") + 1, str.length - 1);
 		return str;
 	}
 	
