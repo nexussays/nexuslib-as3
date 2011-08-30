@@ -40,6 +40,8 @@ public class Reflection
 	
 	///store all reflected types to the describeType() call and processing into a TypeInfo instance only ever happens once
 	private static const s_reflectedTypes:Dictionary = new Dictionary();
+	///store strongly-typed classes that represent metadata on members
+	static private const s_registeredMetadataTypes : Dictionary = new Dictionary();
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -80,9 +82,9 @@ public class Reflection
 	/**
 	 * Given a Class or a fully qualified class name, this will return the unqualified class name.
 	 * @example	<pre>
-	 * parseUnqualifiedClassName(SomeClass) => "SomeClass"
-	 * parseUnqualifiedClassName("com.example.pkg::SomeClass") => "SomeClass"
-	 * parseUnqualifiedClassName("[class SomeClass]") => "SomeClass"
+	 * getUnqualifiedClassName(SomeClass) => "SomeClass"
+	 * getUnqualifiedClassName("com.example.pkg::SomeClass") => "SomeClass"
+	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
 	 * </pre>
 	 * @param	className	The fully qualified class name or Class to parse
 	 * @return
@@ -149,17 +151,14 @@ public class Reflection
 			addFields(type, true, false, xml.variable, reflectedType);
 			addFields(type, false, true, xml.factory.constant, reflectedType);
 			addFields(type, false, false, xml.factory.variable, reflectedType);
-			reflectedType.fields.sort(sortMemberInfoOnPosition);
 			
 			//add methods
 			addMethods(type, true, xml.method, reflectedType);
 			addMethods(type, false, xml.factory.method, reflectedType);
-			reflectedType.methods.sort(sortMemberInfoOnPosition);
 			
 			//add properties
 			addProperties(type, true, xml.accessor, reflectedType);
 			addProperties(type, false, xml.factory.accessor, reflectedType);
-			reflectedType.properties.sort(sortMemberInfoOnPosition);
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
@@ -180,6 +179,15 @@ public class Reflection
 		return reflectedType;
 	}
 	
+	public static function registerMetadataClasses(types:Vector.<Class>):void
+	{
+		//parse and store the class names of the above Metadata classes instead of parsing them every time
+		for each(var type : Class in types)
+		{
+			s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(type)] = type;
+		}
+	}
+	
 	//--------------------------------------
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
@@ -188,7 +196,7 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, reflectedType, xmlItem.metadata.length());
+			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, reflectedType, info, xmlItem.metadata.length());
 			addMetadata(xmlItem, field);
 			info.addField(field);
 			//trace(field);
@@ -199,7 +207,7 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), reflectedType, xmlItem.parameter.length(), xmlItem.metadata.length());
+			var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), reflectedType, info, xmlItem.parameter.length(), xmlItem.metadata.length());
 			for each(var paramXml:XML in xmlItem.parameter)
 			{
 				method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
@@ -218,7 +226,7 @@ public class Reflection
 			if(name != "prototype")
 			{
 				var access:String = String(xmlItem.@access).toLowerCase();
-				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), reflectedType, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
+				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), reflectedType, info, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
 				addMetadata(xmlItem, property);
 				info.addProperty(property);
 				//trace(property);
@@ -236,32 +244,49 @@ public class Reflection
 	{
 		for each(var metadataXml:XML in xml.metadata)
 		{
-			//special-case this metadata tag
+			//this is a default matadata tag added by the compiler in a debug build
 			if(metadataXml.@name == "__go_to_definition_help")
 			{
 				item.setPosition(parseInt(metadataXml.arg[0].@value));
 			}
 			else
 			{
-				var metadata:MetadataInfo = new MetadataInfo(metadataXml.@name);
+				//add metadata info
+				var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
 				for each(var argXml:XML in metadataXml.arg)
 				{
-					metadata.addValue(argXml.@key, argXml.@value);
+					metadataInfo.addValue(argXml.@key, argXml.@value);
 				}
-				item.addMetadata(metadata);
+				item.addMetadataInfo(metadataInfo);
+				
+				//see if there is a registered strongly-typed class for this metadata
+				var metadata : Metadata = Reflection.getTypedMetadata(metadataInfo);
+				if(metadata != null)
+				{
+					item.addMetadataInstance(metadata);
+				}
 			}
 		}
 	}
 	
-	private static function sortMemberInfoOnPosition(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
+	static internal function getTypedMetadata(metadataInfo:MetadataInfo):Metadata
 	{
-		return l.position < r.position ? -1 : (r.position < l.position ? 1 : 0);
+		//iterate over all the available metadata types and instantiate any found matches
+		for(var name : String in s_registeredMetadataTypes)
+		{
+			//implemantors of metadata should omit the "Metadata" suffix, it is added here
+			if(metadataInfo.name + "Metadata" == name)
+			{
+				return new s_registeredMetadataTypes[name](metadataInfo);
+			}
+		}
+		return null;
 	}
 	
 	///returns a type for use in the reflection framework
-	private static function getClassForReflection(type:String):Class
+	private static function getClassForReflection(typeName:String):Class
 	{
-		return type == "void" || type == "undefined" ? null : (type == "*" ? Object : Class(getDefinitionByName(type)));
+		return typeName == "void" || typeName == "undefined" ? null : (typeName == "*" ? Object : Class(getDefinitionByName(typeName)));
 	}
 }
 }

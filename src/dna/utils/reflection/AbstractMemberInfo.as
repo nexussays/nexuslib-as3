@@ -37,28 +37,33 @@ public class AbstractMemberInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	protected var m_name : String;
+	protected var m_name:String;
 	protected var m_declaringType:Class;
 	protected var m_reflectedType:Class;
-	//as defined in the debug-only metadata tag __go_to_definition_help
-	protected var m_position : int;
+	protected var m_reflectedTypeInfo : TypeInfo;
+	///as defined in the debug-only metadata tag __go_to_definition_help
+	protected var m_position:int;
 	
-	private var m_metadataIndex : int = 0;
-	protected var m_metadata : Vector.<MetadataInfo>;
-	protected var m_metadataByName : Dictionary;
+	private var m_metadataIndex:int = 0;
+	protected var m_metadata:Vector.<MetadataInfo>;
+	protected var m_metadataByName:Dictionary;
+	///if provided, metadata tags can be parsed into classes that are registered with Metadata
+	protected var m_metadataInstances:Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractMemberInfo(name:String, declaringType:Class, reflectedType:Class, metadataCount:int)
+	public function AbstractMemberInfo(name:String, declaringType:Class, reflectedType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
 	{
 		m_name = name;
 		m_declaringType = declaringType;
 		m_reflectedType = reflectedType;
+		m_reflectedTypeInfo  = reflectedTypeInfo;
 		
 		m_metadata = new Vector.<MetadataInfo>(metadataCount, true);
 		m_metadataByName = new Dictionary();
+		m_metadataInstances = new Dictionary();
 	}
 	
 	//--------------------------------------
@@ -79,6 +84,11 @@ public class AbstractMemberInfo
 	 * The class which was reflected to derive this member info
 	 */
 	public function get reflectedType():Class { return m_reflectedType; }
+	
+	/**
+	 * The TypeInfo that was created to derive this member info
+	 */
+	public function get reflectedTypeInfo():TypeInfo { return m_reflectedTypeInfo; }
 	
 	/**
 	 * Any metadata attached to this member
@@ -104,14 +114,33 @@ public class AbstractMemberInfo
 		return m_metadataByName[name];
 	}
 	
+	public function getMetadataByType(type:Class):Metadata
+	{
+		return m_metadataInstances[type] as Metadata;
+	}
+	
 	//--------------------------------------
 	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
 	
-	internal function addMetadata(meta:MetadataInfo):void
+	internal function addMetadataInfo(meta:MetadataInfo):void
 	{
 		m_metadata[m_metadataIndex++] = meta;
 		m_metadataByName[meta.name] = meta;
+	}
+	
+	internal function addMetadataInstance(meta:Metadata):void
+	{
+		var type:Class = Reflection.getClassOfInstance(meta);
+		
+		if(m_metadataInstances[type] != null)
+		{
+			throw new Error("Metadata tag of type \"" + type + "\" defined twice on the same member");
+		}
+		else
+		{
+			m_metadataInstances[type] = meta;
+		}
 	}
 	
 	internal function setPosition(value:int):void
@@ -123,11 +152,6 @@ public class AbstractMemberInfo
 	//	PROTECTED INSTANCE METHODS
 	//--------------------------------------
 	
-	protected function getStringForClass(type:Class):String
-	{
-		var str : String = type + "";
-		return str.substr(str.indexOf(" "), str.length - 2);
-	}
 }
 
 }

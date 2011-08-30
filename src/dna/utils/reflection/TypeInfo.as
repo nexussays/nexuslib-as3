@@ -58,7 +58,7 @@ public class TypeInfo extends AbstractMemberInfo
 	
 	public function TypeInfo(name:String, type:Class, isDynamic:Boolean, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
-		super(name, type, type, metadataCount);
+		super(name, type, type, this, metadataCount);
 		
 		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
@@ -97,10 +97,100 @@ public class TypeInfo extends AbstractMemberInfo
 	{
 		return "[Type:" + m_name + "]";
 	}
-
+	
+	/**
+	 * Sorts fields, methods, and properties according to their position in the reflected TypeInfo
+	 */
+	public function sortMembersByPosition():void
+	{
+		m_fields.sort(positionSort);
+		m_methods.sort(positionSort);
+		m_properties.sort(positionSort);
+	}
+	
+	/**
+	 * Sorts fields, methods, and properties according to their name
+	 */
+	public function sortMembersByName():void
+	{
+		m_fields.sort(nameSort);
+		m_methods.sort(nameSort);
+		m_properties.sort(nameSort);
+	}
+	
+	/**
+	 * Warning! This is a very costly sort that needs to get the TypeInfo for the entire inheritance chain. Sorts members according
+	 * to the type that declares them
+	 */
+	public function sortMembersByDeclaringType():void
+	{
+		//malachi: really need to figure out a way to streamline this method
+		var superTypes : Vector.<TypeInfo> = new Vector.<TypeInfo>();
+		for each(var superClass : Class in m_extendedClasses)
+		{
+			superTypes.push(Reflection.getTypeInfo(superClass));
+		}
+		superTypes.push(this);
+		
+		var fieldsChecked : Dictionary = new Dictionary(true);
+		var fieldsInOrder : Vector.<FieldInfo> = new Vector.<FieldInfo>();
+		for each(var superType : TypeInfo in superTypes)
+		{
+			var superclassFields : Vector.<FieldInfo> = new Vector.<FieldInfo>();
+			for each(var field : FieldInfo in superType.fields)
+			{
+				if(fieldsChecked[field.name] == null)
+				{
+					for each(var memberField : FieldInfo in m_fields)
+					{
+						if(memberField.name == field.name)
+						{
+							superclassFields.push(memberField);
+							fieldsChecked[memberField.name] = true;
+							break;
+						}
+					}
+				}
+			}
+			fieldsInOrder = fieldsInOrder.concat(superclassFields.sort(positionSort));
+		}
+		m_fields = fieldsInOrder;
+		
+		m_methods.sort(declaringTypeSort);
+		m_properties.sort(declaringTypeSort);
+	}
+	
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
+	
+	private function declaringTypeSort(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
+	{
+		trace("L", l, l.reflectedType, l.declaringType, l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType));
+		trace("R", r, r.reflectedType, r.declaringType, r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType));
+		if(l.declaringType == r.declaringType)
+		{
+			return positionSort(l, r);
+		}
+		else if(l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType) < r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType))
+		{
+			return -1;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	
+	private function positionSort(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
+	{
+		return l.position < r.position ? -1 : (r.position < l.position ? 1 : nameSort(l, r));
+	}
+	
+	private function nameSort(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
+	{
+		return l.name < r.name ? -1 : (r.name < l.name ? 1 : 0);
+	}
 	
 	//--------------------------------------
 	//	INTERNAL INSTANCE METHODS

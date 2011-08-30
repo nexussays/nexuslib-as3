@@ -51,9 +51,9 @@ public class MethodInfo extends AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function MethodInfo(name:String, isStatic:Boolean, returnType:Class, declaringType:Class, reflectedType:Class, paramCount:int, metadataCount:int)
+	public function MethodInfo(name:String, isStatic:Boolean, returnType:Class, declaringType:Class, reflectedType:Class, reflectedTypeInfo:TypeInfo, paramCount:int, metadataCount:int)
 	{
-		super(name, declaringType, reflectedType, metadataCount);
+		super(name, declaringType, reflectedType, reflectedTypeInfo, metadataCount);
 		
 		m_returnType = returnType;
 		m_isStatic = isStatic;

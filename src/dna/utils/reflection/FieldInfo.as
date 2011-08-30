@@ -51,9 +51,9 @@ public class FieldInfo extends AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedType:Class, metadatacount:int)
+	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
 	{
-		super(name, declaringType, reflectedType, metadatacount);
+		super(name, declaringType, reflectedType, reflectedTypeInfo, metadatacount);
 		
 		m_type = type;
 		m_isStatic = isStatic;
