@@ -166,8 +166,8 @@ public class TypeInfo extends AbstractMemberInfo
 	
 	private function declaringTypeSort(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
 	{
-		trace("L", l, l.reflectedType, l.declaringType, l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType));
-		trace("R", r, r.reflectedType, r.declaringType, r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType));
+		//trace("L", l, l.reflectedType, l.declaringType, l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType));
+		//trace("R", r, r.reflectedType, r.declaringType, r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType));
 		if(l.declaringType == r.declaringType)
 		{
 			return positionSort(l, r);
