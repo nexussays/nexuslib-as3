@@ -25,7 +25,10 @@ package dna.utils.reflection
 {
 
 import dna.utils.Parse;
-import flash.utils.*;
+import flash.utils.describeType;
+import flash.utils.Dictionary;
+import flash.utils.getDefinitionByName;
+import flash.utils.getQualifiedSuperclassName;
 
 /**
  * ...
@@ -54,7 +57,7 @@ public class Reflection
 	 */
 	public static function getClass(obj:Object):Class
 	{
-		return obj == null ? null : Class(getDefinitionByName(getQualifiedClassName(obj)));
+		return obj == null ? null : Class(getDefinitionByName(flash.utils.getQualifiedClassName(obj)));
 	}
 	
 	/**
@@ -97,6 +100,16 @@ public class Reflection
 		//parse out class when in format "[class ClassName]"
 		str = str.substring(str.lastIndexOf(" ") + 1, str.length - 1);
 		return str;
+	}
+	
+	/**
+	 * Returns the fully qualified class name of an object. Convenience method that wraps flash.utils.getQualifiedClassName
+	 * @param	value	The object for which a fully qualified class name is desired.
+	 * @return	A string containing the fully qualified class name.
+	 */
+	public static function getQualifiedClassName(value:Object):String
+	{
+		return flash.utils.getQualifiedClassName(value);
 	}
 	
 	/**
@@ -208,7 +221,7 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var member:AbstractMemberInfo = method(xmlItem, typeInfo, isStatic);
+			var member:AbstractMemberInfo = method(xmlItem, typeInfo, isStatic, isConstant);
 			if(member != null)
 			{
 				//add metadata
