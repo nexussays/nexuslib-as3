@@ -21,7 +21,7 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
 import flash.utils.*;

@@ -21,17 +21,18 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
 import flash.utils.*;
 
+
 /**
- * Represents a property (getter/setter)
+ * Base class for PropertyInfo and FieldInfo
  * @author	Malachi Griffie <malachi@nexussays.com>
- * @since	7/23/2011 3:34 AM
+ * @since	9/7/2011 4:50 AM
  */
-public class PropertyInfo extends AbstractFieldInfo
+public class AbstractFieldInfo extends AbstractMemberInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -41,48 +42,38 @@ public class PropertyInfo extends AbstractFieldInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_canRead : Boolean;
-	private var m_canWrite : Boolean;
+	protected var m_type:Class;
+	protected var m_typeName : String;
+	
+	protected var m_isStatic : Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
+	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, declaringType, reflectedTypeInfo, metadataCount);
 		
-		m_declaringType = declaringType;
-		
-		m_canRead = read;
-		m_canWrite = write;
-		
-		if (m_canRead == false && m_canWrite == false)
-		{
-			throw new ArgumentError("Cannot create PropertyInfo, both canRead and canWrite are set to false");
-		}
+		m_type = type;
+		m_isStatic = isStatic;
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get canRead():Boolean { return m_canRead; }
+	public function get isStatic():Boolean { return m_isStatic; }
 	
-	public function get canWrite():Boolean { return m_canWrite; }
+	public function get type():Class { return m_type; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function toString():String
-	{
-		if(m_typeName == null)
-		{
-			m_typeName = Reflection.getUnqualifiedClassName(m_type);
-		}
-		return "[" + (m_isStatic ? "Static" : "") + (m_canRead && m_canWrite ? "ReadWrite" : (m_canRead ? "ReadOnly" : "WriteOnly")) + "Property|" + m_name + ":" + m_typeName + "]";
-	}
+	//--------------------------------------
+	//	PRIVATE & PROTECTED INSTANCE METHODS
+	//--------------------------------------
 }
 
 }

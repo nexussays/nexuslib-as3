@@ -21,69 +21,70 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
-import flash.utils.*;
-
 /**
- * Represents a metadata tag applied to an element
+ * ...
  * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
-public class MetadataInfo
+public class MethodParameterInfo
 {
+	//--------------------------------------
+	//	CLASS CONSTANTS
+	//--------------------------------------
+	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_name : String;
-	
-	private var m_properties : Dictionary;
-	//private var m_keys : Vector.<String>;
+	private var m_type : Class;
+	private var m_typeName : String;
+	private var m_isOptional : Boolean;
+	private var m_position : int;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function MetadataInfo(name:String)
+	public function MethodParameterInfo(type:Class, pos:int, isOptional:Boolean)
 	{
-		m_name = name;
-		m_properties = new Dictionary();
+		m_type = type;
+		m_position = pos;
+		m_isOptional = isOptional;
 	}
-
+	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get name():String { return m_name; }
+	/**
+	 * The type of this parameter. If the paramater is untyped, this will return null
+	 */
+	public function get type():Class { return m_type; }
 	
-	//public function get keys():Vector.<String> { return m_keys; }
+	/**
+	 * If the argument is optional to the method, that is, a default value is provided if the argument is not
+	 */
+	public function get isOptional():Boolean { return m_isOptional; }
 	
-	public function get properties():Dictionary { return m_properties; }
+	/**
+	 * The zero-based position of the parameter in the parameter list
+	 */
+	public function get position():int { return m_position; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function getValue(key:String):String
-	{
-		return m_properties[key];
-	}
-	
 	public function toString():String
 	{
-		return "[Metadata|" + m_name + "]";
-	}
-	
-	//--------------------------------------
-	//	INTERNAL INSTANCE METHODS
-	//--------------------------------------
-	
-	internal function addValue(key:String, value:String):void
-	{
-		m_properties[key] = value;
-		//m_keys.push(key);
+		if(m_typeName == null)
+		{
+			m_typeName = Reflection.getUnqualifiedClassName(m_type);
+		}
+		return m_typeName;
 	}
 }
 

@@ -21,7 +21,7 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils
+package nexus.utils
 {
 
 import flash.geom.Point;

@@ -21,11 +21,11 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.serialization
+package nexus.utils.serialization
 {
 
-import dna.errors.NotImplementedError;
-import dna.utils.reflection.*;
+import nexus.errors.NotImplementedError;
+import nexus.utils.reflection.*;
 
 /**
  * Serialize a strongly-typed object into a native object

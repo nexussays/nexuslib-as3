@@ -21,37 +21,36 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.errors
 {
 
 import flash.errors.IllegalOperationError;
 import flash.utils.*;
 
+
 /**
  * ...
  * @author	Malachi Griffie <malachi@nexussays.com>
+ * @since 7/6/2010 9:38 PM
  */
-public class Metadata
+public class NotImplementedError extends IllegalOperationError
 {
+	
 	//--------------------------------------
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
 	//--------------------------------------
-	//	INSTANCE VARIABLES
+	//	PRIVATE VARIABLES
 	//--------------------------------------
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	/**
-	 * Create a strongly-typed Metadata instance from the provided MetadataInfo
-	 * @param	info
-	 */
-	public function Metadata(info:MetadataInfo)
+	public function NotImplementedError(id:int=0)
 	{
-		
+		super("Not Implemented", id);
 	}
 	
 	//--------------------------------------
@@ -59,12 +58,17 @@ public class Metadata
 	//--------------------------------------
 	
 	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
+	//	PUBLIC METHODS
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	EVENT HANDLERS
 	//--------------------------------------
 
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
+
 }
 
 }

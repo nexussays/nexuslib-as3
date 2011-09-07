@@ -21,10 +21,10 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
-import dna.utils.Parse;
+import nexus.utils.Parse;
 import flash.utils.describeType;
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;

@@ -21,54 +21,57 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.errors
+package nexus.utils.reflection
 {
 
-import flash.errors.IllegalOperationError;
 import flash.utils.*;
-
 
 /**
  * ...
  * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/6/2010 9:38 PM
+ * @since	7/23/2011 3:34 AM
  */
-public class NotImplementedError extends IllegalOperationError
+public class FieldInfo extends AbstractFieldInfo
 {
-	
 	//--------------------------------------
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
 	//--------------------------------------
-	//	PRIVATE VARIABLES
+	//	INSTANCE VARIABLES
 	//--------------------------------------
+	
+	private var m_isConstant : Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function NotImplementedError(id:int=0)
+	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
 	{
-		super("Not Implemented", id);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadatacount);
+		
+		m_isConstant = isConstant;
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	//--------------------------------------
-	//	PUBLIC METHODS
-	//--------------------------------------
+	public function get isConstant():Boolean { return m_isConstant; }
 	
 	//--------------------------------------
-	//	EVENT HANDLERS
+	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
-
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
-
+	
+	public function toString():String
+	{
+		if(m_typeName == null)
+		{
+			m_typeName = Reflection.getUnqualifiedClassName(m_type);
+		}
+		return "[" + (m_isStatic ? "Static" : "") + (m_isConstant ? "Constant" : "Variable") + "|" + m_name + ":" + m_typeName + "]";
+	}
 }
 
 }

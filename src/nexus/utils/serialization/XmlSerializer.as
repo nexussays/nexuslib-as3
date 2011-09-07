@@ -21,12 +21,12 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.serialization
+package nexus.utils.serialization
 {
 
-import dna.errors.NotImplementedError;
-import dna.utils.reflection.Reflection;
-import dna.utils.Parse;
+import nexus.errors.NotImplementedError;
+import nexus.utils.reflection.Reflection;
+import nexus.utils.Parse;
 
 import flash.utils.*;
 

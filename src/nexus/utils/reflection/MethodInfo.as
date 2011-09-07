@@ -21,10 +21,10 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
-import dna.errors.NotImplementedError;
+import nexus.errors.NotImplementedError;
 import flash.utils.*;
 
 /**

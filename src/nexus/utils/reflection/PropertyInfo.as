@@ -21,17 +21,17 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
 import flash.utils.*;
 
 /**
- * ...
+ * Represents a property (getter/setter)
  * @author	Malachi Griffie <malachi@nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
-public class FieldInfo extends AbstractFieldInfo
+public class PropertyInfo extends AbstractFieldInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -41,24 +41,35 @@ public class FieldInfo extends AbstractFieldInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_isConstant : Boolean;
+	private var m_canRead : Boolean;
+	private var m_canWrite : Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
+	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadatacount);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadataCount);
 		
-		m_isConstant = isConstant;
+		m_declaringType = declaringType;
+		
+		m_canRead = read;
+		m_canWrite = write;
+		
+		if (m_canRead == false && m_canWrite == false)
+		{
+			throw new ArgumentError("Cannot create PropertyInfo, both canRead and canWrite are set to false");
+		}
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get isConstant():Boolean { return m_isConstant; }
+	public function get canRead():Boolean { return m_canRead; }
+	
+	public function get canWrite():Boolean { return m_canWrite; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -70,7 +81,7 @@ public class FieldInfo extends AbstractFieldInfo
 		{
 			m_typeName = Reflection.getUnqualifiedClassName(m_type);
 		}
-		return "[" + (m_isStatic ? "Static" : "") + (m_isConstant ? "Constant" : "Variable") + "|" + m_name + ":" + m_typeName + "]";
+		return "[" + (m_isStatic ? "Static" : "") + (m_canRead && m_canWrite ? "ReadWrite" : (m_canRead ? "ReadOnly" : "WriteOnly")) + "Property|" + m_name + ":" + m_typeName + "]";
 	}
 }
 

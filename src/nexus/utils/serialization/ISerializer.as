@@ -21,7 +21,7 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.serialization
+package nexus.utils.serialization
 {
 	
 /**

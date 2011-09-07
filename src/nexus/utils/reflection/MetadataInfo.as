@@ -21,59 +21,70 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package dna.utils.reflection
+package nexus.utils.reflection
 {
 
 import flash.utils.*;
 
-
 /**
- * Base class for PropertyInfo and FieldInfo
+ * Represents a metadata tag applied to an element
  * @author	Malachi Griffie <malachi@nexussays.com>
- * @since	9/7/2011 4:50 AM
+ * @since 7/23/2011 3:34 AM
  */
-public class AbstractFieldInfo extends AbstractMemberInfo
+public class MetadataInfo
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	protected var m_type:Class;
-	protected var m_typeName : String;
+	private var m_name : String;
 	
-	protected var m_isStatic : Boolean;
+	private var m_properties : Dictionary;
+	//private var m_keys : Vector.<String>;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
+	public function MetadataInfo(name:String)
 	{
-		super(name, declaringType, reflectedTypeInfo, metadataCount);
-		
-		m_type = type;
-		m_isStatic = isStatic;
+		m_name = name;
+		m_properties = new Dictionary();
 	}
-	
+
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get isStatic():Boolean { return m_isStatic; }
+	public function get name():String { return m_name; }
 	
-	public function get type():Class { return m_type; }
+	//public function get keys():Vector.<String> { return m_keys; }
+	
+	public function get properties():Dictionary { return m_properties; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
+	public function getValue(key:String):String
+	{
+		return m_properties[key];
+	}
+	
+	public function toString():String
+	{
+		return "[Metadata|" + m_name + "]";
+	}
+	
 	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
+	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
+	
+	internal function addValue(key:String, value:String):void
+	{
+		m_properties[key] = value;
+		//m_keys.push(key);
+	}
 }
 
 }

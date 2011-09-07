@@ -21,20 +21,20 @@
     </source-path>
   </compiler>
   <include-classes>
-    <class>dna.errors.NotImplementedError</class>
-    <class>dna.utils.Parse</class>
-    <class>dna.utils.reflection.AbstractFieldInfo</class>
-    <class>dna.utils.reflection.AbstractMemberInfo</class>
-    <class>dna.utils.reflection.FieldInfo</class>
-    <class>dna.utils.reflection.Metadata</class>
-    <class>dna.utils.reflection.MetadataInfo</class>
-    <class>dna.utils.reflection.MethodInfo</class>
-    <class>dna.utils.reflection.MethodParameterInfo</class>
-    <class>dna.utils.reflection.PropertyInfo</class>
-    <class>dna.utils.reflection.Reflection</class>
-    <class>dna.utils.reflection.TypeInfo</class>
-    <class>dna.utils.serialization.ISerializer</class>
-    <class>dna.utils.serialization.ObjectSerializer</class>
-    <class>dna.utils.serialization.XmlSerializer</class>
+    <class>nexus.errors.NotImplementedError</class>
+    <class>nexus.utils.Parse</class>
+    <class>nexus.utils.reflection.AbstractFieldInfo</class>
+    <class>nexus.utils.reflection.AbstractMemberInfo</class>
+    <class>nexus.utils.reflection.FieldInfo</class>
+    <class>nexus.utils.reflection.Metadata</class>
+    <class>nexus.utils.reflection.MetadataInfo</class>
+    <class>nexus.utils.reflection.MethodInfo</class>
+    <class>nexus.utils.reflection.MethodParameterInfo</class>
+    <class>nexus.utils.reflection.PropertyInfo</class>
+    <class>nexus.utils.reflection.Reflection</class>
+    <class>nexus.utils.reflection.TypeInfo</class>
+    <class>nexus.utils.serialization.ISerializer</class>
+    <class>nexus.utils.serialization.ObjectSerializer</class>
+    <class>nexus.utils.serialization.XmlSerializer</class>
   </include-classes>
 </flex-config>
