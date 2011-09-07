@@ -26,9 +26,11 @@ package dna.utils.serialization
 
 import dna.Debug;
 import dna.errors.NotImplementedError;
+import dna.utils.reflection.AbstractMemberInfo;
+import dna.utils.reflection.FieldInfo;
+import dna.utils.reflection.PropertyInfo;
 import dna.utils.reflection.Reflection;
 import dna.utils.reflection.TypeInfo;
-import flash.utils.getDefinitionByName;
 
 /**
  * ...
@@ -90,7 +92,36 @@ public class JsonSerializer implements ISerializer
 	 */
 	static public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
 	{
-		throw new NotImplementedError();
+		if(sourceObject == null)
+		{
+			return null;
+		}
+		
+		var result:Object = { "type": Reflection.getQualifiedClassName(sourceObject), "data": { }};
+		var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+		//var members : Vector.<AbstractMemberInfo> = typeInfo.fields.concat(typeInfo.properties);
+		//for each(var member : AbstractMemberInfo in typeInfo.fields)
+		//{
+			//if( includeReadOnlyProperties || ((member is FieldInfo && !FieldInfo(member).isConstant) || (member is PropertyInfo && PropertyInfo(member).canWrite)) )
+			//{
+				//result.data[member.name] = Reflection.isPrimitive(member.type) ? sourceObject[member.name] : serialize(sourceObject[member.name], includeReadOnlyProperties);
+			//}
+		//}
+		for each(var field : FieldInfo in typeInfo.fields)
+		{
+			if(includeReadOnlyProperties || !field.isConstant)
+			{
+				result.data[field.name] = Reflection.isPrimitive(field.type) ? sourceObject[field.name] : serialize(sourceObject[field.name], includeReadOnlyProperties);
+			}
+		}
+		for each(var property : PropertyInfo in typeInfo.properties)
+		{
+			if(property.canRead && (includeReadOnlyProperties || property.canWrite))
+			{
+				result.data[property.name] = Reflection.isPrimitive(property.type) ? sourceObject[property.name] : serialize(sourceObject[property.name], includeReadOnlyProperties);
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -107,8 +138,8 @@ public class JsonSerializer implements ISerializer
 		}
 		
 		//check to see if object is in the same format as this deserializes to or if we have the data only
-		var dataOnly : Boolean = false;
-		for(var key : String in serializedObject)
+		var dataOnly:Boolean = false;
+		for(var key:String in serializedObject)
 		{
 			if(key != "data" && key != "type")
 			{
@@ -116,7 +147,7 @@ public class JsonSerializer implements ISerializer
 			}
 		}
 		
-		var data : Object = dataOnly ? serializedObject : serializedObject.data;
+		var data:Object = dataOnly ? serializedObject : serializedObject.data;
 		
 		var type:Class = classType;
 		if(type == null)
@@ -124,7 +155,7 @@ public class JsonSerializer implements ISerializer
 			//check to see if the format provides the type or not
 			if(!dataOnly && "type" in serializedObject)
 			{
-				type = Class(getDefinitionByName(serializedObject.type));
+				type = Reflection.getClass(serializedObject.type);
 			}
 			else
 			{
@@ -132,12 +163,13 @@ public class JsonSerializer implements ISerializer
 			}
 		}
 		
-		var typeInfo : TypeInfo = Reflection.getTypeInfo(type);
-		var instance : Object = new type();
+		var typeInfo:TypeInfo = Reflection.getTypeInfo(type);
+		var instance:Object = new type();
 		for(key in data)
 		{
-			if(
+			
 		}
+		return instance;
 	}
 	
 	//--------------------------------------
