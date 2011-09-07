@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">
+  <output>C:\Users\mgriffie\Development\Projects\Misc Game Designs\foo\.\bin\nexuslib.reflection.swc</output>
+  <use-network>true</use-network>
+  <target-player>10.0</target-player>
+  <warnings>true</warnings>
+  <benchmark>false</benchmark>
+  <compiler>
+    <accessible>false</accessible>
+    <allow-source-path-overlap>false</allow-source-path-overlap>
+    <optimize>true</optimize>
+    <strict>true</strict>
+    <es>false</es>
+    <show-actionscript-warnings>true</show-actionscript-warnings>
+    <show-binding-warnings>true</show-binding-warnings>
+    <show-unused-type-selector-warnings>true</show-unused-type-selector-warnings>
+    <use-resource-bundle-metadata>true</use-resource-bundle-metadata>
+    <verbose-stacktraces>false</verbose-stacktraces>
+    <source-path>
+      <path-element>c:\users\mgriffie\development\projects\misc game designs\foo\src</path-element>
+    </source-path>
+  </compiler>
+  <include-classes>
+    <class>dna.errors.NotImplementedError</class>
+    <class>dna.utils.Parse</class>
+    <class>dna.utils.reflection.AbstractFieldInfo</class>
+    <class>dna.utils.reflection.AbstractMemberInfo</class>
+    <class>dna.utils.reflection.FieldInfo</class>
+    <class>dna.utils.reflection.Metadata</class>
+    <class>dna.utils.reflection.MetadataInfo</class>
+    <class>dna.utils.reflection.MethodInfo</class>
+    <class>dna.utils.reflection.MethodParameterInfo</class>
+    <class>dna.utils.reflection.PropertyInfo</class>
+    <class>dna.utils.reflection.Reflection</class>
+    <class>dna.utils.reflection.TypeInfo</class>
+    <class>dna.utils.serialization.ISerializer</class>
+    <class>dna.utils.serialization.ObjectSerializer</class>
+    <class>dna.utils.serialization.XmlSerializer</class>
+  </include-classes>
+</flex-config>

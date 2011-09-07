@@ -29,7 +29,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie (malachi@nexussays.com)
+ * @author	Malachi Griffie <malachi@nexussays.com>
  */
 public class Metadata
 {

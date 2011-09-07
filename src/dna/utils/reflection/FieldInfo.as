@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie (malachi@nexussays.com)
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
 public class FieldInfo extends AbstractFieldInfo

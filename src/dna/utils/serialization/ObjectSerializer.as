@@ -29,7 +29,7 @@ import dna.utils.reflection.*;
 
 /**
  * Serialize a strongly-typed object into a native object
- * @author	Malachi Griffie (malachi@nexussays.com)
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since	9/7/2011 4:39 AM
  */
 public class ObjectSerializer implements ISerializer
