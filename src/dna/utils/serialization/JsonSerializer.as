@@ -26,6 +26,9 @@ package dna.utils.serialization
 
 import dna.Debug;
 import dna.errors.NotImplementedError;
+import dna.utils.reflection.Reflection;
+import dna.utils.reflection.TypeInfo;
+import flash.utils.getDefinitionByName;
 
 /**
  * ...
@@ -48,7 +51,7 @@ public class JsonSerializer implements ISerializer
 	
 	public function JsonSerializer()
 	{
-		
+	
 	}
 	
 	//--------------------------------------
@@ -69,7 +72,7 @@ public class JsonSerializer implements ISerializer
 		return JsonSerializer.deserialize(serializedObject, classType);
 	}
 	
-	public function toString(verbose:Boolean=false):String
+	public function toString(verbose:Boolean = false):String
 	{
 		return "[JsonSerializer]";
 	}
@@ -98,14 +101,50 @@ public class JsonSerializer implements ISerializer
 	 */
 	static public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		throw new NotImplementedError();
+		if(serializedObject == null)
+		{
+			return null;
+		}
+		
+		//check to see if object is in the same format as this deserializes to or if we have the data only
+		var dataOnly : Boolean = false;
+		for(var key : String in serializedObject)
+		{
+			if(key != "data" && key != "type")
+			{
+				dataOnly = true;
+			}
+		}
+		
+		var data : Object = dataOnly ? serializedObject : serializedObject.data;
+		
+		var type:Class = classType;
+		if(type == null)
+		{
+			//check to see if the format provides the type or not
+			if(!dataOnly && "type" in serializedObject)
+			{
+				type = Class(getDefinitionByName(serializedObject.type));
+			}
+			else
+			{
+				throw new Error("Cannot deserialize object, no type is provided and none could be derived.");
+			}
+		}
+		
+		var typeInfo : TypeInfo = Reflection.getTypeInfo(type);
+		var instance : Object = new type();
+		for(key in data)
+		{
+			if(
+		}
 	}
 	
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
 	
-	private final function trace(...params): void
+	private final function trace(... params):void
 	{
 		Debug.debug(JsonSerializer, params);
 	}
