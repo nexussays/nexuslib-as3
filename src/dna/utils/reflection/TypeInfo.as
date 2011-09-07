@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * Represents a reflected class, call Reflection.getTypeInfo() to retrieve a TypeInfo object
- * @author mgriffie
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class TypeInfo extends AbstractMemberInfo
@@ -58,7 +58,7 @@ public class TypeInfo extends AbstractMemberInfo
 	
 	public function TypeInfo(name:String, type:Class, isDynamic:Boolean, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
-		super(name, type, type, this, metadataCount);
+		super(name, type, this, metadataCount);
 		
 		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
@@ -172,7 +172,7 @@ public class TypeInfo extends AbstractMemberInfo
 		{
 			return positionSort(l, r);
 		}
-		else if(l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType) < r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType))
+		else if(l.reflectedFrom.extendedClasses.indexOf(l.declaringType) < r.reflectedFrom.extendedClasses.indexOf(r.declaringType))
 		{
 			return -1;
 		}

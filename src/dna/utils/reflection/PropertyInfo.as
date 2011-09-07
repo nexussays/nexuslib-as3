@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * Represents a property (getter/setter)
- * @author mgriffie
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class PropertyInfo extends AbstractMemberInfo
@@ -53,9 +53,9 @@ public class PropertyInfo extends AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
+	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
-		super(name, declaringType, reflectedType, reflectedTypeInfo, metadataCount);
+		super(name, declaringType, reflectedTypeInfo, metadataCount);
 		
 		m_isStatic = isStatic;
 		

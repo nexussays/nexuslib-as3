@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -29,7 +29,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author mgriffie
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class Reflection
@@ -196,7 +196,7 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, reflectedType, info, xmlItem.metadata.length());
+			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, info, xmlItem.metadata.length());
 			addMetadata(xmlItem, field);
 			info.addField(field);
 			//trace(field);
@@ -207,7 +207,7 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), reflectedType, info, xmlItem.parameter.length(), xmlItem.metadata.length());
+			var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), info, xmlItem.parameter.length(), xmlItem.metadata.length());
 			for each(var paramXml:XML in xmlItem.parameter)
 			{
 				method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
@@ -226,7 +226,7 @@ public class Reflection
 			if(name != "prototype")
 			{
 				var access:String = String(xmlItem.@access).toLowerCase();
-				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), reflectedType, info, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
+				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), info, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
 				addMetadata(xmlItem, property);
 				info.addProperty(property);
 				//trace(property);

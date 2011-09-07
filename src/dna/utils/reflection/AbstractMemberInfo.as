@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author mgriffie
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class AbstractMemberInfo
@@ -39,8 +39,7 @@ public class AbstractMemberInfo
 	
 	protected var m_name:String;
 	protected var m_declaringType:Class;
-	protected var m_reflectedType:Class;
-	protected var m_reflectedTypeInfo : TypeInfo;
+	protected var m_reflectedFrom : TypeInfo;
 	///as defined in the debug-only metadata tag __go_to_definition_help
 	protected var m_position:int;
 	
@@ -54,12 +53,11 @@ public class AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractMemberInfo(name:String, declaringType:Class, reflectedType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
+	public function AbstractMemberInfo(name:String, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
 	{
 		m_name = name;
 		m_declaringType = declaringType;
-		m_reflectedType = reflectedType;
-		m_reflectedTypeInfo  = reflectedTypeInfo;
+		m_reflectedFrom  = reflectedTypeInfo;
 		
 		m_metadata = new Vector.<MetadataInfo>(metadataCount, true);
 		m_metadataByName = new Dictionary();
@@ -81,14 +79,9 @@ public class AbstractMemberInfo
 	public function get declaringType():Class { return m_declaringType; }
 	
 	/**
-	 * The class which was reflected to derive this member info
-	 */
-	public function get reflectedType():Class { return m_reflectedType; }
-	
-	/**
 	 * The TypeInfo that was created to derive this member info
 	 */
-	public function get reflectedTypeInfo():TypeInfo { return m_reflectedTypeInfo; }
+	public function get reflectedFrom():TypeInfo { return m_reflectedFrom; }
 	
 	/**
 	 * Any metadata attached to this member
