@@ -38,8 +38,8 @@ public class ObjectSerializer implements ISerializer
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	public static const TYPE_KEY : String = ".type";
-	public static const DATA_KEY : String = ".data";
+	public static const TYPE_KEY:String = ".type";
+	public static const DATA_KEY:String = ".data";
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -90,33 +90,57 @@ public class ObjectSerializer implements ISerializer
 	 */
 	static public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
 	{
-		if(sourceObject == null)
+		if(sourceObject == null || Reflection.isPrimitive(sourceObject))
 		{
-			return null;
+			return sourceObject;
 		}
 		
-		var data : Object = { };
-		var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+		var data:Object = {};
+		var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);
 		
-		//write out fields
-		for each(var field : FieldInfo in typeInfo.fields)
+		//if the object is a map, iterate over the values of the object
+		if(Reflection.isAssociativeArray(typeInfo.declaringType))
 		{
-			if(includeReadOnlyProperties || !field.isConstant)
+			for(var key:Object in sourceObject)
 			{
-				data[field.name] = Reflection.isPrimitive(field.type) ? sourceObject[field.name] : serialize(sourceObject[field.name], includeReadOnlyProperties);
+				data[key] = serialize(sourceObject[key], includeReadOnlyProperties);
+			}
+		}
+		//if the object is an array-type, iterate over the values of the object
+		else if(Reflection.isArray(typeInfo.declaringType))
+		{
+			data = [];
+			for(var x : int = 0; x < sourceObject.length; ++x)
+			{
+				if(x in sourceObject)
+				{
+					data[x] = serialize(sourceObject[x], includeReadOnlyProperties);
+				}
+			}
+		}
+		//otherwise iterate over the values of the reflected type of the object
+		else
+		{
+			//write out fields
+			for each(var field:FieldInfo in typeInfo.fields)
+			{
+				if(includeReadOnlyProperties || !field.isConstant)
+				{
+					data[field.name] = serialize(sourceObject[field.name], includeReadOnlyProperties);
+				}
+			}
+			
+			//write out properties
+			for each(var property:PropertyInfo in typeInfo.properties)
+			{
+				if(property.canRead && (includeReadOnlyProperties || property.canWrite))
+				{
+					data[property.name] = serialize(sourceObject[property.name], includeReadOnlyProperties);
+				}
 			}
 		}
 		
-		//write out properties
-		for each(var property : PropertyInfo in typeInfo.properties)
-		{
-			if(property.canRead && (includeReadOnlyProperties || property.canWrite))
-			{
-				data[property.name] = Reflection.isPrimitive(property.type) ? sourceObject[property.name] : serialize(sourceObject[property.name], includeReadOnlyProperties);
-			}
-		}
-		
-		var result : Object = { };
+		var result:Object = {};
 		result[TYPE_KEY] = Reflection.getQualifiedClassName(sourceObject);
 		result[DATA_KEY] = data;
 		return result;
@@ -128,11 +152,11 @@ public class ObjectSerializer implements ISerializer
 	 * @param	classType			The type of object to create. If null, the Class type is derived from the type value of the serializedObject
 	 * @return
 	 */
-	static public function deserialize(serializedObject:Object, classType:Class = null):Object
+	static public function deserialize(serializedObject:Object, classType:Class = null, forceType:Boolean=true):Object
 	{
-		if(serializedObject == null)
+		if(serializedObject == null || Reflection.isPrimitive(serializedObject))
 		{
-			return null;
+			return serializedObject;
 		}
 		
 		//check to see if object is in the same format that as this deserializes to or if we have the data only
@@ -145,42 +169,53 @@ public class ObjectSerializer implements ISerializer
 			}
 		}
 		
-		var data:Object = dataOnly ? serializedObject : serializedObject.data;
+		var data:Object = dataOnly ? serializedObject : serializedObject[DATA_KEY];
 		
-		var type:Class = classType;
+		var dataType : Class = (!dataOnly && TYPE_KEY in serializedObject ? Reflection.getClass(serializedObject[TYPE_KEY]) : null);
+		
+		//check to see if the format provides the type or not
+		//if forceType and a class it provided, use it, otherwise check the object first and override the provided type if one exists
+		var type:Class = forceType ? (classType || dataType) : (dataType || classType);
 		if(type == null)
 		{
-			//check to see if the format provides the type or not
-			if(!dataOnly && TYPE_KEY in serializedObject)
-			{
-				type = Reflection.getClass(serializedObject.type);
-			}
-			else
-			{
-				throw new Error("Cannot deserialize object, no type is provided and none could be derived from the object on key \"" + TYPE_KEY + "\".");
-			}
+			throw new Error("Cannot deserialize object, no type is provided and none could be derived from the object (\"" + TYPE_KEY + "\":\"" + serializedObject[TYPE_KEY] + "\").");
 		}
 		
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(type);
 		var instance:Object = new type();
-		for(key in data)
+		if(Reflection.isArray(type))
 		{
-			var member : AbstractMemberInfo = typeInfo.getMemberByName(key);
-			if(member != null && member is AbstractFieldInfo)
+			for(var x : int = 0; x < data.length; ++x)
 			{
-				if(Reflection.isPrimitive(AbstractFieldInfo(member).type))
+				if(x in data)
 				{
-					instance[member.name] = data[key];
+					instance[x] = deserialize(data[x], Object, false);
+				}
+			}
+		}
+		else
+		{
+			var isMap:Boolean = Reflection.isAssociativeArray(type);
+			for(key in data)
+			{
+				if(isMap)
+				{
+					instance[key] = deserialize(data[key], Object, false);
 				}
 				else
 				{
-					instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
+					var member:AbstractMemberInfo = typeInfo.getMemberByName(key) as AbstractMemberInfo;
+					if(member != null && ( (member is PropertyInfo && PropertyInfo(member).canWrite) || (member is FieldInfo && !FieldInfo(member).isConstant) ))
+					{
+						instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
+					}
+				
 				}
 			}
 		}
 		return instance;
 	}
-	
+
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------

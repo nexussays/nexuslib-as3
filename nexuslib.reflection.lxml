@@ -12,8 +12,12 @@
   <MXIAuthor />
   <MXIDescription />
   <MXIUIAccessText />
-  <Flex_IgnoreClasses />
-  <CS3_IgnoreClasses />
+  <Flex_IgnoreClasses>
+    <string>src\main.as</string>
+  </Flex_IgnoreClasses>
+  <CS3_IgnoreClasses>
+    <string>src\main.as</string>
+  </CS3_IgnoreClasses>
   <CS3_ComponentClass />
   <CS3_ComponentName />
   <CS3_ComponentGroup />

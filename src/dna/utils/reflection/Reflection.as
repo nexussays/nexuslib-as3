@@ -41,8 +41,11 @@ public class Reflection
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
+	static private const VECTOR_PREFIX : String = flash.utils.getQualifiedClassName(Vector);
+	static private const UNTYPED_VECTOR_CLASSNAME : String = VECTOR_PREFIX + ".<*>";
+	
 	///store all reflected types to the describeType() call and processing into a TypeInfo instance only ever happens once
-	private static const s_reflectedTypes:Dictionary = new Dictionary();
+	static private const s_reflectedTypes:Dictionary = new Dictionary();
 	///store strongly-typed classes that represent metadata on members
 	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
 	
@@ -57,38 +60,7 @@ public class Reflection
 	 */
 	public static function getClass(obj:Object):Class
 	{
-		if(obj == null)
-		{
-			return null;
-		}
-		else if(obj is Class)
-		{
-			return Class(obj);
-		}
-		else
-		{
-			var def : Object;
-			
-			//allow passing in a class name as the argument
-			if(obj is String)
-			{
-				try
-				{
-					def = getDefinitionByName(String(obj));
-				}
-				catch(e:ReferenceError)
-				{
-					//ignore
-				}
-			}
-			
-			if(def == null)
-			{
-				def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
-			}
-			
-			return Class(def);
-		}
+		return getClassInternal(obj, true);
 	}
 	
 	/**
@@ -102,14 +74,22 @@ public class Reflection
 		{
 			//use getClass to handle parsing string values that are qualified class names
 			obj = getClass(obj);
+			var superClassName : String = getQualifiedSuperclassName(obj);
 			try
 			{
-				return Class(getDefinitionByName(getQualifiedSuperclassName(obj)));
+				return Class(getDefinitionByName(superClassName));
 			}
 			catch(e:ReferenceError)
 			{
-				e.message = "Cannot find definition for " + getQualifiedSuperclassName(obj) + ", the class is either not present or not public.";
-				throw e;
+				if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
+				{
+					return Object;
+				}
+				else
+				{
+					e.message = "Cannot find definition for " + superClassName + ", the class is either not present or not public.";
+					throw e;
+				}
 			}
 		}
 		return null;
@@ -186,6 +166,11 @@ public class Reflection
 	public static function getTypeInfo(object:Object):TypeInfo
 	{
 		var type:Class = getClass(object);
+		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo))
+		{
+			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
+		}
+		
 		var reflectedType:TypeInfo = s_reflectedTypes[type];
 		if(reflectedType == null)
 		{
@@ -236,9 +221,7 @@ public class Reflection
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
-		//special-case strings since this goes through the getClass method which parses class names in strings into class instances,
-		//so we check for string here so that if the contents of the string is a class name it won't parse it into that class and return false.
-		var type : Class = value is Class ? Class(value) : (value is String ? String : getClass(value));
+		var type : Class = getClassInternal(value, false);
 		switch(type)
 		{
 			case int:
@@ -250,6 +233,37 @@ public class Reflection
 			default:
 				return false;
 		}
+	}
+	
+	/**
+	 * Returns true if the provided object is an Array or Vector
+	 * @param	value
+	 * @return
+	 */
+	public static function isArray(value:Object):Boolean
+	{
+		var type : Class = getClassInternal(value, false);
+		var typePrefix:String = getQualifiedClassName(type).substr(0, VECTOR_PREFIX.length);
+		if(type == Array || typePrefix == VECTOR_PREFIX)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the provided object is a Dictionary or dynamic Object
+	 * @param	value
+	 * @return
+	 */
+	public static function isAssociativeArray(value:Object):Boolean
+	{
+		var type : Class = getClassInternal(value, false);
+		if(type == Dictionary || type == Object)
+		{
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -372,10 +386,67 @@ public class Reflection
 		return property;
 	}
 	
+	/**
+	 * Gets the class of the given object, optionally looking up string values that contain qualified class names
+	 * @param	obj			The object to find the class of
+	 * @param	castStrings	If true, a string value that contains a valid qualified class name will be cast to that class
+	 * @return
+	 */
+	private static function getClassInternal(obj:Object, castStrings:Boolean):Class
+	{
+		if(obj == null)
+		{
+			return null;
+		}
+		else if(obj is Class)
+		{
+			return Class(obj);
+		}
+		else
+		{
+			var def : Object;
+			
+			//allow passing in a class name as the argument if castStrings is true
+			if(castStrings && obj is String)
+			{
+				try
+				{
+					def = getDefinitionByName(String(obj));
+				}
+				catch(e:ReferenceError)
+				{
+					//ignore
+				}
+			}
+			
+			if(def == null)
+			{
+				def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
+			}
+			
+			return Class(def);
+		}
+	}
+	
 	///returns a type for use in the reflection framework
 	private static function getClassForReflection(typeName:String):Class
 	{
-		return typeName == null || typeName == "" || typeName == "void" || typeName == "undefined" ? null : (typeName == "*" ? Object : Class(getDefinitionByName(typeName)));
+		if(typeName == "void" || typeName == "undefined")
+		{
+			return null;
+		}
+		else if(typeName == UNTYPED_VECTOR_CLASSNAME)
+		{
+			return Vector;
+		}
+		else if(typeName == "*" || typeName == "Object")
+		{
+			return Object;
+		}
+		else
+		{
+			return Class(getDefinitionByName(typeName));
+		}
 	}
 }
 }
