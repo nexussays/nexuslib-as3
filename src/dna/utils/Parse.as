@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -29,7 +29,7 @@ import flash.utils.Dictionary;
 
 /**
  * ...
- * @author mgriffie
+ * @author	Malachi Griffie <malachi@nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class Parse
