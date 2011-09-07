@@ -41,7 +41,7 @@ public class Reflection
 	///store all reflected types to the describeType() call and processing into a TypeInfo instance only ever happens once
 	private static const s_reflectedTypes:Dictionary = new Dictionary();
 	///store strongly-typed classes that represent metadata on members
-	static private const s_registeredMetadataTypes : Dictionary = new Dictionary();
+	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -52,7 +52,7 @@ public class Reflection
 	 * @param	obj
 	 * @return
 	 */
-	public static function getClassOfInstance(obj:Object):Class
+	public static function getClass(obj:Object):Class
 	{
 		return obj == null ? null : Class(getDefinitionByName(getQualifiedClassName(obj)));
 	}
@@ -62,7 +62,7 @@ public class Reflection
 	 * @param	obj
 	 * @return
 	 */
-	public static function getSuperClassOfInstance(obj:Object):Class
+	public static function getSuperClass(obj:Object):Class
 	{
 		if(obj != null)
 		{
@@ -122,7 +122,7 @@ public class Reflection
 		
 		while(potentialSubclass != Object)
 		{
-			potentialSubclass = getSuperClassOfInstance(potentialSubclass);
+			potentialSubclass = getSuperClass(potentialSubclass);
 			if(potentialSubclass == potentialSuperClass)
 			{
 				return true;
@@ -139,7 +139,7 @@ public class Reflection
 	 */
 	public static function getTypeInfo(obj:Object):TypeInfo
 	{
-		var type:Class = obj is Class ? Class(obj) : getClassOfInstance(obj);
+		var type:Class = obj is Class ? Class(obj) : getClass(obj);
 		var reflectedType:TypeInfo = s_reflectedTypes[type];
 		if(reflectedType == null)
 		{
@@ -183,11 +183,19 @@ public class Reflection
 		return reflectedType;
 	}
 	
+	/**
+	 * Provide a list of classes that extend Metadata and reflected TypeInfo will parse any metadata into strongly-typed classes
+	 * @param	types	A vector of classes, each of which must be a subclass of Metadata
+	 */
 	public static function registerMetadataClasses(types:Vector.<Class>):void
 	{
-		//parse and store the class names of the above Metadata classes instead of parsing them every time
-		for each(var type : Class in types)
+		for each(var type:Class in types)
 		{
+			if(!classExtendsClass(type, Metadata))
+			{
+				throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
+			}
+			//TODO: store by class so similarly named metadata in different packages won't conflict
 			s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(type)] = type;
 		}
 	}
@@ -200,11 +208,44 @@ public class Reflection
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var member : AbstractMemberInfo = method(xmlItem, typeInfo, isStatic);
+			var member:AbstractMemberInfo = method(xmlItem, typeInfo, isStatic);
 			if(member != null)
 			{
-				addMetadata(xmlItem, member);
+				//add metadata
+				for each(var metadataXml:XML in xmlItem.metadata)
+				{
+					//this is a default matadata tag added by the compiler in a debug build
+					if(metadataXml.@name == "__go_to_definition_help")
+					{
+						member.setPosition(parseInt(metadataXml.arg[0].@value));
+					}
+					else
+					{
+						//add metadata info
+						var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
+						for each(var argXml:XML in metadataXml.arg)
+						{
+							metadataInfo.addValue(argXml.@key, argXml.@value);
+						}
+						member.addMetadataInfo(metadataInfo);
+						
+						//see if there is a registered strongly-typed class for this metadata
+						for(var name:String in s_registeredMetadataTypes)
+						{
+							//implemantors of metadata should omit the "Metadata" suffix, it is added here
+							if(metadataInfo.name + "Metadata" == name)
+							{
+								var metadata:Metadata = new s_registeredMetadataTypes[name](metadataInfo);
+								member.addMetadataInstance(metadata);
+								break;
+							}
+						}
+					}
+				}
+				
+				//add member to typeinfo
 				typeInfo.addMember(member);
+				
 				//trace(member);
 			}
 		}
@@ -242,49 +283,6 @@ public class Reflection
 			typeInfo.properties.fixed = true;
 		}
 		return property;
-	}
-	
-	private static function addMetadata(xml:XML, item:AbstractMemberInfo):void
-	{
-		for each(var metadataXml:XML in xml.metadata)
-		{
-			//this is a default matadata tag added by the compiler in a debug build
-			if(metadataXml.@name == "__go_to_definition_help")
-			{
-				item.setPosition(parseInt(metadataXml.arg[0].@value));
-			}
-			else
-			{
-				//add metadata info
-				var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
-				for each(var argXml:XML in metadataXml.arg)
-				{
-					metadataInfo.addValue(argXml.@key, argXml.@value);
-				}
-				item.addMetadataInfo(metadataInfo);
-				
-				//see if there is a registered strongly-typed class for this metadata
-				var metadata : Metadata = Reflection.getTypedMetadata(metadataInfo);
-				if(metadata != null)
-				{
-					item.addMetadataInstance(metadata);
-				}
-			}
-		}
-	}
-	
-	static internal function getTypedMetadata(metadataInfo:MetadataInfo):Metadata
-	{
-		//iterate over all the available metadata types and instantiate any found matches
-		for(var name : String in s_registeredMetadataTypes)
-		{
-			//implemantors of metadata should omit the "Metadata" suffix, it is added here
-			if(metadataInfo.name + "Metadata" == name)
-			{
-				return new s_registeredMetadataTypes[name](metadataInfo);
-			}
-		}
-		return null;
 	}
 	
 	///returns a type for use in the reflection framework

@@ -124,7 +124,7 @@ public class AbstractMemberInfo
 	
 	internal function addMetadataInstance(meta:Metadata):void
 	{
-		var type:Class = Reflection.getClassOfInstance(meta);
+		var type:Class = Reflection.getClass(meta);
 		
 		if(m_metadataInstances[type] != null)
 		{
