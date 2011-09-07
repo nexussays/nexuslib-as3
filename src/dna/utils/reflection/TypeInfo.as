@@ -28,8 +28,8 @@ import flash.utils.*;
 
 /**
  * Represents a reflected class, call Reflection.getTypeInfo() to retrieve a TypeInfo object
- * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie (malachi@nexussays.com)
+ * @since	7/23/2011 3:34 AM
  */
 public class TypeInfo extends AbstractMemberInfo
 {
@@ -54,6 +54,8 @@ public class TypeInfo extends AbstractMemberInfo
 	private var m_fields : Vector.<FieldInfo>;
 	private var m_fieldsIndex : int;
 	
+	private var m_allMembersByName : Dictionary;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
@@ -64,6 +66,8 @@ public class TypeInfo extends AbstractMemberInfo
 		
 		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
+		
+		m_allMembersByName = new Dictionary();
 		
 		m_inheritedInterfaces = new Vector.<Class>();
 		m_extendedClasses = new Vector.<Class>();
@@ -100,6 +104,11 @@ public class TypeInfo extends AbstractMemberInfo
 	public function toString(verbose:Boolean = false):String
 	{
 		return "[Type:" + m_name + "]";
+	}
+	
+	public function getMemberByName(name:String):AbstractMemberInfo
+	{
+		return m_allMembersByName[name];
 	}
 	
 	/**
@@ -223,6 +232,8 @@ public class TypeInfo extends AbstractMemberInfo
 		{
 			throw new ArgumentError("Cannot add unknown member type \"" + member + "\" to this TypeInfo.");
 		}
+		
+		m_allMembersByName[member.name] = member;
 	}
 }
 

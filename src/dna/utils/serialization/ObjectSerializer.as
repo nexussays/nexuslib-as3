@@ -24,17 +24,12 @@
 package dna.utils.serialization
 {
 
-import dna.Debug;
 import dna.errors.NotImplementedError;
-import dna.utils.reflection.AbstractMemberInfo;
-import dna.utils.reflection.FieldInfo;
-import dna.utils.reflection.PropertyInfo;
-import dna.utils.reflection.Reflection;
-import dna.utils.reflection.TypeInfo;
+import dna.utils.reflection.*;
 
 /**
- * Serialized a strongly-typed object into a native object
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * Serialize a strongly-typed object into a native object
+ * @author	Malachi Griffie (malachi@nexussays.com)
  * @since	9/7/2011 4:39 AM
  */
 public class ObjectSerializer implements ISerializer
@@ -43,8 +38,8 @@ public class ObjectSerializer implements ISerializer
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	private static const TYPE_KEY : String = ".type";
-	private static const DATA_KEY : String = ".data";
+	public static const TYPE_KEY : String = ".type";
+	public static const DATA_KEY : String = ".data";
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -140,7 +135,7 @@ public class ObjectSerializer implements ISerializer
 			return null;
 		}
 		
-		//check to see if object is in the same format as this deserializes to or if we have the data only
+		//check to see if object is in the same format that as this deserializes to or if we have the data only
 		var dataOnly:Boolean = false;
 		for(var key:String in serializedObject)
 		{
@@ -162,7 +157,7 @@ public class ObjectSerializer implements ISerializer
 			}
 			else
 			{
-				throw new Error("Cannot deserialize object, no type is provided and none could be derived from key \"" + TYPE_KEY + "\".");
+				throw new Error("Cannot deserialize object, no type is provided and none could be derived from the object on key \"" + TYPE_KEY + "\".");
 			}
 		}
 		
@@ -170,7 +165,18 @@ public class ObjectSerializer implements ISerializer
 		var instance:Object = new type();
 		for(key in data)
 		{
-			
+			var member : AbstractMemberInfo = typeInfo.getMemberByName(key);
+			if(member != null && member is AbstractFieldInfo)
+			{
+				if(Reflection.isPrimitive(AbstractFieldInfo(member).type))
+				{
+					instance[member.name] = data[key];
+				}
+				else
+				{
+					instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
+				}
+			}
 		}
 		return instance;
 	}
@@ -178,11 +184,6 @@ public class ObjectSerializer implements ISerializer
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
-	
-	private final function trace(... params):void
-	{
-		Debug.debug(ObjectSerializer, params);
-	}
 }
 
 }

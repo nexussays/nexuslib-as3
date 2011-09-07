@@ -30,7 +30,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie (malachi@nexussays.com)
  * @since 7/6/2010 9:38 PM
  */
 public class NotImplementedError extends IllegalOperationError

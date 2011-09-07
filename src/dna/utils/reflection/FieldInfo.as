@@ -28,10 +28,10 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie (malachi@nexussays.com)
+ * @since	7/23/2011 3:34 AM
  */
-public class FieldInfo extends AbstractMemberInfo
+public class FieldInfo extends AbstractFieldInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -41,10 +41,6 @@ public class FieldInfo extends AbstractMemberInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_type:Class;
-	private var m_typeName : String;
-	
-	private var m_isStatic : Boolean;
 	private var m_isConstant : Boolean;
 	
 	//--------------------------------------
@@ -53,20 +49,14 @@ public class FieldInfo extends AbstractMemberInfo
 	
 	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
 	{
-		super(name, declaringType, reflectedTypeInfo, metadatacount);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadatacount);
 		
-		m_type = type;
-		m_isStatic = isStatic;
 		m_isConstant = isConstant;
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	public function get type():Class { return m_type; }
-	
-	public function get isStatic():Boolean { return m_isStatic; }
 	
 	public function get isConstant():Boolean { return m_isConstant; }
 	

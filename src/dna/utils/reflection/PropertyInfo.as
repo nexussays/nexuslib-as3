@@ -28,10 +28,10 @@ import flash.utils.*;
 
 /**
  * Represents a property (getter/setter)
- * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie (malachi@nexussays.com)
+ * @since	7/23/2011 3:34 AM
  */
-public class PropertyInfo extends AbstractMemberInfo
+public class PropertyInfo extends AbstractFieldInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -41,13 +41,8 @@ public class PropertyInfo extends AbstractMemberInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_type:Class;
-	private var m_typeName : String;
-	
 	private var m_canRead : Boolean;
 	private var m_canWrite : Boolean;
-	
-	private var m_isStatic : Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -55,11 +50,8 @@ public class PropertyInfo extends AbstractMemberInfo
 	
 	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
-		super(name, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadataCount);
 		
-		m_isStatic = isStatic;
-		
-		m_type = type;
 		m_declaringType = declaringType;
 		
 		m_canRead = read;
@@ -75,13 +67,9 @@ public class PropertyInfo extends AbstractMemberInfo
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get type():Class { return m_type; }
-	
 	public function get canRead():Boolean { return m_canRead; }
 	
 	public function get canWrite():Boolean { return m_canWrite; }
-	
-	public function get isStatic():Boolean { return m_isStatic; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
