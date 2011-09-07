@@ -33,15 +33,18 @@ import dna.utils.reflection.Reflection;
 import dna.utils.reflection.TypeInfo;
 
 /**
- * ...
+ * Serialized a strongly-typed object into a native object
  * @author	Malachi Griffie <malachi@nexussays.com>
  * @since	9/7/2011 4:39 AM
  */
-public class JsonSerializer implements ISerializer
+public class ObjectSerializer implements ISerializer
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
 	//--------------------------------------
+	
+	private static const TYPE_KEY : String = ".type";
+	private static const DATA_KEY : String = ".data";
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -51,7 +54,7 @@ public class JsonSerializer implements ISerializer
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function JsonSerializer()
+	public function ObjectSerializer()
 	{
 	
 	}
@@ -66,17 +69,17 @@ public class JsonSerializer implements ISerializer
 	
 	public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
 	{
-		return JsonSerializer.serialize(sourceObject, includeReadOnlyProperties);
+		return ObjectSerializer.serialize(sourceObject, includeReadOnlyProperties);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		return JsonSerializer.deserialize(serializedObject, classType);
+		return ObjectSerializer.deserialize(serializedObject, classType);
 	}
 	
 	public function toString(verbose:Boolean = false):String
 	{
-		return "[JsonSerializer]";
+		return "[ObjectSerializer]";
 	}
 	
 	//--------------------------------------
@@ -97,37 +100,37 @@ public class JsonSerializer implements ISerializer
 			return null;
 		}
 		
-		var result:Object = { "type": Reflection.getQualifiedClassName(sourceObject), "data": { }};
+		var data : Object = { };
 		var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
-		//var members : Vector.<AbstractMemberInfo> = typeInfo.fields.concat(typeInfo.properties);
-		//for each(var member : AbstractMemberInfo in typeInfo.fields)
-		//{
-			//if( includeReadOnlyProperties || ((member is FieldInfo && !FieldInfo(member).isConstant) || (member is PropertyInfo && PropertyInfo(member).canWrite)) )
-			//{
-				//result.data[member.name] = Reflection.isPrimitive(member.type) ? sourceObject[member.name] : serialize(sourceObject[member.name], includeReadOnlyProperties);
-			//}
-		//}
+		
+		//write out fields
 		for each(var field : FieldInfo in typeInfo.fields)
 		{
 			if(includeReadOnlyProperties || !field.isConstant)
 			{
-				result.data[field.name] = Reflection.isPrimitive(field.type) ? sourceObject[field.name] : serialize(sourceObject[field.name], includeReadOnlyProperties);
+				data[field.name] = Reflection.isPrimitive(field.type) ? sourceObject[field.name] : serialize(sourceObject[field.name], includeReadOnlyProperties);
 			}
 		}
+		
+		//write out properties
 		for each(var property : PropertyInfo in typeInfo.properties)
 		{
 			if(property.canRead && (includeReadOnlyProperties || property.canWrite))
 			{
-				result.data[property.name] = Reflection.isPrimitive(property.type) ? sourceObject[property.name] : serialize(sourceObject[property.name], includeReadOnlyProperties);
+				data[property.name] = Reflection.isPrimitive(property.type) ? sourceObject[property.name] : serialize(sourceObject[property.name], includeReadOnlyProperties);
 			}
 		}
+		
+		var result : Object = { };
+		result[TYPE_KEY] = Reflection.getQualifiedClassName(sourceObject);
+		result[DATA_KEY] = data;
 		return result;
 	}
 	
 	/**
 	 * Deserializes the provided native object into an instance of a typed class, either specified in the object or provided as an argument.
 	 * @param	serializedObject	The native object from which to create a typed object instance
-	 * @param	classType			The type of object to create. If null, the Class type is derived from the "type" value of the serializedObject
+	 * @param	classType			The type of object to create. If null, the Class type is derived from the type value of the serializedObject
 	 * @return
 	 */
 	static public function deserialize(serializedObject:Object, classType:Class = null):Object
@@ -141,7 +144,7 @@ public class JsonSerializer implements ISerializer
 		var dataOnly:Boolean = false;
 		for(var key:String in serializedObject)
 		{
-			if(key != "data" && key != "type")
+			if(key != DATA_KEY && key != TYPE_KEY)
 			{
 				dataOnly = true;
 			}
@@ -153,13 +156,13 @@ public class JsonSerializer implements ISerializer
 		if(type == null)
 		{
 			//check to see if the format provides the type or not
-			if(!dataOnly && "type" in serializedObject)
+			if(!dataOnly && TYPE_KEY in serializedObject)
 			{
 				type = Reflection.getClass(serializedObject.type);
 			}
 			else
 			{
-				throw new Error("Cannot deserialize object, no type is provided and none could be derived.");
+				throw new Error("Cannot deserialize object, no type is provided and none could be derived from key \"" + TYPE_KEY + "\".");
 			}
 		}
 		
@@ -178,7 +181,7 @@ public class JsonSerializer implements ISerializer
 	
 	private final function trace(... params):void
 	{
-		Debug.debug(JsonSerializer, params);
+		Debug.debug(ObjectSerializer, params);
 	}
 }
 

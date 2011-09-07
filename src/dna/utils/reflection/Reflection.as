@@ -236,10 +236,9 @@ public class Reflection
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
-		//TODO: will need to account for the fact that this goes through the getClass method which parses class names in strings,
-		//so if we check if a string is a primitive it will return false if the contents of the string is a class name. Perhaps
-		//that is a desired side-effect, and perhaps not
-		var type : Class = value is Class ? Class(value) : getClass(value);
+		//special-case strings since this goes through the getClass method which parses class names in strings into class instances,
+		//so we check for string here so that if the contents of the string is a class name it won't parse it into that class and return false.
+		var type : Class = value is Class ? Class(value) : (value is String ? String : getClass(value));
 		switch(type)
 		{
 			case int:
