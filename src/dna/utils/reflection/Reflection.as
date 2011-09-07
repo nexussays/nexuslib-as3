@@ -51,13 +51,37 @@ public class Reflection
 	//--------------------------------------
 	
 	/**
-	 * Returns Class(getDefinitionByName(getQualifiedClassName(obj)))
+	 * Returns a Class, given an object instance, a class, or a string formatted as qualified class name
 	 * @param	obj
 	 * @return
 	 */
 	public static function getClass(obj:Object):Class
 	{
-		return obj == null ? null : Class(getDefinitionByName(flash.utils.getQualifiedClassName(obj)));
+		if(obj != null)
+		{
+			var def : Object;
+			
+			//allow passing in a class name as the argument
+			if(obj is String)
+			{
+				try
+				{
+					def = getDefinitionByName(String(obj));
+				}
+				catch(e:ReferenceError)
+				{
+					//ignore
+				}
+			}
+			
+			if(def == null)
+			{
+				def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
+			}
+			
+			return Class(def);
+		}
+		return null;
 	}
 	
 	/**
@@ -69,6 +93,8 @@ public class Reflection
 	{
 		if(obj != null)
 		{
+			//use getClass to handle parsing string values that are qualified class names
+			obj = getClass(obj);
 			try
 			{
 				return Class(getDefinitionByName(getQualifiedSuperclassName(obj)));
