@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -32,8 +32,8 @@ import flash.utils.*;
 
 /**
  * ...
- * @author mgriffie
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie <malachi@nexussays.com>
+ * @since	7/23/2011 3:34 AM
  */
 public class XmlSerializer implements ISerializer
 {
@@ -62,7 +62,7 @@ public class XmlSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, elementName:String = null, getReadOnlyProperties:Boolean = false):Object
+	public function serialize(sourceObject:Object, getReadOnlyProperties:Boolean = false):Object
 	{
 		throw new NotImplementedError();
 		//return XmlSerializer.serialize(sourceObject, elementName, getReadOnlyProperties);
@@ -90,7 +90,7 @@ public class XmlSerializer implements ISerializer
 	 * @param	elementName		The name of the root element. If null, the name of the object's class is used.
 	 * @return
 	 */
-	public static function serialize(sourceObject:Object, elementName:String = null, getReadOnlyProperties:Boolean = false):XML
+	public static function serialize(sourceObject:Object, getReadOnlyProperties:Boolean = false):XML
 	{
 		/*
 		var type:String = getQualifiedClassName(sourceObject);

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is dna_lib.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -26,12 +26,12 @@ package dna.utils.serialization
 	
 /**
  * ...
- * @author mgriffie
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie <malachi@nexussays.com>
+ * @since	7/23/2011 3:34 AM
  */
 public interface ISerializer
 {
-	function serialize(sourceObject:Object, elementName:String = null, getReadOnlyProperties:Boolean = false):Object;
+	function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object;
 	function deserialize(serializedObject:Object, classType:Class = null):Object;
 }
 
