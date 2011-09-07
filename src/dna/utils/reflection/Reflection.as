@@ -144,21 +144,25 @@ public class Reflection
 		if(reflectedType == null)
 		{
 			var xml:XML = describeType(type);
+			
 			reflectedType = new TypeInfo(xml.@name, type, Parse.boolean(xml.@isDynamic, false), Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
 			
+			//add constructor
+			reflectedType.setConstructor(parseMethodInfo(xml.factory.constructor[0], reflectedType, true, false));
+			
 			//add fields
-			addFields(type, true, true, xml.constant, reflectedType);
-			addFields(type, true, false, xml.variable, reflectedType);
-			addFields(type, false, true, xml.factory.constant, reflectedType);
-			addFields(type, false, false, xml.factory.variable, reflectedType);
+			addMembers(parseFieldInfo, xml.constant, reflectedType, true, true);
+			addMembers(parseFieldInfo, xml.variable, reflectedType, true, false);
+			addMembers(parseFieldInfo, xml.factory.constant, reflectedType, false, true);
+			addMembers(parseFieldInfo, xml.factory.variable, reflectedType, false, false);
 			
 			//add methods
-			addMethods(type, true, xml.method, reflectedType);
-			addMethods(type, false, xml.factory.method, reflectedType);
+			addMembers(parseMethodInfo, xml.method, reflectedType, true, false);
+			addMembers(parseMethodInfo, xml.factory.method, reflectedType, false, false);
 			
 			//add properties
-			addProperties(type, true, xml.accessor, reflectedType);
-			addProperties(type, false, xml.factory.accessor, reflectedType);
+			addMembers(parsePropertyInfo, xml.accessor, reflectedType, true, false);
+			addMembers(parsePropertyInfo, xml.factory.accessor, reflectedType, false, false);
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
@@ -192,52 +196,52 @@ public class Reflection
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	private static function addFields(reflectedType:Class, isStatic:Boolean, isConstant:Boolean, xmlList:XMLList, info:TypeInfo):void
+	private static function addMembers(method:Function, xmlList:XMLList, typeInfo:TypeInfo, isStatic:Boolean, isConstant:Boolean):void
 	{
 		for each(var xmlItem:XML in xmlList)
 		{
-			var field:FieldInfo = new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), reflectedType, info, xmlItem.metadata.length());
-			addMetadata(xmlItem, field);
-			info.addField(field);
-			//trace(field);
+			var member : AbstractMemberInfo = method(xmlItem, typeInfo, isStatic);
+			if(member != null)
+			{
+				addMetadata(xmlItem, member);
+				typeInfo.addMember(member);
+				//trace(member);
+			}
 		}
 	}
 	
-	private static function addMethods(reflectedType:Class, isStatic:Boolean, xmlList:XMLList, info:TypeInfo):void
+	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, isStatic:Boolean, isConstant:Boolean):FieldInfo
 	{
-		for each(var xmlItem:XML in xmlList)
-		{
-			var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), info, xmlItem.parameter.length(), xmlItem.metadata.length());
-			for each(var paramXml:XML in xmlItem.parameter)
-			{
-				method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
-			}
-			addMetadata(xmlItem, method);
-			info.addMethod(method);
-			//trace(method);
-		}
+		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
+		return new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassForReflection(xmlItem.@type), null, typeInfo, xmlItem.metadata.length());
 	}
 	
-	private static function addProperties(reflectedType:Class, isStatic:Boolean, xmlList:XMLList, info:TypeInfo):void
+	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, isStatic:Boolean, isConstant:Boolean):MethodInfo
 	{
-		for each(var xmlItem:XML in xmlList)
+		var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassForReflection(xmlItem.@returnType), getClassForReflection(xmlItem.@declaredBy), typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
+		for each(var paramXml:XML in xmlItem.parameter)
 		{
-			var name:String = xmlItem.@name;
-			if(name != "prototype")
-			{
-				var access:String = String(xmlItem.@access).toLowerCase();
-				var property:PropertyInfo = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), info, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
-				addMetadata(xmlItem, property);
-				info.addProperty(property);
-				//trace(property);
-			}
-			else
-			{
-				info.properties.fixed = false;
-				info.properties.length--;
-				info.properties.fixed = true;
-			}
+			method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
 		}
+		return method;
+	}
+	
+	static private function parsePropertyInfo(xmlItem:XML, typeInfo:TypeInfo, isStatic:Boolean, isConstant:Boolean):PropertyInfo
+	{
+		var property:PropertyInfo;
+		var name:String = xmlItem.@name;
+		if(name != "prototype")
+		{
+			var access:String = String(xmlItem.@access).toLowerCase();
+			property = new PropertyInfo(name, isStatic, getClassForReflection(xmlItem.@type), getClassForReflection(xmlItem.@declaredBy), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
+		}
+		else
+		{
+			typeInfo.properties.fixed = false;
+			typeInfo.properties.length--;
+			typeInfo.properties.fixed = true;
+		}
+		return property;
 	}
 	
 	private static function addMetadata(xml:XML, item:AbstractMemberInfo):void
@@ -286,7 +290,7 @@ public class Reflection
 	///returns a type for use in the reflection framework
 	private static function getClassForReflection(typeName:String):Class
 	{
-		return typeName == "void" || typeName == "undefined" ? null : (typeName == "*" ? Object : Class(getDefinitionByName(typeName)));
+		return typeName == null || typeName == "" || typeName == "void" || typeName == "undefined" ? null : (typeName == "*" ? Object : Class(getDefinitionByName(typeName)));
 	}
 }
 }

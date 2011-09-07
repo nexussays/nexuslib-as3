@@ -43,6 +43,8 @@ public class TypeInfo extends AbstractMemberInfo
 	private var m_inheritedInterfaces : Vector.<Class>;
 	private var m_extendedClasses : Vector.<Class>;
 	
+	private var m_constructor : MethodInfo;
+	
 	private var m_methods : Vector.<MethodInfo>;
 	private var m_methodsIndex : int;
 	
@@ -88,6 +90,8 @@ public class TypeInfo extends AbstractMemberInfo
 	public function get properties():Vector.<PropertyInfo> { return m_properties; }
 	
 	public function get fields():Vector.<FieldInfo> { return m_fields; }
+	
+	public function get constructor():MethodInfo { return m_constructor; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -196,19 +200,29 @@ public class TypeInfo extends AbstractMemberInfo
 	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
 	
-	internal function addProperty(property:PropertyInfo):void
+	internal function setConstructor(constructor:MethodInfo):void
 	{
-		m_properties[m_propertiesIndex++] = property;
+		m_constructor = constructor;
 	}
 	
-	internal function addMethod(method:MethodInfo):void
+	internal function addMember(member:AbstractMemberInfo):void
 	{
-		m_methods[m_methodsIndex++] = method;
-	}
-	
-	internal function addField(field:FieldInfo):void
-	{
-		m_fields[m_fieldsIndex++] = field;
+		if(member is PropertyInfo)
+		{
+			m_properties[m_propertiesIndex++] = PropertyInfo(member);
+		}
+		else if(member is FieldInfo)
+		{
+			m_fields[m_fieldsIndex++] = FieldInfo(member);
+		}
+		else if(member is MethodInfo)
+		{
+			m_methods[m_methodsIndex++] = MethodInfo(member);
+		}
+		else
+		{
+			throw new ArgumentError("Cannot add unknown member type \"" + member + "\" to this TypeInfo.");
+		}
 	}
 }
 
