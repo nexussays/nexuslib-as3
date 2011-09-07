@@ -70,20 +70,6 @@ public class FieldInfo extends AbstractMemberInfo
 	
 	public function get isConstant():Boolean { return m_isConstant; }
 	
-	public function get isPrimitive():Boolean
-	{
-		switch(m_type)
-		{
-			case int:
-			case Number:
-			case String:
-			case Boolean:
-				return true;
-			default:
-				return false;
-		}
-	}
-	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------

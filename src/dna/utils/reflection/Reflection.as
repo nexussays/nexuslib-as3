@@ -57,7 +57,15 @@ public class Reflection
 	 */
 	public static function getClass(obj:Object):Class
 	{
-		if(obj != null)
+		if(obj == null)
+		{
+			return null;
+		}
+		else if(obj is Class)
+		{
+			return Class(obj);
+		}
+		else
 		{
 			var def : Object;
 			
@@ -81,7 +89,6 @@ public class Reflection
 			
 			return Class(def);
 		}
-		return null;
 	}
 	
 	/**
@@ -176,9 +183,9 @@ public class Reflection
 	 * @param	obj	The object to reflect
 	 * @return	A TypeInfo that represents the given object's Class information
 	 */
-	public static function getTypeInfo(obj:Object):TypeInfo
+	public static function getTypeInfo(object:Object):TypeInfo
 	{
-		var type:Class = obj is Class ? Class(obj) : getClass(obj);
+		var type:Class = getClass(object);
 		var reflectedType:TypeInfo = s_reflectedTypes[type];
 		if(reflectedType == null)
 		{
@@ -187,7 +194,7 @@ public class Reflection
 			reflectedType = new TypeInfo(xml.@name, type, Parse.boolean(xml.@isDynamic, false), Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
 			
 			//add constructor
-			reflectedType.setConstructor(parseMethodInfo(xml.factory.constructor[0], reflectedType, true, false));
+			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, true, false));
 			
 			//add fields
 			addMembers(parseFieldInfo, xml.constant, reflectedType, true, true);
@@ -220,6 +227,30 @@ public class Reflection
 			xml = null;
 		}
 		return reflectedType;
+	}
+	
+	/**
+	 * Returns true if the provided object is an instance of a primitive class or is a Class object of a primitive type
+	 * @param	type
+	 * @return
+	 */
+	public static function isPrimitive(value:Object):Boolean
+	{
+		//TODO: will need to account for the fact that this goes through the getClass method which parses class names in strings,
+		//so if we check if a string is a primitive it will return false if the contents of the string is a class name. Perhaps
+		//that is a desired side-effect, and perhaps not
+		var type : Class = value is Class ? Class(value) : getClass(value);
+		switch(type)
+		{
+			case int:
+			case uint:
+			case Number:
+			case String:
+			case Boolean:
+				return true;
+			default:
+				return false;
+		}
 	}
 	
 	/**
@@ -302,6 +333,24 @@ public class Reflection
 		for each(var paramXml:XML in xmlItem.parameter)
 		{
 			method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
+		}
+		return method;
+	}
+	
+	static private function parseConstructorInfo(xmlItem:XML, typeInfo:TypeInfo, isStatic:Boolean, isConstant:Boolean):MethodInfo
+	{
+		var method:MethodInfo;
+		if(xmlItem != null)
+		{
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.declaringType, typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
+			for each(var paramXml:XML in xmlItem.parameter)
+			{
+				method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
+			}
+		}
+		else
+		{
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.declaringType, typeInfo, 0, 0);
 		}
 		return method;
 	}
