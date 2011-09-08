@@ -201,10 +201,13 @@ public class ObjectSerializer implements ISerializer
 		}
 		else
 		{
-			var member:AbstractFieldInfo = typeInfo.getMemberByName(key) as AbstractFieldInfo;
-			if(member != null && ( (member is PropertyInfo && PropertyInfo(member).canWrite) || (member is FieldInfo && !FieldInfo(member).isConstant) ))
+			for(key in data)
 			{
-				instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
+				var member:AbstractFieldInfo = typeInfo.getMemberByName(key) as AbstractFieldInfo;
+				if(member != null && ( (member is PropertyInfo && PropertyInfo(member).canWrite) || (member is FieldInfo && !FieldInfo(member).isConstant) ))
+				{
+					instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
+				}
 			}
 		}
 		return instance;
