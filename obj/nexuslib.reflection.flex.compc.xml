@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
-  <output>C:\Users\mgriffie\Development\Projects\Misc Game Designs\foo\.\bin\nexuslib.reflection.swc</output>
+  <output>C:\Users\nexus\Development\Projects\Personal\nexuslib\reflection\.\bin\nexuslib.reflection.swc</output>
   <use-network>true</use-network>
   <target-player>10.0</target-player>
   <warnings>true</warnings>
@@ -17,7 +17,7 @@
     <use-resource-bundle-metadata>true</use-resource-bundle-metadata>
     <verbose-stacktraces>false</verbose-stacktraces>
     <source-path>
-      <path-element>c:\users\mgriffie\development\projects\misc game designs\foo\src</path-element>
+      <path-element>c:\users\nexus\development\projects\personal\nexuslib\reflection\src</path-element>
     </source-path>
   </compiler>
   <include-classes>

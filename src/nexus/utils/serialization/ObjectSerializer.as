@@ -72,11 +72,6 @@ public class ObjectSerializer implements ISerializer
 		return ObjectSerializer.deserialize(serializedObject, classType);
 	}
 	
-	public function toString(verbose:Boolean = false):String
-	{
-		return "[ObjectSerializer]";
-	}
-	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
@@ -170,6 +165,10 @@ public class ObjectSerializer implements ISerializer
 		}
 		
 		var data:Object = dataOnly ? serializedObject : serializedObject[DATA_KEY];
+		if(data == null || Reflection.isPrimitive(data))
+		{
+			return data;
+		}
 		
 		var dataType : Class = (!dataOnly && TYPE_KEY in serializedObject ? Reflection.getClass(serializedObject[TYPE_KEY]) : null);
 		
@@ -183,7 +182,7 @@ public class ObjectSerializer implements ISerializer
 		
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(type);
 		var instance:Object = new type();
-		if(Reflection.isArray(type))
+		if(Reflection.isArray(typeInfo.declaringType))
 		{
 			for(var x : int = 0; x < data.length; ++x)
 			{
@@ -193,24 +192,19 @@ public class ObjectSerializer implements ISerializer
 				}
 			}
 		}
-		else
+		else if(Reflection.isAssociativeArray(typeInfo.declaringType))
 		{
-			var isMap:Boolean = Reflection.isAssociativeArray(type);
 			for(key in data)
 			{
-				if(isMap)
-				{
-					instance[key] = deserialize(data[key], Object, false);
-				}
-				else
-				{
-					var member:AbstractMemberInfo = typeInfo.getMemberByName(key) as AbstractMemberInfo;
-					if(member != null && ( (member is PropertyInfo && PropertyInfo(member).canWrite) || (member is FieldInfo && !FieldInfo(member).isConstant) ))
-					{
-						instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
-					}
-				
-				}
+				instance[key] = deserialize(data[key], Object, false);
+			}
+		}
+		else
+		{
+			var member:AbstractFieldInfo = typeInfo.getMemberByName(key) as AbstractFieldInfo;
+			if(member != null && ( (member is PropertyInfo && PropertyInfo(member).canWrite) || (member is FieldInfo && !FieldInfo(member).isConstant) ))
+			{
+				instance[member.name] = deserialize(data[key], AbstractFieldInfo(member).type);
 			}
 		}
 		return instance;
