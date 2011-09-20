@@ -20,7 +20,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie
  * @since 7/28/2011 8:46 PM
  */
 public class Main extends Sprite

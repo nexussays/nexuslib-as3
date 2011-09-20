@@ -29,7 +29,7 @@ import flash.utils.*;
 
 /**
  * Base class for PropertyInfo and FieldInfo
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie
  * @since	9/7/2011 4:50 AM
  */
 public class AbstractFieldInfo extends AbstractMemberInfo

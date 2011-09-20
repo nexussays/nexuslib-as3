@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * Represents a reflected class, call Reflection.getTypeInfo() to retrieve a TypeInfo object
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie
  * @since	7/23/2011 3:34 AM
  */
 public class TypeInfo extends AbstractMemberInfo

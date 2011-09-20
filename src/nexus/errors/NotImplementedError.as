@@ -30,20 +30,10 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/6/2010 9:38 PM
+ * @author	Malachi Griffie
  */
 public class NotImplementedError extends IllegalOperationError
 {
-	
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PRIVATE VARIABLES
-	//--------------------------------------
-	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
@@ -52,22 +42,6 @@ public class NotImplementedError extends IllegalOperationError
 	{
 		super("Not Implemented", id);
 	}
-	
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PUBLIC METHODS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	EVENT HANDLERS
-	//--------------------------------------
-
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
 
 }
 

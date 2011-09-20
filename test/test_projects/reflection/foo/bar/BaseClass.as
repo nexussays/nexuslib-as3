@@ -4,7 +4,7 @@ import dna.geom.CircleIntersection;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie
  */
 public class BaseClass
 {

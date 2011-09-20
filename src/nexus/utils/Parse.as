@@ -29,11 +29,14 @@ import flash.utils.Dictionary;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
- * @since 7/23/2011 3:34 AM
+ * @author	Malachi Griffie
  */
 public class Parse
 {
+	//--------------------------------------
+	//	PUBLIC CLASS METHODS
+	//--------------------------------------
+	
 	/**
 	 * Parse the given value as a Number. If the parsed Number is NaN or Infinity then defaultValue is returned instead.
 	 * @param	source

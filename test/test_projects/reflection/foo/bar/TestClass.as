@@ -8,7 +8,7 @@ import foo.*;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi@nexussays.com>
+ * @author	Malachi Griffie
  * @since 7/28/2011 8:46 PM
  */
 [classMetadata(param="value", param2="value2")]

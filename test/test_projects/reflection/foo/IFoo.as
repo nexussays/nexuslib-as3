@@ -3,7 +3,7 @@ package foo
 	
 	/**
 	 * ...
-	 * @author	Malachi Griffie <malachi@nexussays.com>
+	 * @author	Malachi Griffie
 	 */
 	public interface IFoo 
 	{
