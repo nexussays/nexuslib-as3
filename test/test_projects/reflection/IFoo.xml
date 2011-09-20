@@ -1,0 +1,15 @@
+<type name="foo::IFoo" base="Class" isDynamic="true" isFinal="true" isStatic="true">
+  <extendsClass type="Class"/>
+  <extendsClass type="Object"/>
+  <accessor name="prototype" access="readonly" type="*" declaredBy="Class"/>
+  <factory type="foo::IFoo">
+    <accessor name="publicProperty" access="readonly" type="int" declaredBy="foo::IFoo" uri="foo:IFoo">
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="107"/>
+      </metadata>
+    </accessor>
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="81"/>
+    </metadata>
+  </factory>
+</type>

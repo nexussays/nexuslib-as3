@@ -1,0 +1,117 @@
+<type name="foo.bar::TestClass" base="Class" isDynamic="true" isFinal="true" isStatic="true">
+  <extendsClass type="Class"/>
+  <extendsClass type="Object"/>
+  <variable name="staticVar" type="String">
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="482"/>
+    </metadata>
+  </variable>
+  <constant name="staticConst" type="String">
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="426"/>
+    </metadata>
+  </constant>
+  <constant name="foo_namespace" type="*"/>
+  <constant name="embed" type="Class">
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="732"/>
+    </metadata>
+  </constant>
+  <accessor name="prototype" access="readonly" type="*" declaredBy="Class"/>
+  <accessor name="staticProperty" access="readonly" type="dna::Enum" declaredBy="foo.bar::TestClass">
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="779"/>
+    </metadata>
+  </accessor>
+  <method name="foo" declaredBy="foo.bar::TestClass" returnType="void">
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="2582"/>
+    </metadata>
+  </method>
+  <factory type="foo.bar::TestClass">
+    <extendsClass type="foo.bar::BaseClass"/>
+    <extendsClass type="Object"/>
+    <implementsInterface type="foo::IFoo"/>
+    <constructor>
+      <parameter index="1" type="Boolean" optional="false"/>
+      <parameter index="2" type="String" optional="true"/>
+    </constructor>
+    <constant name="instanceEmbed" type="Class">
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1106"/>
+      </metadata>
+    </constant>
+    <constant name="publicConst" type="String">
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1145"/>
+      </metadata>
+    </constant>
+    <variable name="publicVar" type="int">
+      <metadata name="CMSComponentSet">
+        <arg key="className" value="datamodel.schemas::CookingComponents"/>
+        <arg key="source" value="components"/>
+      </metadata>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1281"/>
+      </metadata>
+    </variable>
+    <accessor name="publicProperty" access="readwrite" type="int" declaredBy="foo.bar::TestClass">
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1735"/>
+      </metadata>
+      <metadata name="blargh">
+        <arg key="param" value="value"/>
+        <arg key="param2" value="value2"/>
+      </metadata>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1856"/>
+      </metadata>
+    </accessor>
+    <method name="publicFinalFun" declaredBy="foo.bar::TestClass" returnType="*">
+      <parameter index="1" type="foo.bar::TestClass" optional="false"/>
+      <metadata name="RandomMetadata">
+        <arg key="param" value="value"/>
+        <arg key="param2" value="value2"/>
+      </metadata>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="2391"/>
+      </metadata>
+    </method>
+    <method name="publicFun" declaredBy="foo.bar::TestClass" returnType="int">
+      <parameter index="1" type="foo.bar::TestClass" optional="false"/>
+      <parameter index="2" type="Number" optional="true"/>
+      <parameter index="3" type="*" optional="true"/>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="2468"/>
+      </metadata>
+    </method>
+    <method name="baseMethod" declaredBy="foo.bar::TestClass" returnType="dna.geom::CircleIntersection">
+      <parameter index="1" type="*" optional="false"/>
+      <parameter index="2" type="Object" optional="false"/>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="2214"/>
+      </metadata>
+    </method>
+    <method name="namespacedMethod" declaredBy="foo.bar::TestClass" returnType="Object" uri="special_namespace">
+      <parameter index="1" type="String" optional="false"/>
+      <parameter index="2" type="*" optional="false"/>
+      <metadata name="bazbazbaz">
+        <arg key="param" value="value"/>
+        <arg key="param2" value="value2"/>
+      </metadata>
+      <metadata name="__go_to_definition_help">
+        <arg key="pos" value="1998"/>
+      </metadata>
+    </method>
+    <metadata name="classMetadata">
+      <arg key="param" value="value"/>
+      <arg key="param2" value="value2"/>
+    </metadata>
+    <metadata name="__go_to_ctor_definition_help">
+      <arg key="pos" value="1535"/>
+    </metadata>
+    <metadata name="__go_to_definition_help">
+      <arg key="pos" value="247"/>
+    </metadata>
+  </factory>
+</type>
