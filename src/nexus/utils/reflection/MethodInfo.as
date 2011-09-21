@@ -47,6 +47,9 @@ public class MethodInfo extends AbstractMemberInfo
 	private var m_parameters : Vector.<MethodParameterInfo>;
 	private var m_isStatic : Boolean;
 	
+	///@see toString
+	private var m_parametersString : String;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
@@ -84,10 +87,33 @@ public class MethodInfo extends AbstractMemberInfo
 	 * Invokes the method on the provided instance using the specified parameters.
 	 * @param	scope
 	 * @param	...params
-	 * @return
+	 * @return	Returns the result of the method invocation or null if the return type is void
 	 */
 	public function invoke(scope:Object, ...params):Object
 	{
+		//TODO: Decide if this is all necessary or if we can let errors fall through and throw when apply() is called
+		if(!(scope is m_declaringType))
+		{
+			throw new ArgumentError("Cannot invoke " + this.toString() + ", declared on " + Reflection.getQualifiedClassName(m_declaringType) + ", on an object of type " + Reflection.getQualifiedClassName(scope) + ".");
+		}
+		/*
+		for(var x : int = 0; x < m_parameters.length; ++x)
+		{
+			var paramInfo : MethodParameterInfo = m_parameters[x];
+			if(x >= params.length)
+			{
+				if(!paramInfo.isOptional)
+				{
+					throw new ArgumentError("Cannot invoke " + this.toString() + " with " + params.length + " arguments.");
+				}
+			}
+			else if(!(params[x] is paramInfo.type))
+			{
+				throw new ArgumentError("Cannot invoke " + this.toString() + " with an argument of type " + Reflection.getQualifiedClassName(params[x]) + " at position " + x + ".");
+			}
+		}
+		//*/
+		
 		if(m_returnType != null)
 		{
 			return scope[m_name].apply(scope, params);
@@ -105,7 +131,18 @@ public class MethodInfo extends AbstractMemberInfo
 		{
 			m_returnTypeName = (m_returnType == null ? "void" : Reflection.getUnqualifiedClassName(m_returnType));
 		}
-		return "[" + (m_isStatic ? "Static" : "") + "Method|" + m_name + "(" + m_parameters.join(",") + "):" + m_returnTypeName + "]";
+		
+		if(m_parametersString == null)
+		{
+			m_parametersString = "";
+			for each(var param : MethodParameterInfo in m_parameters)
+			{
+				m_parametersString += param.toString() + (param.isOptional ? "?" : "") + ",";
+			}
+			m_parametersString = m_parametersString.substr(0, m_parametersString.length - 1);
+		}
+		
+		return "[" + (m_isStatic ? "Static" : "") + "Method|" + m_name + "(" + m_parametersString + "):" + m_returnTypeName + "]";
 	}
 	
 	//--------------------------------------

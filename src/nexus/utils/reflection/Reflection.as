@@ -83,7 +83,7 @@ public class Reflection
 			{
 				if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
 				{
-					return Object;
+					return Vector;
 				}
 				else
 				{
@@ -199,13 +199,13 @@ public class Reflection
 			{
 				reflectedType.extendedClasses.push(getClassForReflection(extendedClassXml.@type));
 			}
-			//trace(reflectedType.extendedClasses);
+			trace(reflectedType.extendedClasses);
 			
 			for each(var implementedInterfacesXml:XML in xml.factory.implementsInterface)
 			{
 				reflectedType.implementedInterfaces.push(getClassForReflection(implementedInterfacesXml.@type));
 			}
-			//trace(reflectedType.implementedInterfaces);
+			trace(reflectedType.implementedInterfaces);
 			
 			s_reflectedTypes[type] = reflectedType;
 			
@@ -244,11 +244,7 @@ public class Reflection
 	{
 		var type : Class = getClassInternal(value, false);
 		var typePrefix:String = getQualifiedClassName(type).substr(0, VECTOR_PREFIX.length);
-		if(type == Array || typePrefix == VECTOR_PREFIX)
-		{
-			return true;
-		}
-		return false;
+		return type == Array || typePrefix == VECTOR_PREFIX;
 	}
 	
 	/**
@@ -259,11 +255,7 @@ public class Reflection
 	public static function isAssociativeArray(value:Object):Boolean
 	{
 		var type : Class = getClassInternal(value, false);
-		if(type == Dictionary || type == Object)
-		{
-			return true;
-		}
-		return false;
+		return type == Dictionary || type == Object;
 	}
 	
 	/**
@@ -313,12 +305,12 @@ public class Reflection
 						member.addMetadataInfo(metadataInfo);
 						
 						//see if there is a registered strongly-typed class for this metadata
-						for(var name:String in s_registeredMetadataTypes)
+						for(var registeredMetadataName:String in s_registeredMetadataTypes)
 						{
-							//implemantors of metadata should omit the "Metadata" suffix, it is added here
-							if(metadataInfo.name + "Metadata" == name)
+							//implementers of metadata should omit the "Metadata" suffix, it is added here
+							if(metadataInfo.name + "Metadata" == registeredMetadataName)
 							{
-								var metadata:Metadata = new s_registeredMetadataTypes[name](metadataInfo);
+								var metadata:Metadata = new s_registeredMetadataTypes[registeredMetadataName](metadataInfo);
 								member.addMetadataInstance(metadata);
 								break;
 							}
@@ -329,7 +321,7 @@ public class Reflection
 				//add member to typeinfo
 				typeInfo.addMember(member);
 				
-				//trace(member);
+				trace(member);
 			}
 		}
 	}
@@ -355,7 +347,7 @@ public class Reflection
 		var method:MethodInfo;
 		if(xmlItem != null)
 		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.declaringType, typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
 			for each(var paramXml:XML in xmlItem.parameter)
 			{
 				method.addMethodParameter(new MethodParameterInfo(getClassForReflection(paramXml.@type), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
@@ -363,7 +355,7 @@ public class Reflection
 		}
 		else
 		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.declaringType, typeInfo, 0, 0);
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, 0, 0);
 		}
 		return method;
 	}

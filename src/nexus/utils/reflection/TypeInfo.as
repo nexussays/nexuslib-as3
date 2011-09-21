@@ -31,11 +31,13 @@ import flash.utils.*;
  * @author	Malachi Griffie
  * @since	7/23/2011 3:34 AM
  */
-public class TypeInfo extends AbstractMemberInfo
+public final class TypeInfo extends AbstractMetadataRecipient
 {
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
+	
+	private var m_type:Class;
 	
 	private var m_isDynamic : Boolean;
 	private var m_isFinal : Boolean;
@@ -62,7 +64,9 @@ public class TypeInfo extends AbstractMemberInfo
 	
 	public function TypeInfo(name:String, type:Class, isDynamic:Boolean, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
-		super(name, type, this, metadataCount);
+		super(name, metadataCount);
+		
+		m_type = type;
 		
 		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
@@ -80,6 +84,8 @@ public class TypeInfo extends AbstractMemberInfo
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
+	
+	public function get type():Class { return m_type; }
 	
 	public function get isDynamic():Boolean { return m_isDynamic; }
 	
@@ -103,7 +109,7 @@ public class TypeInfo extends AbstractMemberInfo
 	
 	public function toString(verbose:Boolean = false):String
 	{
-		return "[Type:" + m_name + "]";
+		return "[" + m_name + "]";
 	}
 	
 	public function getMemberByName(name:String):AbstractMemberInfo

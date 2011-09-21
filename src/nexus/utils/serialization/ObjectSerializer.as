@@ -94,7 +94,7 @@ public class ObjectSerializer implements ISerializer
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);
 		
 		//if the object is a map, iterate over the values of the object
-		if(Reflection.isAssociativeArray(typeInfo.declaringType))
+		if(Reflection.isAssociativeArray(typeInfo.type))
 		{
 			for(var key:Object in sourceObject)
 			{
@@ -102,7 +102,7 @@ public class ObjectSerializer implements ISerializer
 			}
 		}
 		//if the object is an array-type, iterate over the values of the object
-		else if(Reflection.isArray(typeInfo.declaringType))
+		else if(Reflection.isArray(typeInfo.type))
 		{
 			data = [];
 			for(var x : int = 0; x < sourceObject.length; ++x)
@@ -182,7 +182,7 @@ public class ObjectSerializer implements ISerializer
 		
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(type);
 		var instance:Object = new type();
-		if(Reflection.isArray(typeInfo.declaringType))
+		if(Reflection.isArray(typeInfo.type))
 		{
 			for(var x : int = 0; x < data.length; ++x)
 			{
@@ -192,7 +192,7 @@ public class ObjectSerializer implements ISerializer
 				}
 			}
 		}
-		else if(Reflection.isAssociativeArray(typeInfo.declaringType))
+		else if(Reflection.isAssociativeArray(typeInfo.type))
 		{
 			for(key in data)
 			{
