@@ -17,8 +17,6 @@
   <classpaths>
     <class path="." />
     <class path="..\..\..\src" />
-    <class path="..\..\..\lib\reflection\src" />
-    <class path="..\..\..\lib\blooddy_crypto_0.3.5" />
   </classpaths>
   <!-- Build options -->
   <build>

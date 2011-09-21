@@ -1,6 +1,7 @@
 package foo.bar
 {
-import dna.geom.CircleIntersection;
+
+import nexus.utils.serialization.ObjectSerializer;
 
 /**
  * ...
@@ -14,7 +15,7 @@ public class BaseClass
 	
 	}
 	
-	public function baseMethod(arg1:*, arg2:Object):CircleIntersection
+	public function baseMethod(arg1:*, arg2:Object):ObjectSerializer
 	{
 		return null;
 	}

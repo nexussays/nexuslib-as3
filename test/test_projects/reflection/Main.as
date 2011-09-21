@@ -1,22 +1,15 @@
 package
 {
 
-import by.blooddy.crypto.serialization.JSON;
-import dna.Debug;
-import dna.display.AdvancedSprite;
-import dna.utils.FPSLabel;
-import dna.utils.reflection.*;
-import dna.utils.serialization.ObjectSerializer;
-import dna.utils.serialization.XmlSerializer;
-import flash.display.DisplayObject;
-import flash.display.MovieClip;
-import flash.display.Sprite;
-import flash.events.Event;
-import flash.events.KeyboardEvent;
-import foo.bar.*;
-import foo.*;
-
+import flash.display.*;
+import flash.events.*;
 import flash.utils.*;
+
+import foo.*;
+import foo.bar.*;
+
+import nexus.utils.reflection.*;
+import nexus.utils.serialization.*;
 
 /**
  * ...
@@ -48,7 +41,7 @@ public class Main extends Sprite
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, frame1);
 		XmlSerializer;
-		stage.addChild(new FPSLabel());
+		//stage.addChild(new FPSLabel());
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		var start : int;
@@ -80,8 +73,13 @@ public class Main extends Sprite
 		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		
-		var testClass : TypeInfo = Reflection.getTypeInfo(TestClass);
-		
+		var testClass : TestClass = new TestClass(false);
+		var typeInfo : TypeInfo = Reflection.getTypeInfo(testClass);
+		MethodInfo(typeInfo.getMemberByName("publicFun")).invoke(testClass, testClass, 5);
+		var type : Class = Reflection.getClass(MethodInfo(typeInfo.getMemberByName("publicFinalFun")).parameters[0].type);
+		trace(type);
+		var bar : Object = new type();
+		trace(bar);
 		/*
 		trace("testClass.declaringType", testClass.declaringType);
 		trace("testClass.implementedInterfaces", testClass.implementedInterfaces);
@@ -113,7 +111,7 @@ public class Main extends Sprite
 		trace(Reflection.isPrimitive(Number));
 		//*/
 		
-		trace(JSON.encode(ObjectSerializer.serialize(new AdvancedSprite())));
+		//trace(JSON.encode(ObjectSerializer.serialize(new AdvancedSprite())));
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void

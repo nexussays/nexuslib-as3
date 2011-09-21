@@ -1,10 +1,11 @@
 package foo.bar
 {
 
-import dna.Enum;
-import dna.geom.CircleIntersection;
 import flash.utils.*;
+
 import foo.*;
+
+import nexus.utils.serialization.*;
 
 /**
  * ...
@@ -27,9 +28,9 @@ public class TestClass extends BaseClass implements IFoo
 	[Embed(source='test.xml', mimeType='application/octet-stream')]
 	public static const embed : Class;
 	
-	public static function get staticProperty():Enum
+	public static function get staticProperty():ISerializer
 	{
-		return new Enum();
+		return null;
 	}
 	
 	//--------------------------------------
@@ -84,20 +85,22 @@ public class TestClass extends BaseClass implements IFoo
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	override public function baseMethod(arg1:*, arg2:Object):CircleIntersection
+	override public function baseMethod(arg1:*, arg2:Object):ObjectSerializer
 	{
 		return super.baseMethod(arg1, arg2);
 	}
 	
 	[RandomMetadata(param="value", param2="value2")]
-	public final function publicFinalFun(param:TestClass):*
+	public final function publicFinalFun(param:Vector.<String>):*
 	{
+		trace("publicFinalFun");
 		return "";
 	}
 	
-	public function publicFun(param:TestClass, param2:Number=NaN, param3:*=null):int
+	public function publicFun(param:TestClass, param2:Number=556, param3:*=null):Vector.<*>
 	{
-		return 0;
+		trace("publicFun", param == this ? "param is self" : "param is other instance", param2);
+		return null;
 	}
 	
 	public static function foo():void
