@@ -21,14 +21,13 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package nexus.utils.serialization
+package nexus.utils.serialization.xml
 {
 
-import nexus.errors.NotImplementedError;
-import nexus.utils.reflection.Reflection;
-import nexus.utils.Parse;
-
 import flash.utils.*;
+
+import nexus.errors.NotImplementedError;
+import nexus.utils.serialization.ISerializer;
 
 /**
  * ...

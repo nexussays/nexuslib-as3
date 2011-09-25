@@ -21,3 +21,6 @@ the Initial Developer. All Rights Reserved.
 Contributor(s):
 
 ***** END LICENSE BLOCK *****
+
+nexuslib: http://code.nexussays.com/nexuslib
+nexus says: http://nexussays.com
