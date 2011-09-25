@@ -9,7 +9,6 @@ import foo.*;
 import foo.bar.*;
 
 import nexus.utils.reflection.*;
-import nexus.utils.serialization.*;
 
 /**
  * ...
@@ -40,7 +39,7 @@ public class Main extends Sprite
 	private function frame1(e:Event):void
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, frame1);
-		XmlSerializer;
+		
 		//stage.addChild(new FPSLabel());
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
