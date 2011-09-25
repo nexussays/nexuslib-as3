@@ -39,7 +39,6 @@ public class Main extends Sprite
 	private function frame1(e:Event):void
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, frame1);
-		
 		//stage.addChild(new FPSLabel());
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		

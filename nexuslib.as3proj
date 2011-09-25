@@ -76,6 +76,7 @@
   <hiddenPaths>
     <hidden path="nexuslib.lxml" />
     <hidden path="nexuslib.reflection.lxml" />
+    <hidden path="doc" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
