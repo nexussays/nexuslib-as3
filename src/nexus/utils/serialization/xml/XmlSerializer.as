@@ -61,16 +61,14 @@ public class XmlSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, getReadOnlyProperties:Boolean = false):Object
+	public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
 	{
-		throw new NotImplementedError();
-		//return XmlSerializer.serialize(sourceObject, elementName, getReadOnlyProperties);
+		return XmlSerializer.serialize(sourceObject, includeReadOnlyProperties);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		throw new NotImplementedError();
-		//return XmlSerializer.deserialize(serializedObject, classType);
+		return XmlSerializer.deserialize(serializedObject, classType);
 	}
 	
 	public function toString(verbose:Boolean = false):String
@@ -89,13 +87,13 @@ public class XmlSerializer implements ISerializer
 	 * @param	elementName		The name of the root element. If null, the name of the object's class is used.
 	 * @return
 	 */
-	public static function serialize(sourceObject:Object, getReadOnlyProperties:Boolean = false):XML
+	public static function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):XML
 	{
 		/*
 		var type:String = getQualifiedClassName(sourceObject);
 		var xml:XML = new XML("<" + (elementName || type.toLowerCase().substring(type.lastIndexOf(":") + 1)) + " />");
 		xml.@type = type;
-		var props:Object = Reflection.getPublicPropertyValues(sourceObject, getReadOnlyProperties);
+		var props:Object = Reflection.getPublicPropertyValues(sourceObject, includeReadOnlyProperties);
 		for(var prop:String in props)
 		{
 			if(props[prop] is Date)
@@ -118,7 +116,7 @@ public class XmlSerializer implements ISerializer
 	 * @param	classType	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
 	 * @return
 	 */
-	public static function deserialize(sourceXML:XML, classType:Class = null):*
+	public static function deserialize(sourceXML:XML, classType:Class = null):Object
 	{
 		/*
 		classType = classType || Class(getDefinitionByName(sourceXML.@type));

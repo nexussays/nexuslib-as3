@@ -21,18 +21,18 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package nexus.utils.serialization.xml
+package nexus.utils.serialization.json
 {
 	
 /**
- * Implement on objects that want to override their serialization to XML
+ * ...
  * @author	Malachi Griffie
- * @since	9/24/2011 5:37 PM
+ * @since	9/29/2011 2:12 AM
  */
-public interface IXmlSerializable
+public interface IJsonSerializable
 {
-	function toXml():XML;
-	function fromXml(xml:XML):Object;
+	function toJson():String;
+	function fromJson(json:Object):Object;
 }
 
 }
