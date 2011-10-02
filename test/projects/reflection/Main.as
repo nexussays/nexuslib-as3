@@ -44,9 +44,7 @@ public class Main extends Sprite
 		
 		var start : int;
 		
-		//make sure if there is any internal caching we call it once first
-		describeType(TestClass);
-		
+		//call it once first in case there is any internal caching going on
 		trace(describeType(TestClass).toXMLString());
 		//trace(describeType(IFoo).toXMLString());
 		
@@ -57,7 +55,7 @@ public class Main extends Sprite
 		describeType(TestClass);
 		trace("took " + (getTimer() - start) + "ms for describeType");
 		
-		//*
+		/*
 		start = getTimer();
 		for (var x : int = 0; x < COUNT; ++x)
 		{
@@ -71,13 +69,15 @@ public class Main extends Sprite
 		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		
+		/*
 		var testClass : TestClass = new TestClass(false);
 		var typeInfo : TypeInfo = Reflection.getTypeInfo(testClass);
-		MethodInfo(typeInfo.getMemberByName("publicFun")).invoke(testClass, testClass, 5);
-		var type : Class = Reflection.getClass(MethodInfo(typeInfo.getMemberByName("publicFinalFun")).parameters[0].type);
+		typeInfo.getMethodByName("publicFun").invoke(testClass, testClass, 5);
+		var type : Class = Reflection.getClass(typeInfo.getMethodByName("publicFinalFun").parameters[0].type);
 		trace(type);
 		var bar : Object = new type();
-		trace(bar);
+		//*/
+		
 		/*
 		trace("testClass.declaringType", testClass.declaringType);
 		trace("testClass.implementedInterfaces", testClass.implementedInterfaces);
