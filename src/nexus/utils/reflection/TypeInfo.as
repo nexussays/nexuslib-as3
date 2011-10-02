@@ -57,6 +57,9 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_fieldsIndex : int;
 	
 	private var m_allMembersByName : Dictionary;
+	private var m_methodsByName : Dictionary;
+	private var m_fieldsByName : Dictionary;
+	private var m_propertiesByName : Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -72,6 +75,9 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		m_isFinal = isFinal;
 		
 		m_allMembersByName = new Dictionary();
+		m_methodsByName = new Dictionary();
+		m_fieldsByName = new Dictionary();
+		m_propertiesByName = new Dictionary();
 		
 		m_inheritedInterfaces = new Vector.<Class>();
 		m_extendedClasses = new Vector.<Class>();
@@ -115,6 +121,21 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	public function getMemberByName(name:String):AbstractMemberInfo
 	{
 		return m_allMembersByName[name];
+	}
+	
+	public function getMethodByName(name:String):MethodInfo
+	{
+		return m_allMembersByName[name] as MethodInfo;
+	}
+	
+	public function getPropertyByName(name:String):PropertyInfo
+	{
+		return m_allMembersByName[name] as PropertyInfo;
+	}
+	
+	public function getFieldByName(name:String):FieldInfo
+	{
+		return m_allMembersByName[name] as FieldInfo;
 	}
 	
 	/**
@@ -225,14 +246,17 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		if(member is PropertyInfo)
 		{
 			m_properties[m_propertiesIndex++] = PropertyInfo(member);
+			m_propertiesByName[member.name] = member;
 		}
 		else if(member is FieldInfo)
 		{
 			m_fields[m_fieldsIndex++] = FieldInfo(member);
+			m_fieldsByName[member.name] = member;
 		}
 		else if(member is MethodInfo)
 		{
 			m_methods[m_methodsIndex++] = MethodInfo(member);
+			m_methodsByName[member.name] = member;
 		}
 		else
 		{
