@@ -102,6 +102,7 @@ public class Reflection
 	 * getUnqualifiedClassName(instanceOfSomeClass) => "SomeClass"
 	 * getUnqualifiedClassName("com.example.pkg::SomeClass") => "SomeClass"
 	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
+	 * getUnqualifiedClassName("some string value") => "String"
 	 * </pre>
 	 * @param	className	The fully qualified class name or Class to parse
 	 * @return
