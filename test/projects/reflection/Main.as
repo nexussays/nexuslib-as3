@@ -69,9 +69,10 @@ public class Main extends Sprite
 		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		
-		/*
 		var testClass : TestClass = new TestClass(false);
 		var typeInfo : TypeInfo = Reflection.getTypeInfo(testClass);
+		
+		/*
 		typeInfo.getMethodByName("publicFun").invoke(testClass, testClass, 5);
 		var type : Class = Reflection.getClass(typeInfo.getMethodByName("publicFinalFun").parameters[0].type);
 		trace(type);
@@ -99,6 +100,14 @@ public class Main extends Sprite
 		trace(Reflection.getSuperClass(TypeInfo));
 		trace(Reflection.getSuperClass("dna.utils.reflection::TypeInfo"));
 		trace(Reflection.getSuperClass("TypeInfo"));
+		//*/
+		
+		//*
+		trace(Reflection.getUnqualifiedClassName(testClass) + "|");
+		trace(Reflection.getUnqualifiedClassName(TestClass) + "|");
+		trace(Reflection.getUnqualifiedClassName("[class TestClass]") + "|");
+		trace(Reflection.getUnqualifiedClassName("foo::TestClass") + "|");
+		trace(Reflection.getUnqualifiedClassName("TestClass") + "|");
 		//*/
 		
 		/*
