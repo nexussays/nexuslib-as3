@@ -12,7 +12,7 @@ import nexus.utils.reflection.*;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/28/2011 8:46 PM
  */
 public class Main extends Sprite

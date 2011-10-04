@@ -31,7 +31,7 @@ import nexus.utils.serialization.ISerializer;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
 public class XmlSerializer implements ISerializer

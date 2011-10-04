@@ -26,7 +26,7 @@ package nexus.utils.serialization.xml
 	
 /**
  * Implement on objects that want to override their serialization to XML
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	9/24/2011 5:37 PM
  */
 public interface IXmlSerializable

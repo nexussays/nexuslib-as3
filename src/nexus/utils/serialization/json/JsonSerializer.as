@@ -28,7 +28,7 @@ package nexus.utils.serialization.json
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	9/29/2011 2:13 AM
  */
 public class JsonSerializer implements ISerializer

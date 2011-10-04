@@ -29,7 +29,7 @@ import flash.utils.Dictionary;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
 public class Parse
 {

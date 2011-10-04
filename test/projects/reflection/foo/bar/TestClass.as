@@ -9,7 +9,7 @@ import nexus.utils.serialization.*;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/28/2011 8:46 PM
  */
 [classMetadata(param="value", param2="value2")]
