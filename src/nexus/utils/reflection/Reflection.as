@@ -32,7 +32,7 @@ import flash.utils.getQualifiedSuperclassName;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
 public class Reflection
@@ -99,6 +99,7 @@ public class Reflection
 	 * Given a Class or a fully qualified class name, this will return the unqualified class name.
 	 * @example	<pre>
 	 * getUnqualifiedClassName(SomeClass) => "SomeClass"
+	 * getUnqualifiedClassName(instanceOfSomeClass) => "SomeClass"
 	 * getUnqualifiedClassName("com.example.pkg::SomeClass") => "SomeClass"
 	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
 	 * </pre>
@@ -107,7 +108,19 @@ public class Reflection
 	 */
 	public static function getUnqualifiedClassName(object:Object):String
 	{
-		var str:String = String(object + "");
+		var str : String;
+		//special handling of strings
+		if(	object is String
+			//allow allow formatted class names to be provided
+			&& (String(object).substr(0, 7) == "[class " || String(object).indexOf("::") != -1))
+		{
+			str = String(object);
+		}
+		else
+		{
+			str = getQualifiedClassName(object);
+		}
+		
 		//parse out class when in format "package.package.package::ClassName"
 		str = str.substring(str.lastIndexOf(":") + 1);
 		//parse out class when in format "[class ClassName]"
