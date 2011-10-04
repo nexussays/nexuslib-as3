@@ -1,4 +1,5 @@
-syntax: glob
-.svn
-obj/*
-bin/*.swf
+syntax: regexp
+\.svn
+obj
+bin/.+\.swf
+test/.+\.lxml
