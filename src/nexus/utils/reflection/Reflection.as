@@ -117,6 +117,10 @@ public class Reflection
 		{
 			str = String(object);
 		}
+		else if(object is Class)
+		{
+			str = object + "";
+		}
 		else
 		{
 			str = getQualifiedClassName(object);
@@ -124,8 +128,14 @@ public class Reflection
 		
 		//parse out class when in format "package.package.package::ClassName"
 		str = str.substring(str.lastIndexOf(":") + 1);
+		
 		//parse out class when in format "[class ClassName]"
-		str = str.substring(str.lastIndexOf(" ") + 1, str.length - 1);
+		var index : int = str.lastIndexOf("]");
+		if(index != -1)
+		{
+			str = str.substring(str.lastIndexOf(" ") + 1, index);
+		}
+		
 		return str;
 	}
 	
