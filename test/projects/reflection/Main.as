@@ -21,7 +21,7 @@ public class Main extends Sprite
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	static public const COUNT:int = 11234;
+	static public const COUNT:int = 5678;
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -39,33 +39,39 @@ public class Main extends Sprite
 	private function frame1(e:Event):void
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, frame1);
-		//stage.addChild(new FPSLabel());
+		
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		var start : int;
 		
 		//call it once first in case there is any internal caching going on
 		trace(describeType(TestClass).toXMLString());
-		//trace(describeType(IFoo).toXMLString());
 		
-		start = getTimer();
-		Reflection.getTypeInfo(TestClass);
-		trace("took " + (getTimer() - start) + "ms for Reflection");
 		start = getTimer();
 		describeType(TestClass);
 		trace("took " + (getTimer() - start) + "ms for describeType");
+		start = getTimer();
+		Reflection.getTypeInfo(TestClass);
+		trace("took " + (getTimer() - start) + "ms for Reflection");
 		
 		/*
+		var x : int;
 		start = getTimer();
-		for (var x : int = 0; x < COUNT; ++x)
+		for (x = 0; x < COUNT; ++x)
 		{
 			//took 3025ms for 11234, 0.2692718533024746ms each
-			//describeType(TestClass);
+			describeType(TestClass);
+		}
+		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
+		//*/
+		/*
+		start = getTimer();
+		for (x = 0; x < COUNT; ++x)
+		{
 			//uncached: took 6953ms for 11234, 0.618924692896564ms each
 			//cached: took 5ms for 11234, 0.0004450774434751647ms each
 			Reflection.getTypeInfo(TestClass);
 		}
-		
 		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		
@@ -102,7 +108,7 @@ public class Main extends Sprite
 		trace(Reflection.getSuperClass("TypeInfo"));
 		//*/
 		
-		//*
+		/*
 		trace(Reflection.getUnqualifiedClassName(testClass) + "|");
 		trace(Reflection.getUnqualifiedClassName(TestClass) + "|");
 		trace(Reflection.getUnqualifiedClassName("[class TestClass]") + "|");
@@ -117,8 +123,6 @@ public class Main extends Sprite
 		trace(Reflection.isPrimitive(String));
 		trace(Reflection.isPrimitive(Number));
 		//*/
-		
-		//trace(JSON.encode(ObjectSerializer.serialize(new AdvancedSprite())));
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void
