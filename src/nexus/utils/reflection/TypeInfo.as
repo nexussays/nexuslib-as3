@@ -56,10 +56,8 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_fields : Vector.<FieldInfo>;
 	private var m_fieldsIndex : int;
 	
+	private var m_memberNames : Vector.<String>;
 	private var m_allMembersByName : Dictionary;
-	private var m_methodsByName : Dictionary;
-	private var m_fieldsByName : Dictionary;
-	private var m_propertiesByName : Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -75,9 +73,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		m_isFinal = isFinal;
 		
 		m_allMembersByName = new Dictionary();
-		m_methodsByName = new Dictionary();
-		m_fieldsByName = new Dictionary();
-		m_propertiesByName = new Dictionary();
+		m_memberNames = new Vector.<String>();
 		
 		m_inheritedInterfaces = new Vector.<Class>();
 		m_extendedClasses = new Vector.<Class>();
@@ -246,23 +242,21 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		if(member is PropertyInfo)
 		{
 			m_properties[m_propertiesIndex++] = PropertyInfo(member);
-			m_propertiesByName[member.name] = member;
 		}
 		else if(member is FieldInfo)
 		{
 			m_fields[m_fieldsIndex++] = FieldInfo(member);
-			m_fieldsByName[member.name] = member;
 		}
 		else if(member is MethodInfo)
 		{
 			m_methods[m_methodsIndex++] = MethodInfo(member);
-			m_methodsByName[member.name] = member;
 		}
 		else
 		{
 			throw new ArgumentError("Cannot add unknown member type \"" + member + "\" to this TypeInfo.");
 		}
 		
+		m_memberNames.push(member.name);
 		m_allMembersByName[member.name] = member;
 	}
 }

@@ -23,8 +23,9 @@
  * ***** END LICENSE BLOCK ***** */
 package nexus.utils.serialization.json
 {
-	import nexus.errors.NotImplementedError;
-	import nexus.utils.serialization.ISerializer;
+
+import nexus.errors.NotImplementedError;
+import nexus.utils.serialization.ISerializer;
 
 /**
  * ...
@@ -74,7 +75,7 @@ public class JsonSerializer implements ISerializer
 	
 	static public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
 	{
-		throw new NotImplementedError();
+		return JSON.stringify(sourceObject);
 	}
 	
 	static public function deserialize(serializedObject:Object, classType:Class = null):Object
