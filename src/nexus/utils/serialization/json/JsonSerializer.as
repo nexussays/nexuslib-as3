@@ -80,9 +80,9 @@ public class JsonSerializer implements ISerializer
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	static public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):String
+	static public function serialize(sourceObject:Object, space:Object = null, includeReadOnlyFields:Boolean = false):String
 	{
-		return JSON.stringify(sourceObject, null);
+		return JSON.stringify(sourceObject, null, space);
 	}
 	
 	static public function deserialize(json:Object, type:Class = null):Object
@@ -105,43 +105,71 @@ public class JsonSerializer implements ISerializer
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	static private function parseObject(data:Object, desiredType:Class):Object
+	static private function parseObject(data:*, desiredType:Class):Object
 	{
 		//TODO: consider adding error checking if the data and desired type do not match
-		if(Reflection.isPrimitive(desiredType))
+		if(data == null)
+		{
+			return null;
+		}
+		else if(Reflection.isPrimitive(desiredType))
 		{
 			return data;
 		}
 		else if(Reflection.isArray(desiredType))
 		{
 			var array : Object = new desiredType();//Reflection.getClass(data)();
-			for(var x : int = 0; x < data.length; ++x)
+			if(data != undefined)
 			{
-				var value : Object = parseObject(data[x], Reflection.getVectorClass(desiredType));
-				array[x] = value;
+				for(var x : int = 0; x < data.length; ++x)
+				{
+					var value : Object = parseObject(data[x], Reflection.getVectorClass(desiredType));
+					array[x] = value;
+				}
 			}
 			return array;
 		}
 		else
 		{
-			var result : Object = new desiredType();
-			var typeInfo : TypeInfo = Reflection.getTypeInfo(desiredType);
-			if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
+			var result : Object;
+			try
 			{
-				return IJsonDeserializable(result).createFromJson(data);
+				result = new desiredType();
 			}
-			else
+			catch(e:ArgumentError)
 			{
-				for each(var member : AbstractMemberInfo in typeInfo.allMembers)
+				//ctor takes arguments
+			}
+			
+			if(data != undefined && result != null)
+			{
+				var typeInfo : TypeInfo = Reflection.getTypeInfo(desiredType);
+				if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
 				{
-					if(	(member is PropertyInfo && PropertyInfo(member).canWrite)
-						|| (member is FieldInfo && !FieldInfo(member).isConstant) )
+					return IJsonDeserializable(result).createFromJson(data);
+				}
+				else
+				{
+					for each(var member : AbstractMemberInfo in typeInfo.allMembers)
 					{
-						result[member.name] = parseObject(data[member.name], AbstractFieldInfo(member).type);
+						if(	((member is PropertyInfo && PropertyInfo(member).canWrite)
+							|| (member is FieldInfo && !FieldInfo(member).isConstant))
+							&& member.name in data )
+						{
+							var resultValue : Object = parseObject(data[member.name], AbstractFieldInfo(member).type);
+							try
+							{
+								result[member.name] = resultValue;
+							}
+							catch(e:Error)
+							{
+								//TODO: is catching everything here ok?
+							}
+						}
 					}
 				}
-				return result;
 			}
+			return result;
 		}
 	}
 }
