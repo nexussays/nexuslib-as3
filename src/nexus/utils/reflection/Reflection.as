@@ -24,6 +24,7 @@
 package nexus.utils.reflection
 {
 
+import flash.utils.getTimer;
 import nexus.utils.Parse;
 import flash.utils.describeType;
 import flash.utils.Dictionary;
@@ -93,6 +94,21 @@ public class Reflection
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Return the object type of the provided vector. If the provided value is not a vector
+	 * or is untyped, Object is returned.
+	 * @param	data
+	 * @return	The type of the vector or Object if no type is present in the value provided
+	 */
+	public static function getVectorClass(data:Object):Class 
+	{
+		var type : Class = getClassInternal(data, false);
+		var typePrefix:String = getQualifiedClassName(type);
+		//parse out class between "Vector.<" and ">"
+		typePrefix = typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1);
+		return typePrefix == "*" ? getClass(typePrefix) || Object : Object;
 	}
 	
 	/**
@@ -194,8 +210,8 @@ public class Reflection
 		{
 			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
 		}
-		
-		var reflectedType:TypeInfo = s_reflectedTypes[type];
+		var s : int = getTimer();
+		var reflectedType:TypeInfo// = s_reflectedTypes[type];
 		if(reflectedType == null)
 		{
 			var xml:XML = describeType(type);
@@ -206,6 +222,7 @@ public class Reflection
 			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, true, false));
 			
 			//add fields
+			s = getTimer();
 			addMembers(parseFieldInfo, xml.constant, reflectedType, true, true);
 			addMembers(parseFieldInfo, xml.variable, reflectedType, true, false);
 			addMembers(parseFieldInfo, xml.factory.constant, reflectedType, false, true);
@@ -218,18 +235,19 @@ public class Reflection
 			//add properties
 			addMembers(parsePropertyInfo, xml.accessor, reflectedType, true, false);
 			addMembers(parsePropertyInfo, xml.factory.accessor, reflectedType, false, false);
+			trace(getTimer() - s);
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
 				reflectedType.extendedClasses.push(getClassForReflection(extendedClassXml.@type));
 			}
-			trace(reflectedType.extendedClasses);
+			//trace(reflectedType.extendedClasses);
 			
 			for each(var implementedInterfacesXml:XML in xml.factory.implementsInterface)
 			{
 				reflectedType.implementedInterfaces.push(getClassForReflection(implementedInterfacesXml.@type));
 			}
-			trace(reflectedType.implementedInterfaces);
+			//trace(reflectedType.implementedInterfaces);
 			
 			s_reflectedTypes[type] = reflectedType;
 			
@@ -335,7 +353,7 @@ public class Reflection
 							if(metadataInfo.name + "Metadata" == registeredMetadataName)
 							{
 								var metadata:Metadata = new s_registeredMetadataTypes[registeredMetadataName](metadataInfo);
-								member.addMetadataInstance(metadata);
+								member.addMetadataInstance(metadata, metadataInfo.name);
 								break;
 							}
 						}
@@ -345,7 +363,7 @@ public class Reflection
 				//add member to typeinfo
 				typeInfo.addMember(member);
 				
-				trace(member);
+				//trace(member);
 			}
 		}
 	}
@@ -420,6 +438,7 @@ public class Reflection
 		}
 		else
 		{
+			//TODO: consider caching this in a dict with the object as a weak key
 			var def : Object;
 			
 			//allow passing in a class name as the argument if castStrings is true

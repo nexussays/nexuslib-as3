@@ -27,7 +27,12 @@ public class Main extends Sprite
 		
 		var start : int;
 		
-		trace(JsonSerializer.serialize(new Shape()));
+		var json : String = JsonSerializer.serialize(new TestClass());
+		trace(json);
+		var foo : Object = JsonSerializer.deserialize(json, TestClass);
+		trace(foo);
+		json = JsonSerializer.serialize(foo);
+		trace(json);
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void

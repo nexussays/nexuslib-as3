@@ -94,9 +94,14 @@ public class AbstractMetadataRecipient
 		return m_metadataByName[name];
 	}
 	
-	public function getMetadataByType(type:Class):Metadata
+	public function getTypdMetadataByClass(type:Class):Metadata
 	{
 		return m_metadataInstances[type] as Metadata;
+	}
+	
+	public function getTypdMetadataByName(name:String):Metadata
+	{
+		return m_metadataInstances[name] as Metadata;
 	}
 	
 	//--------------------------------------
@@ -114,10 +119,9 @@ public class AbstractMetadataRecipient
 		m_metadataByName[meta.name] = meta;
 	}
 	
-	internal function addMetadataInstance(meta:Metadata):void
+	internal function addMetadataInstance(meta:Metadata, name:String):void
 	{
 		var type:Class = Reflection.getClass(meta);
-		
 		if(m_metadataInstances[type] != null)
 		{
 			throw new Error("Metadata tag of type \"" + type + "\" defined twice on the same member");
@@ -125,6 +129,7 @@ public class AbstractMetadataRecipient
 		else
 		{
 			m_metadataInstances[type] = meta;
+			m_metadataInstances[name] = meta;
 		}
 	}
 }

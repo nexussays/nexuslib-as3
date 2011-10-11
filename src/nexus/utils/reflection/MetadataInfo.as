@@ -38,9 +38,7 @@ public class MetadataInfo
 	//--------------------------------------
 	
 	private var m_name : String;
-	
-	private var m_properties : Dictionary;
-	//private var m_keys : Vector.<String>;
+	private var m_data : Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -49,7 +47,7 @@ public class MetadataInfo
 	public function MetadataInfo(name:String)
 	{
 		m_name = name;
-		m_properties = new Dictionary();
+		m_data = new Dictionary();
 	}
 
 	//--------------------------------------
@@ -58,9 +56,7 @@ public class MetadataInfo
 	
 	public function get name():String { return m_name; }
 	
-	//public function get keys():Vector.<String> { return m_keys; }
-	
-	public function get properties():Dictionary { return m_properties; }
+	public function get data():Dictionary { return m_data; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -68,7 +64,7 @@ public class MetadataInfo
 	
 	public function getValue(key:String):String
 	{
-		return m_properties[key];
+		return m_data[key];
 	}
 	
 	public function toString():String
@@ -82,8 +78,7 @@ public class MetadataInfo
 	
 	internal function addValue(key:String, value:String):void
 	{
-		m_properties[key] = value;
-		//m_keys.push(key);
+		m_data[key] = value;
 	}
 }
 

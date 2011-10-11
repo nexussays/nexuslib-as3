@@ -61,9 +61,9 @@ public class XmlSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
+	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
 	{
-		return XmlSerializer.serialize(sourceObject, includeReadOnlyProperties);
+		return XmlSerializer.serialize(sourceObject, includeReadOnlyFields);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
@@ -87,13 +87,13 @@ public class XmlSerializer implements ISerializer
 	 * @param	elementName		The name of the root element. If null, the name of the object's class is used.
 	 * @return
 	 */
-	public static function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):XML
+	public static function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):XML
 	{
 		/*
 		var type:String = getQualifiedClassName(sourceObject);
 		var xml:XML = new XML("<" + (elementName || type.toLowerCase().substring(type.lastIndexOf(":") + 1)) + " />");
 		xml.@type = type;
-		var props:Object = Reflection.getPublicPropertyValues(sourceObject, includeReadOnlyProperties);
+		var props:Object = Reflection.getPublicPropertyValues(sourceObject, includeReadOnlyFields);
 		for(var prop:String in props)
 		{
 			if(props[prop] is Date)

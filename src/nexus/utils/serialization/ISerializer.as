@@ -31,7 +31,7 @@ package nexus.utils.serialization
  */
 public interface ISerializer
 {
-	function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object;
+	function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object;
 	function deserialize(serializedObject:Object, classType:Class = null):Object;
 }
 

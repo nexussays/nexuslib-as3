@@ -41,7 +41,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="" />
+    <option additional="-swf-version=13" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>

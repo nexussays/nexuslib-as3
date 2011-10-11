@@ -25,6 +25,8 @@ package nexus.utils.serialization.json
 {
 
 import nexus.errors.NotImplementedError;
+
+import nexus.utils.reflection.*;
 import nexus.utils.serialization.ISerializer;
 
 /**
@@ -59,28 +61,76 @@ public class JsonSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
+	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
 	{
-		return JsonSerializer.serialize(sourceObject, includeReadOnlyProperties);
+		return JsonSerializer.serialize(sourceObject, includeReadOnlyFields);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		return JsonSerializer.deserialize(serializedObject, classType);
+		if(!(serializedObject is String))
+		{
+			throw new ArgumentError("Cannot deserialize object of type \"" + Reflection.getQualifiedClassName(serializedObject) + "\", must be a String in JSON format");
+		}
+		return JsonSerializer.deserialize(String(serializedObject), classType);
 	}
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	static public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
+	static public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):String
 	{
-		return JSON.stringify(sourceObject);
+		return JSON.stringify(sourceObject, null);
 	}
 	
-	static public function deserialize(serializedObject:Object, classType:Class = null):Object
+	static public function deserialize(json:String, type:Class = null):Object
 	{
-		throw new NotImplementedError();
+		var object : Object = JSON.parse(json);
+		return type == null ? object : parseObject(object, type);
+	}
+	
+	//--------------------------------------
+	//	PRIVATE CLASS METHODS
+	//--------------------------------------
+	
+	static private function parseObject(data:Object, desiredType:Class):Object
+	{
+		//TODO: consider adding error checking if the data and desired type do not match
+		if(Reflection.isPrimitive(data))
+		{
+			return data;
+		}
+		else if(Reflection.isArray(data))
+		{
+			var array : Object = new desiredType();// Reflection.getClass(data)();
+			for(var x : int = 0; x < data.length; ++x)
+			{
+				array[x] = parseObject(data[x], Reflection.getVectorClass(desiredType));
+			}
+			return array;
+		}
+		else
+		{
+			var result : Object = new desiredType();
+			var typeInfo : TypeInfo = Reflection.getTypeInfo(desiredType);
+			if(typeInfo.implementedInterfaces.indexOf(IJsonSerializable) != -1)
+			{
+				return IJsonSerializable(result).createFromJson(data);
+			}
+			else
+			{
+				for each(var member : AbstractMemberInfo in typeInfo.allMembers)
+				{
+					if(	(member is PropertyInfo && PropertyInfo(member).canWrite)
+						|| (member is FieldInfo && !FieldInfo(member).isConstant) )
+					{
+						result[member.name] = parseObject(data[member.name], AbstractFieldInfo(member).type);
+					}
+				}
+				return result;
+			}
+		}
 	}
 }
 

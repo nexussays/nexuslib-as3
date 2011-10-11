@@ -105,6 +105,8 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	
 	public function get constructor():MethodInfo { return m_constructor; }
 	
+	public function get allMembers():Dictionary { return m_allMembersByName; }
+	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------

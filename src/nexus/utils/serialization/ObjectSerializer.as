@@ -62,9 +62,9 @@ public class ObjectSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
+	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
 	{
-		return ObjectSerializer.serialize(sourceObject, includeReadOnlyProperties);
+		return ObjectSerializer.serialize(sourceObject, includeReadOnlyFields);
 	}
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
@@ -80,10 +80,10 @@ public class ObjectSerializer implements ISerializer
 	 * Creates a native object representing the provided typed-object instance. Only public properties are included, and Dates
 	 * are converted to number of milliseconds since Jan 1, 1970 UTC
 	 * @param	sourceObject	The typed object to convert to a native object
-	 * @param	includeReadOnlyProperties	By default, read-only properties are not serialized you can override that here
+	 * @param	includeReadOnlyFields	By default, read-only properties are not serialized you can override that here
 	 * @return	A native object representing the provided object instance
 	 */
-	static public function serialize(sourceObject:Object, includeReadOnlyProperties:Boolean = false):Object
+	static public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
 	{
 		if(sourceObject == null || Reflection.isPrimitive(sourceObject))
 		{
@@ -98,7 +98,7 @@ public class ObjectSerializer implements ISerializer
 		{
 			for(var key:Object in sourceObject)
 			{
-				data[key] = serialize(sourceObject[key], includeReadOnlyProperties);
+				data[key] = serialize(sourceObject[key], includeReadOnlyFields);
 			}
 		}
 		//if the object is an array-type, iterate over the values of the object
@@ -109,7 +109,7 @@ public class ObjectSerializer implements ISerializer
 			{
 				if(x in sourceObject)
 				{
-					data[x] = serialize(sourceObject[x], includeReadOnlyProperties);
+					data[x] = serialize(sourceObject[x], includeReadOnlyFields);
 				}
 			}
 		}
@@ -119,18 +119,18 @@ public class ObjectSerializer implements ISerializer
 			//write out fields
 			for each(var field:FieldInfo in typeInfo.fields)
 			{
-				if(includeReadOnlyProperties || !field.isConstant)
+				if(includeReadOnlyFields || !field.isConstant)
 				{
-					data[field.name] = serialize(sourceObject[field.name], includeReadOnlyProperties);
+					data[field.name] = serialize(sourceObject[field.name], includeReadOnlyFields);
 				}
 			}
 			
 			//write out properties
 			for each(var property:PropertyInfo in typeInfo.properties)
 			{
-				if(property.canRead && (includeReadOnlyProperties || property.canWrite))
+				if(property.canRead && (includeReadOnlyFields || property.canWrite))
 				{
-					data[property.name] = serialize(sourceObject[property.name], includeReadOnlyProperties);
+					data[property.name] = serialize(sourceObject[property.name], includeReadOnlyFields);
 				}
 			}
 		}
