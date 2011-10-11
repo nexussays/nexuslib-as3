@@ -1,10 +1,11 @@
 package  
 {
+	import nexus.utils.serialization.json.IJsonSerializable;
 /**
  * ...
  * @author ...
  */
-public class TestClass 
+public class TestClass implements IJsonSerializable
 {
 	public static const STATIC_CONST : String = "foo";
 	public const INSTANCE_CONST : String = "also foo";
@@ -24,26 +25,27 @@ public class TestClass
 		}
 	}
 	
-	public function get foo():int 
+	/* INTERFACE nexus.utils.serialization.json.IJsonSerializable */
+	
+	public function toJson():Object 
 	{
-		return m_foo;
+		return { "baz":baz, "foo":foo };
 	}
 	
+	public function jsonLikeType(data:Object):Boolean 
+	{
+		return "foo" in data && "baz" in data;
+	}
+	
+	public function get foo():int  { return m_foo; }
 	public function set foo(value:int):void 
 	{
 		m_foo = value;
 	}
 	
-	public function get bar():int 
-	{
-		return m_bar;
-	}
+	public function get bar():int  { return m_bar; }
 	
-	public function get baz():Vector.<TestClass> 
-	{
-		return m_baz;
-	}
-	
+	public function get baz():Vector.<TestClass>  { return m_baz; }
 	public function set baz(value:Vector.<TestClass>):void 
 	{
 		m_baz = value;
