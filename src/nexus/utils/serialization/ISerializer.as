@@ -33,6 +33,7 @@ public interface ISerializer
 {
 	function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object;
 	function deserialize(serializedObject:Object, classType:Class = null):Object;
+	function fill(objectInstance:Object, data:Object):void;
 }
 
 }

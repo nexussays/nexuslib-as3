@@ -71,6 +71,11 @@ public class XmlSerializer implements ISerializer
 		return XmlSerializer.deserialize(serializedObject as XML, classType);
 	}
 	
+	public function fill(objectInstance:Object, data:Object):void 
+	{
+		
+	}
+	
 	public function toString(verbose:Boolean = false):String
 	{
 		return "[XmlSerializer]";

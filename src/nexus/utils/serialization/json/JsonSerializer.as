@@ -68,11 +68,12 @@ public class JsonSerializer implements ISerializer
 	
 	public function deserialize(serializedObject:Object, classType:Class = null):Object
 	{
-		if(!(serializedObject is String))
-		{
-			throw new ArgumentError("Cannot deserialize object of type \"" + Reflection.getQualifiedClassName(serializedObject) + "\", must be a String in JSON format");
-		}
-		return JsonSerializer.deserialize(String(serializedObject), classType);
+		return JsonSerializer.deserialize(serializedObject, classType);
+	}
+	
+	public function fill(objectInstance:Object, data:Object):void 
+	{
+		
 	}
 	
 	//--------------------------------------
@@ -84,10 +85,20 @@ public class JsonSerializer implements ISerializer
 		return JSON.stringify(sourceObject, null);
 	}
 	
-	static public function deserialize(json:String, type:Class = null):Object
+	static public function deserialize(json:Object, type:Class = null):Object
 	{
-		var object : Object = JSON.parse(json);
+		//if(!(serializedObject is String))
+		//{
+			//throw new ArgumentError("Cannot deserialize object of type \"" + Reflection.getQualifiedClassName(serializedObject) + "\", must be a String in JSON format");
+		//}
+		var object : Object = json is String ? JSON.parse(String(json)) : json;
+		delete object.baz;
 		return type == null ? object : parseObject(object, type);
+	}
+	
+	static public function fill(objectInstance:Object, data:Object):void 
+	{
+		
 	}
 	
 	//--------------------------------------
@@ -97,16 +108,17 @@ public class JsonSerializer implements ISerializer
 	static private function parseObject(data:Object, desiredType:Class):Object
 	{
 		//TODO: consider adding error checking if the data and desired type do not match
-		if(Reflection.isPrimitive(data))
+		if(Reflection.isPrimitive(desiredType))
 		{
 			return data;
 		}
-		else if(Reflection.isArray(data))
+		else if(Reflection.isArray(desiredType))
 		{
-			var array : Object = new desiredType();// Reflection.getClass(data)();
+			var array : Object = new desiredType();//Reflection.getClass(data)();
 			for(var x : int = 0; x < data.length; ++x)
 			{
-				array[x] = parseObject(data[x], Reflection.getVectorClass(desiredType));
+				var value : Object = parseObject(data[x], Reflection.getVectorClass(desiredType));
+				array[x] = value;
 			}
 			return array;
 		}
@@ -114,9 +126,9 @@ public class JsonSerializer implements ISerializer
 		{
 			var result : Object = new desiredType();
 			var typeInfo : TypeInfo = Reflection.getTypeInfo(desiredType);
-			if(typeInfo.implementedInterfaces.indexOf(IJsonSerializable) != -1)
+			if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
 			{
-				return IJsonSerializable(result).createFromJson(data);
+				return IJsonDeserializable(result).createFromJson(data);
 			}
 			else
 			{

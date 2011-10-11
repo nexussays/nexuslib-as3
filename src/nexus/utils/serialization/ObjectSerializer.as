@@ -72,6 +72,11 @@ public class ObjectSerializer implements ISerializer
 		return ObjectSerializer.deserialize(serializedObject, classType);
 	}
 	
+	public function fill(objectInstance:Object, data:Object):void 
+	{
+		
+	}
+	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
