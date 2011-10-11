@@ -108,7 +108,7 @@ public class Reflection
 		var typePrefix:String = getQualifiedClassName(type);
 		//parse out class between "Vector.<" and ">"
 		typePrefix = typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1);
-		return typePrefix == "*" ? getClass(typePrefix) || Object : Object;
+		return typePrefix == "*" ? Object : (getClass(typePrefix) || Object);
 	}
 	
 	/**
