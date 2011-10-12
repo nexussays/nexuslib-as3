@@ -130,31 +130,30 @@ public class JsonSerializer implements ISerializer
 	
 	static private function parseObject(data:*, desiredType:Class):Object
 	{
+		var result : Object;
+		
 		//TODO: consider adding error checking if the data and desired type do not match
 		if(data == null)
 		{
-			return null;
+			result = null;
 		}
 		else if(Reflection.isPrimitive(desiredType))
 		{
-			return data;
+			result = data;
 		}
 		else if(Reflection.isArray(desiredType))
 		{
-			var array : Object = new desiredType();//Reflection.getClass(data)();
-			if(data != undefined)
+			result = new desiredType();//Reflection.getClass(data)();
+			for(var x : int = 0; x < data.length; ++x)
 			{
-				for(var x : int = 0; x < data.length; ++x)
+				if(x in data && data[x] !== undefined)
 				{
-					var value : Object = parseObject(data[x], Reflection.getVectorClass(desiredType));
-					array[x] = value;
+					result[x] = parseObject(data[x], Reflection.getVectorClass(desiredType));
 				}
 			}
-			return array;
 		}
 		else
 		{
-			var result : Object;
 			try
 			{
 				result = new desiredType();
@@ -164,7 +163,7 @@ public class JsonSerializer implements ISerializer
 				//ctor takes arguments
 			}
 			
-			if(data != undefined && result != null)
+			if(result != null)
 			{
 				var typeInfo : TypeInfo = Reflection.getTypeInfo(desiredType);
 				if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
@@ -177,7 +176,8 @@ public class JsonSerializer implements ISerializer
 					{
 						if(	((member is PropertyInfo && PropertyInfo(member).canWrite)
 							|| (member is FieldInfo && !FieldInfo(member).isConstant))
-							&& member.name in data )
+							//ensure the field exists in the data
+							&& member.name in data && data[member.name] !== undefined)
 						{
 							var resultValue : Object = parseObject(data[member.name], AbstractFieldInfo(member).type);
 							try
@@ -186,14 +186,14 @@ public class JsonSerializer implements ISerializer
 							}
 							catch(e:Error)
 							{
-								//TODO: is catching everything here ok?
+								//TODO: is a catch-all here ok?
 							}
 						}
 					}
 				}
 			}
-			return result;
 		}
+		return result;
 	}
 }
 
