@@ -25,15 +25,34 @@ package nexus.utils.serialization
 {
 	
 /**
- * ...
+ * A standardized interface for serializers
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
 public interface ISerializer
 {
+	/**
+	 * Serializes the given object into the serialized type
+	 * @param	sourceObject
+	 * @param	includeReadOnlyFields
+	 * @return
+	 */
 	function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object;
-	function deserialize(serializedObject:Object, classType:Class = null):Object;
-	function fill(objectInstance:Object, data:Object):void;
+	
+	/**
+	 * Deserializes the given serialized data into an object. If a type is not provided the object is a native Actionscript object.
+	 * @param	serializedData	The serialized data to parse into an object
+	 * @param	type	The type of object to deserialize to, or null if a native object should be returned
+	 * @return	An object instance parsed from the serialized data
+	 */
+	function deserialize(serializedData:Object, type:Class = null):Object;
+	
+	/**
+	 * Takes a given object instance and assigns matching fields from the serialized data
+	 * @param	objectInstance	The instance to assign to
+	 * @param	data	The serialized data
+	 */
+	function fill(objectInstance:Object, serializedData:Object):void;
 }
 
 }
