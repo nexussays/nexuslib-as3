@@ -44,6 +44,8 @@ public class JsonSerializer implements ISerializer
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
+	private var m_space : Object;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
@@ -57,18 +59,32 @@ public class JsonSerializer implements ISerializer
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
+	/**
+	 * Entries in generated JSON objects and JSON arrays are separated by a gap derived from the space value.
+	 * This gap is always 0 to 10 characters wide. If space is longer than 10 characters only the first 10
+	 * characters of the string are used.
+	 */
+	public function get space():Object { return m_space; }
+	public function set space(value:Object):void 
+	{
+		m_space = value;
+	}
+	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
+	/**
+	 * @inheritDoc
+	 */
 	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
 	{
-		return JsonSerializer.serialize(sourceObject, includeReadOnlyFields);
+		return JsonSerializer.serialize(sourceObject, m_space, includeReadOnlyFields);
 	}
 	
-	public function deserialize(serializedObject:Object, classType:Class = null):Object
+	public function deserialize(serializedData:Object, type:Class = null):Object
 	{
-		return JsonSerializer.deserialize(serializedObject, classType);
+		return JsonSerializer.deserialize(serializedData, type);
 	}
 	
 	public function fill(objectInstance:Object, data:Object):void 
@@ -80,6 +96,13 @@ public class JsonSerializer implements ISerializer
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
+	/**
+	 * Serializes the given object into a JSON string
+	 * @param	sourceObject
+	 * @param	space
+	 * @param	includeReadOnlyFields
+	 * @return
+	 */
 	static public function serialize(sourceObject:Object, space:Object = null, includeReadOnlyFields:Boolean = false):String
 	{
 		return JSON.stringify(sourceObject, null, space);
@@ -87,9 +110,9 @@ public class JsonSerializer implements ISerializer
 	
 	static public function deserialize(json:Object, type:Class = null):Object
 	{
-		//if(!(serializedObject is String))
+		//if(!(serializedData is String))
 		//{
-			//throw new ArgumentError("Cannot deserialize object of type \"" + Reflection.getQualifiedClassName(serializedObject) + "\", must be a String in JSON format");
+			//throw new ArgumentError("Cannot deserialize object of type \"" + Reflection.getQualifiedClassName(serializedData) + "\", must be a String in JSON format");
 		//}
 		var object : Object = json is String ? JSON.parse(String(json)) : json;
 		delete object.baz;

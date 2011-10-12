@@ -24,12 +24,10 @@
 package nexus.utils.reflection
 {
 
-import flash.utils.getTimer;
+import nexus.nexuslib_internal;
 import nexus.utils.Parse;
-import flash.utils.describeType;
-import flash.utils.Dictionary;
-import flash.utils.getDefinitionByName;
-import flash.utils.getQualifiedSuperclassName;
+
+import flash.utils.*;
 
 /**
  * ...
@@ -65,8 +63,9 @@ public class Reflection
 	}
 	
 	/**
-	 * Returns Class(getDefinitionByName(getQualifiedSuperclassName(obj)))
+	 * Returns Class(getDefinitionByName(getQualifiedSuperclassName(obj))) with special handling of Vectors
 	 * @param	obj
+	 * @throws	ReferenceError	If the super class is not present or accessible, for example if the class is internal or not in this ApplicationDomain.
 	 * @return
 	 */
 	public static function getSuperClass(obj:Object):Class
@@ -146,10 +145,10 @@ public class Reflection
 		str = str.substring(str.lastIndexOf(":") + 1);
 		
 		//parse out class when in format "[class ClassName]"
-		var index : int = str.lastIndexOf("]");
-		if(index != -1)
+		var closingBracketIndex : int = str.lastIndexOf("]");
+		if(closingBracketIndex != -1)
 		{
-			str = str.substring(str.lastIndexOf(" ") + 1, index);
+			str = str.substring(str.lastIndexOf(" ") + 1, closingBracketIndex);
 		}
 		
 		return str;
@@ -210,7 +209,7 @@ public class Reflection
 		{
 			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
 		}
-		var s : int = getTimer();
+		//var s : int = getTimer();
 		var reflectedType:TypeInfo// = s_reflectedTypes[type];
 		if(reflectedType == null)
 		{
@@ -222,7 +221,7 @@ public class Reflection
 			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, true, false));
 			
 			//add fields
-			s = getTimer();
+			//s = getTimer();
 			addMembers(parseFieldInfo, xml.constant, reflectedType, true, true);
 			addMembers(parseFieldInfo, xml.variable, reflectedType, true, false);
 			addMembers(parseFieldInfo, xml.factory.constant, reflectedType, false, true);
@@ -235,7 +234,7 @@ public class Reflection
 			//add properties
 			addMembers(parsePropertyInfo, xml.accessor, reflectedType, true, false);
 			addMembers(parsePropertyInfo, xml.factory.accessor, reflectedType, false, false);
-			trace(getTimer() - s);
+			//trace(getTimer() - s);
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
@@ -257,9 +256,9 @@ public class Reflection
 	}
 	
 	/**
-	 * Returns true if the provided object is an instance of a primitive class or is a Class object of a primitive type
-	 * @param	type
-	 * @return
+	 * Check if the provided object is an instance of a primitive class or is a Class object of a primitive type
+	 * @param	value	The object to test
+	 * @return	True if the provided object is an instance of a primitive class or is a Class object of a primitive type
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
@@ -278,21 +277,26 @@ public class Reflection
 	}
 	
 	/**
-	 * Returns true if the provided object is an Array or Vector
-	 * @param	value
-	 * @return
+	 * Check if the provided object is an Array or Vector
+	 * @param	value	The object to test
+	 * @return	True if the provided object is an Array or Vector
 	 */
 	public static function isArray(value:Object):Boolean
 	{
 		var type : Class = getClassInternal(value, false);
+		if(type == Array)
+		{
+			return true;
+		}
+		//if it's not an Array, see if it's a vector
 		var typePrefix:String = getQualifiedClassName(type).substr(0, VECTOR_PREFIX.length);
-		return type == Array || typePrefix == VECTOR_PREFIX;
+		return typePrefix == VECTOR_PREFIX;
 	}
 	
 	/**
-	 * Returns true if the provided object is a Dictionary or dynamic Object
-	 * @param	value
-	 * @return
+	 * Check if the provided object is a Dictionary or native Object
+	 * @param	value	The object to test
+	 * @return	True if the provided object is a Dictionary or native Object
 	 */
 	public static function isAssociativeArray(value:Object):Boolean
 	{
@@ -300,11 +304,16 @@ public class Reflection
 		return type == Dictionary || type == Object;
 	}
 	
+	//--------------------------------------
+	//	INTERNAL CLASS METHODS
+	//--------------------------------------
+	
 	/**
-	 * Provide a list of classes that extend Metadata and reflected TypeInfo will parse any metadata into strongly-typed classes
+	 * Provide a list of classes that extend Metadata and reflected TypeInfo will parse any matching metadata into
+	 * and instance of the strongly-typed class provided.
 	 * @param	types	A vector of classes, each of which must be a subclass of Metadata
 	 */
-	public static function registerMetadataClasses(types:Vector.<Class>):void
+	nexuslib_internal static function registerMetadataClasses(types:Vector.<Class>):void
 	{
 		for each(var type:Class in types)
 		{
@@ -463,7 +472,11 @@ public class Reflection
 		}
 	}
 	
-	///returns a type for use in the reflection framework
+	/**
+	 * Returns a type for use in the reflection framework
+	 * @param	typeName
+	 * @return
+	 */
 	private static function getClassForReflection(typeName:String):Class
 	{
 		if(typeName == "void" || typeName == "undefined")

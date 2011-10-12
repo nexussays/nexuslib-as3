@@ -42,7 +42,7 @@ public interface IJsonSerializable
 	
 	/**
 	 * Returns true if the data provided has the same signature as this class (typically this means that all the fields and properties in
-	 * the class have corresponding keys in the data, and there are no keys in the data that do not exist as class members &mdash; however if
+	 * the class have corresponding keys in the data, and there are no keys in the data that do not exist as class members -- however if
 	 * you have provided a custom toJson() implementation then you will likely need to override this check as well)
 	 * @param	data	A native object which has been parsed from JSON
 	 * @return	True if the provided data has an equivalent signature to this class, false if it does not.
