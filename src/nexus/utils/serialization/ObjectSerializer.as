@@ -67,9 +67,9 @@ public class ObjectSerializer implements ISerializer
 		return ObjectSerializer.serialize(sourceObject, includeReadOnlyFields);
 	}
 	
-	public function deserialize(serializedObject:Object, classType:Class = null):Object
+	public function deserialize(serializedData:Object, type:Class = null):Object
 	{
-		return ObjectSerializer.deserialize(serializedObject, classType);
+		return ObjectSerializer.deserialize(serializedData, type);
 	}
 	
 	public function fill(objectInstance:Object, data:Object):void 
@@ -148,20 +148,20 @@ public class ObjectSerializer implements ISerializer
 	
 	/**
 	 * Deserializes the provided native object into an instance of a typed class, either specified in the object or provided as an argument.
-	 * @param	serializedObject	The native object from which to create a typed object instance
-	 * @param	classType			The type of object to create. If null, the Class type is derived from the type value of the serializedObject
+	 * @param	serializedData	The native object from which to create a typed object instance
+	 * @param	type			The type of object to create. If null, the Class type is derived from the type value of the serializedData
 	 * @return
 	 */
-	static public function deserialize(serializedObject:Object, classType:Class = null, forceType:Boolean=true):Object
+	static public function deserialize(serializedData:Object, type:Class = null, forceType:Boolean=true):Object
 	{
-		if(serializedObject == null || Reflection.isPrimitive(serializedObject))
+		if(serializedData == null || Reflection.isPrimitive(serializedData))
 		{
-			return serializedObject;
+			return serializedData;
 		}
 		
 		//check to see if object is in the same format that as this deserializes to or if we have the data only
 		var dataOnly:Boolean = false;
-		for(var key:String in serializedObject)
+		for(var key:String in serializedData)
 		{
 			if(key != DATA_KEY && key != TYPE_KEY)
 			{
@@ -169,20 +169,20 @@ public class ObjectSerializer implements ISerializer
 			}
 		}
 		
-		var data:Object = dataOnly ? serializedObject : serializedObject[DATA_KEY];
+		var data:Object = dataOnly ? serializedData : serializedData[DATA_KEY];
 		if(data == null || Reflection.isPrimitive(data))
 		{
 			return data;
 		}
 		
-		var dataType : Class = (!dataOnly && TYPE_KEY in serializedObject ? Reflection.getClass(serializedObject[TYPE_KEY]) : null);
+		var dataType : Class = (!dataOnly && TYPE_KEY in serializedData ? Reflection.getClass(serializedData[TYPE_KEY]) : null);
 		
 		//check to see if the format provides the type or not
 		//if forceType and a class it provided, use it, otherwise check the object first and override the provided type if one exists
-		var type:Class = forceType ? (classType || dataType) : (dataType || classType);
+		var type:Class = forceType ? (type || dataType) : (dataType || type);
 		if(type == null)
 		{
-			throw new Error("Cannot deserialize object, no type is provided and none could be derived from the object (\"" + TYPE_KEY + "\":\"" + serializedObject[TYPE_KEY] + "\").");
+			throw new Error("Cannot deserialize object, no type is provided and none could be derived from the object (\"" + TYPE_KEY + "\":\"" + serializedData[TYPE_KEY] + "\").");
 		}
 		
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(type);

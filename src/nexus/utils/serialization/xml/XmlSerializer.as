@@ -66,9 +66,9 @@ public class XmlSerializer implements ISerializer
 		return XmlSerializer.serialize(sourceObject, includeReadOnlyFields);
 	}
 	
-	public function deserialize(serializedObject:Object, classType:Class = null):Object
+	public function deserialize(serializedData:Object, type:Class = null):Object
 	{
-		return XmlSerializer.deserialize(serializedObject as XML, classType);
+		return XmlSerializer.deserialize(serializedData as XML, type);
 	}
 	
 	public function fill(objectInstance:Object, data:Object):void 
@@ -118,14 +118,14 @@ public class XmlSerializer implements ISerializer
 	/**
 	 * Creates an instance of the passed class from the passed XML data
 	 * @param	sourceXML	The XML to source the object from
-	 * @param	classType	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
+	 * @param	type	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
 	 * @return
 	 */
-	public static function deserialize(sourceXML:XML, classType:Class = null):Object
+	public static function deserialize(sourceXML:XML, type:Class = null):Object
 	{
 		/*
-		classType = classType || Class(getDefinitionByName(sourceXML.@type));
-		var result:* = new classType();
+		type = type || Class(getDefinitionByName(sourceXML.@type));
+		var result:* = new type();
 		var props:Object = Reflection.getPublicPropertyValues(result);
 		//loop through the properties of the object, not the XML
 		for(var prop:String in props)
