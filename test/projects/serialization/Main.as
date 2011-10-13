@@ -30,7 +30,6 @@ public class Main extends Sprite
 		var json : String = JsonSerializer.serialize(new TestClass());
 		trace(json);
 		var foo : Object = JsonSerializer.deserialize(json, TestClass);
-		trace(foo);
 		json = JsonSerializer.serialize(foo);
 		trace(json);
 	}

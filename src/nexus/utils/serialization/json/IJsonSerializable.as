@@ -34,11 +34,12 @@ package nexus.utils.serialization.json
 public interface IJsonSerializable
 {
 	/**
-	 * Used by the JsonSerializer to return a custom native object representation of this instance. Note that an Object should
-	 * be returned, not a JSON-formatted String; the returned Object will be converted to JSON by the serializer.
-	 * @return
+	 * Used by the JsonSerializer to return a custom native object representation of this instance. If an Object is returned,
+	 * the serializer recurses into the object. If a String is returned, the serializer does not recurse and will continue on.
+	 * @param	key	The key of this object in its parent
+	 * @return	A String or Object representing this object.
 	 */
-	function toJson():Object;
+	function toJSON(key:String):Object;
 	
 	/**
 	 * Returns true if the data provided has the same signature as this class (typically this means that all the fields and properties in
