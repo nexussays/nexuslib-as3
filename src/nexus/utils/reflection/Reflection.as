@@ -43,10 +43,12 @@ public class Reflection
 	static private const VECTOR_PREFIX : String = flash.utils.getQualifiedClassName(Vector);
 	static private const UNTYPED_VECTOR_CLASSNAME : String = VECTOR_PREFIX + ".<*>";
 	
-	///store all reflected types to the describeType() call and processing into a TypeInfo instance only ever happens once
-	static private const s_reflectedTypes:Dictionary = new Dictionary();
+	///cache all TypeInfo information so the describeType() call and processing it into a TypeInfo only happens once
+	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary();
 	///store strongly-typed classes that represent metadata on members
 	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
+	///store all calls to getClass() so the lookup is quicker if the same object is provided a second time
+	static private const s_cachedObjectClasses : Dictionary = new Dictionary(true);
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -210,7 +212,7 @@ public class Reflection
 			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
 		}
 		//var s : int = getTimer();
-		var reflectedType:TypeInfo// = s_reflectedTypes[type];
+		var reflectedType:TypeInfo = s_cachedTypeInfoObjects[type];
 		if(reflectedType == null)
 		{
 			var xml:XML = describeType(type);
@@ -248,7 +250,7 @@ public class Reflection
 			}
 			//trace(reflectedType.implementedInterfaces);
 			
-			s_reflectedTypes[type] = reflectedType;
+			s_cachedTypeInfoObjects[type] = reflectedType;
 			
 			xml = null;
 		}
@@ -447,28 +449,32 @@ public class Reflection
 		}
 		else
 		{
-			//TODO: consider caching this in a dict with the object as a weak key
-			var def : Object;
-			
-			//allow passing in a class name as the argument if castStrings is true
-			if(castStrings && obj is String)
+			//TODO: do performance testing to see if this caching is actually getting us anything
+			if(!(obj in s_cachedObjectClasses))
 			{
-				try
+				var def : Object;
+				
+				//allow passing in a class name as the argument if castStrings is true
+				if(castStrings && obj is String)
 				{
-					def = getDefinitionByName(String(obj));
+					try
+					{
+						def = getDefinitionByName(String(obj));
+					}
+					catch(e:ReferenceError)
+					{
+						//ignore
+					}
 				}
-				catch(e:ReferenceError)
+				
+				if(def == null)
 				{
-					//ignore
+					def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
 				}
+				
+				s_cachedObjectClasses[obj] = Class(def);
 			}
-			
-			if(def == null)
-			{
-				def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
-			}
-			
-			return Class(def);
+			return s_cachedObjectClasses[obj];
 		}
 	}
 	
