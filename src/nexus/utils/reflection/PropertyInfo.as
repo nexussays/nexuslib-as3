@@ -41,35 +41,18 @@ public class PropertyInfo extends AbstractFieldInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_canRead : Boolean;
-	private var m_canWrite : Boolean;
-	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
 	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadataCount);
-		
-		m_declaringType = declaringType;
-		
-		m_canRead = read;
-		m_canWrite = write;
-		
-		if (m_canRead == false && m_canWrite == false)
-		{
-			throw new ArgumentError("Cannot create PropertyInfo, both canRead and canWrite are set to false");
-		}
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, read, write, metadataCount);
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	public function get canRead():Boolean { return m_canRead; }
-	
-	public function get canWrite():Boolean { return m_canWrite; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS

@@ -24,8 +24,6 @@
 package nexus.utils.reflection
 {
 
-import flash.utils.*;
-
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
@@ -41,24 +39,20 @@ public class FieldInfo extends AbstractFieldInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_isConstant : Boolean;
-	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
 	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, metadatacount);
-		
-		m_isConstant = isConstant;
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, !isConstant, metadatacount);
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get isConstant():Boolean { return m_isConstant; }
+	public function get isConstant():Boolean { return !m_canWrite; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -70,7 +64,7 @@ public class FieldInfo extends AbstractFieldInfo
 		{
 			m_typeName = Reflection.getUnqualifiedClassName(m_type);
 		}
-		return "[" + (m_isStatic ? "Static" : "") + (m_isConstant ? "Constant" : "Variable") + "|" + m_name + ":" + m_typeName + "]";
+		return "[" + (m_isStatic ? "Static" : "") + (m_canWrite ? "Variable" : "Constant") + "|" + m_name + ":" + m_typeName + "]";
 	}
 }
 

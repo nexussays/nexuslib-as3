@@ -177,7 +177,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 			var superclassFields : Vector.<FieldInfo> = new Vector.<FieldInfo>();
 			for each(var field : FieldInfo in superType.fields)
 			{
-				if(fieldsChecked[field.name] == null)
+				if(fieldsChecked[field.name] != true)
 				{
 					for each(var memberField : FieldInfo in m_fields)
 					{

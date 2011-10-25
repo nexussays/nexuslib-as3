@@ -47,16 +47,27 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	
 	protected var m_isStatic : Boolean;
 	
+	protected var m_canRead : Boolean;
+	protected var m_canWrite : Boolean;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
+	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
 		super(name, declaringType, reflectedTypeInfo, metadataCount);
 		
 		m_type = type;
 		m_isStatic = isStatic;
+		
+		m_canRead = read;
+		m_canWrite = write;
+		
+		if(m_canRead == false && m_canWrite == false)
+		{
+			throw new ArgumentError("Cannot create AbstractFieldInfo, both canRead and canWrite are set to false");
+		}
 	}
 	
 	//--------------------------------------
@@ -66,6 +77,10 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	public function get isStatic():Boolean { return m_isStatic; }
 	
 	public function get type():Class { return m_type; }
+	
+	public function get canRead():Boolean { return m_canRead; }
+	
+	public function get canWrite():Boolean { return m_canWrite; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
