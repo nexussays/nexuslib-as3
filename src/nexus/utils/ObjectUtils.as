@@ -21,31 +21,25 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package nexus.utils.serialization
+package nexus.utils
 {
-	
+	import nexus.errors.NotImplementedError;
+
 /**
- * A standardized interface for serializers
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	7/23/2011 3:34 AM
+ * ...
+ * @author	Malachi Griffie
+ * @since	10/25/2011 3:26 AM
  */
-public interface ISerializer
+public class ObjectUtils
 {
-	/**
-	 * Serializes the given object into the serialized type
-	 * @param	sourceObject
-	 * @param	includeReadOnlyFields
-	 * @return
-	 */
-	function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object;
+	//--------------------------------------
+	//	PUBLIC CLASS METHODS
+	//--------------------------------------
 	
-	/**
-	 * Deserializes the given serialized data into an object. If a type is not provided the object is a native Actionscript object.
-	 * @param	serializedData	The serialized data to parse into an object
-	 * @param	type	The type of object to deserialize to, or null if a native object should be returned
-	 * @return	An object instance parsed from the serialized data
-	 */
-	function deserialize(serializedData:Object):Object;
+	static public function createTypedObjectFromNativeObject(source:Object, type:Class):Object
+	{
+		throw new NotImplementedError();
+	}
 }
 
 }
