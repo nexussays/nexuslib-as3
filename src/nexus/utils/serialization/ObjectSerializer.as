@@ -62,17 +62,17 @@ public class ObjectSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
+	public function serialize(sourceObject:Object):Object
 	{
-		return ObjectSerializer.serialize(sourceObject, includeReadOnlyFields);
+		return ObjectSerializer.serialize(sourceObject, false);
 	}
 	
-	public function deserialize(serializedData:Object, type:Class = null):Object
+	public function deserialize(serializedData:Object):Object
 	{
-		return ObjectSerializer.deserialize(serializedData, type);
+		return ObjectSerializer.deserialize(serializedData, Object);
 	}
 	
-	public function fill(objectInstance:Object, data:Object):void 
+	public function fill(objectInstance:Object, data:Object):void
 	{
 		
 	}

@@ -61,24 +61,14 @@ public class XmlSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):Object
+	public function serialize(sourceObject:Object):Object
 	{
-		return XmlSerializer.serialize(sourceObject, includeReadOnlyFields);
+		return XmlSerializer.serialize(sourceObject, false);
 	}
 	
-	public function deserialize(serializedData:Object, type:Class = null):Object
+	public function deserialize(serializedData:Object):Object
 	{
-		return XmlSerializer.deserialize(serializedData as XML, type);
-	}
-	
-	public function fill(objectInstance:Object, data:Object):void 
-	{
-		
-	}
-	
-	public function toString(verbose:Boolean = false):String
-	{
-		return "[XmlSerializer]";
+		return XmlSerializer.deserialize(serializedData as XML, Object);
 	}
 	
 	//--------------------------------------
