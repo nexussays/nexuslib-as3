@@ -32,7 +32,9 @@ public class TestClass// implements IJsonSerializable
 		m_baz[1] = "value 2";
 		m_baz[2] = "value 3";
 		m_d = new Dictionary();
-		m_d["foo"] = "foo1";
+		m_d["foo"] = "foo";
+		m_d["Fop"] = "Fop";
+		m_d["z"] = "z";
 	}
 	
 	/* INTERFACE nexus.utils.serialization.json.IJsonSerializable */
@@ -62,8 +64,8 @@ public class TestClass// implements IJsonSerializable
 		m_baz = value;
 	}
 	
-	public function get d():Dictionary { return m_d; }
-	public function set d(value:Dictionary):void
+	public function get zdict():Dictionary { return m_d; }
+	public function set zdict(value:Dictionary):void
 	{
 		m_d = value;
 	}
