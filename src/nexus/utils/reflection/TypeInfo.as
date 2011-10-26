@@ -56,8 +56,12 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_fields : Vector.<FieldInfo>;
 	private var m_fieldsIndex : int;
 	
-	private var m_memberNames : Vector.<String>;
+	private var m_allMembers : Vector.<AbstractMemberInfo>;
+	private var m_allMembersSortedByName : Vector.<AbstractMemberInfo>;
+	private var m_allMembersSortedByPosition : Vector.<AbstractMemberInfo>;
+	
 	private var m_allMembersByName : Dictionary;
+	private var m_allMemberNames : Vector.<String>;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -72,8 +76,9 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
 		
+		m_allMembers = new Vector.<AbstractMemberInfo>();
+		m_allMemberNames = new Vector.<String>();
 		m_allMembersByName = new Dictionary();
-		m_memberNames = new Vector.<String>();
 		
 		m_inheritedInterfaces = new Vector.<Class>();
 		m_extendedClasses = new Vector.<Class>();
@@ -105,7 +110,31 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	
 	public function get constructor():MethodInfo { return m_constructor; }
 	
-	public function get allMembers():Dictionary { return m_allMembersByName; }
+	public function get allMembers():Vector.<AbstractMemberInfo> { return m_allMembers; }
+	
+	/**
+	 * Returns members, sorted according to their internal position in the reflected TypeInfo
+	 */
+	public function get allMembersByPosition():Vector.<AbstractMemberInfo>
+	{
+		if(m_allMembersSortedByPosition == null)
+		{
+			m_allMembersSortedByPosition = m_allMembers.sort(positionSort);
+		}
+		return m_allMembersSortedByPosition;
+	}
+	
+	/**
+	 * Returns members, sorted according to their name
+	 */
+	public function get allMembersByName():Vector.<AbstractMemberInfo>
+	{
+		if(m_allMembersSortedByName == null)
+		{
+			m_allMembersSortedByName = m_allMembers.sort(nameSort);
+		}
+		return m_allMembersSortedByName;
+	}
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -136,25 +165,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		return m_allMembersByName[name] as FieldInfo;
 	}
 	
-	/**
-	 * Sorts fields, methods, and properties according to their position in the reflected TypeInfo
-	 */
-	public function sortMembersByPosition():void
-	{
-		m_fields.sort(positionSort);
-		m_methods.sort(positionSort);
-		m_properties.sort(positionSort);
-	}
 	
-	/**
-	 * Sorts fields, methods, and properties according to their name
-	 */
-	public function sortMembersByName():void
-	{
-		m_fields.sort(nameSort);
-		m_methods.sort(nameSort);
-		m_properties.sort(nameSort);
-	}
 	
 	/**
 	 * Warning! This is a very costly sort that needs to get the TypeInfo for the entire inheritance chain. Sorts members according
@@ -204,8 +215,6 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	
 	private function declaringTypeSort(l:AbstractMemberInfo, r:AbstractMemberInfo):Number
 	{
-		//trace("L", l, l.reflectedType, l.declaringType, l.reflectedTypeInfo.extendedClasses.indexOf(l.declaringType));
-		//trace("R", r, r.reflectedType, r.declaringType, r.reflectedTypeInfo.extendedClasses.indexOf(r.declaringType));
 		if(l.declaringType == r.declaringType)
 		{
 			return positionSort(l, r);
@@ -258,7 +267,8 @@ public final class TypeInfo extends AbstractMetadataRecipient
 			throw new ArgumentError("Cannot add unknown member type \"" + member + "\" to this TypeInfo.");
 		}
 		
-		m_memberNames.push(member.name);
+		m_allMembers.push(member);
+		m_allMemberNames.push(member.name);
 		m_allMembersByName[member.name] = member;
 	}
 }
