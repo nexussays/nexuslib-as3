@@ -141,6 +141,46 @@ public class ObjectUtils
 		throw new NotImplementedError();
 	}
 	
+	/**
+	 * Reflects through the two objects provided and determines if objectA shares the same signature as objectB.
+	 * @example	<pre>
+	 * var objectA : Object = {
+	 * 	"name": "Object A",
+	 * 	"value": 50,
+	 * 	"good": true
+	 * };
+	 *
+	 * var objectB : Object = {
+	 * 	"name": "Object B"
+	 * };
+	 *
+	 * ObjectUtils.objectIsLike(objectA, objectB) ==> true
+	 * ObjectUtils.objectIsLike(objectB, objectA) ==> false
+	 * </pre>
+	 * <pre>
+	 * var objectA : Object = {
+	 * 	"name": "Object A",
+	 * 	"value": 50,
+	 * 	"good": true
+	 * };
+	 *
+	 * public interface IFoo
+	 * {
+	 * 	function get name():String;
+	 * 	function get value():int;
+	 * }
+	 *
+	 * ObjectUtils.objectIsLike(objectA, IFoo) ==> true
+	 * </pre>
+	 * @param	objectA
+	 * @param	objectB
+	 * @return
+	 */
+	static public function objectIsLike(instance:Object, instanceOrClassOrInterface:Object):Boolean
+	{
+		throw new NotImplementedError();
+	}
+	
 	//--------------------------------------
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
