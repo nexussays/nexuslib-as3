@@ -251,6 +251,7 @@ public class JsonSerializer implements ISerializer
 		if(Reflection.isAssociativeArray(obj))
 		{
 			var key : String;
+			//alphabetize output
 			//don't check if(pretty) here because we want to sort on case if the entire serialize call is pretty printed
 			//even if this specific object we are recursing over is not
 			if(s_maxLineLength < int.MAX_VALUE)
@@ -315,86 +316,6 @@ public class JsonSerializer implements ISerializer
 			result += JSON.stringify(key);
 			result += pretty ? ": " : ":";
 			result += serializeObject(value);
-		}
-		return result;
-	}
-	
-	static private function deserializeObject(data:*, desiredType:Class):Object
-	{
-		var result:Object;
-		
-		//TODO: consider adding error checking if the data and desired type do not match
-		if(data == null)
-		{
-			result = null;
-		}
-		else if(Reflection.isPrimitive(desiredType))
-		{
-			result = data;
-		}
-		else if(desiredType == Date)
-		{
-			result = new Date(data);
-		}
-		else if(Reflection.isArray(desiredType))
-		{
-			result = new desiredType();
-			for(var x:int = 0; x < data.length; ++x)
-			{
-				if(x in data && data[x] !== undefined)
-				{
-					result[x] = deserializeObject(data[x], Reflection.getVectorClass(desiredType));
-				}
-			}
-		}
-		else if(Reflection.isAssociativeArray(desiredType))
-		{
-			result = new desiredType();
-			for(var key : String in data)
-			{
-				result[key] = deserializeObject(data[key], Reflection.getClass(data[key]));
-			}
-		}
-		else
-		{
-			try
-			{
-				result = new desiredType();
-			}
-			catch(e:ArgumentError)
-			{
-				//ctor takes arguments
-			}
-			
-			if(result != null)
-			{
-				var typeInfo:TypeInfo = Reflection.getTypeInfo(desiredType);
-				if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
-				{
-					return IJsonDeserializable(result).createFromJson(data);
-				}
-				else
-				{
-					for each(var member:AbstractMemberInfo in typeInfo.allMembers)
-					{
-						if(	member is AbstractFieldInfo
-							&& AbstractFieldInfo(member).canWrite
-							//ensure the field exists in the data
-							&& member.name in data && data[member.name] !== undefined)
-						{
-							var resultValue:Object = deserializeObject(data[member.name], AbstractFieldInfo(member).type);
-							try
-							{
-								result[member.name] = resultValue;
-							}
-							catch(e:Error)
-							{
-								//TODO: is a catch-all here ok?
-							}
-						}
-					}
-				}
-			}
 		}
 		return result;
 	}
