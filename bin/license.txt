@@ -22,5 +22,5 @@ Contributor(s):
 
 ***** END LICENSE BLOCK *****
 
-nexuslib: http://code.nexussays.com/nexuslib
-nexus says: http://nexussays.com
+website:          http://nexussays.com
+project website:  http://code.nexussays.com/nexuslib
