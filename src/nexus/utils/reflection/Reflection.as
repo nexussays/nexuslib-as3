@@ -103,7 +103,7 @@ public class Reflection
 	 * @param	data
 	 * @return	The type of the vector or Object if no type is present in the value provided
 	 */
-	public static function getVectorClass(data:Object):Class
+	public static function getVectorClass(data:Object):Class 
 	{
 		var type : Class = getClassInternal(data, false);
 		var typePrefix:String = getQualifiedClassName(type);
@@ -450,13 +450,10 @@ public class Reflection
 		else
 		{
 			//TODO: do performance testing to see if this caching is actually getting us anything
-			if(obj in s_cachedObjectClasses)
-			{
-				return Class(s_cachedObjectClasses[obj]);
-			}
-			else
+			if(!(obj in s_cachedObjectClasses))
 			{
 				var def : Object;
+				
 				//allow passing in a class name as the argument if castStrings is true
 				if(castStrings && obj is String)
 				{
@@ -475,9 +472,9 @@ public class Reflection
 					def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
 				}
 				
-				s_cachedObjectClasses[obj] = def;
-				return Class(def);
+				s_cachedObjectClasses[obj] = Class(def);
 			}
+			return s_cachedObjectClasses[obj];
 		}
 	}
 	
