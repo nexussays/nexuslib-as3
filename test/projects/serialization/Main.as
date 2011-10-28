@@ -6,6 +6,7 @@ import flash.events.KeyboardEvent;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.getTimer;
+import nexus.utils.ObjectUtils;
 import nexus.utils.serialization.json.*;
 //import by.blooddy.crypto.serialization.JSON;
 
@@ -46,7 +47,19 @@ public class Main extends Sprite
 		
 		foo = new TestClass();
 		trace(foo.sub.foo);
-		/*
+		
+		/**
+		 * Test typed object conversion
+		 */
+		json = JsonSerializer.serialize(foo, "\t", 20, false);
+		var bar : TestClass = ObjectUtils.createTypedObjectFromNativeObject(TestClass, JsonSerializer.deserialize(json)) as TestClass;
+		trace(bar);
+		
+		/**
+		 * Test output
+		 */
+		
+		//*
 		json = JsonSerializer.serialize(foo, "\t", 20, false);
 		out("mine: ", json);
 		json = JsonSerializer.serialize(JsonSerializer.deserialize(json), "", int.MAX_VALUE, true);
@@ -67,6 +80,11 @@ public class Main extends Sprite
 		json = JSON.stringify(JSON.parse(json));
 		out("m->n: ", json);
 		//*/
+		
+		/**
+		 * Test performance
+		 */
+		
 		start = getTimer();
 		for(x = 0; x < COUNT; ++x)
 		{
@@ -90,7 +108,7 @@ public class Main extends Sprite
 			str = JSON.stringify(stuff.OBJECT_TEST);
 		}
 		end = (getTimer() - start);
-		out("blooddy took " + end + "ms, " + (end / COUNT) + "ms per object on " + str.length + " characters");
+		out("native took " + end + "ms, " + (end / COUNT) + "ms per object on " + str.length + " characters");
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void
