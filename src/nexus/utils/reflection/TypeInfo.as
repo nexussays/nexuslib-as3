@@ -115,7 +115,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	/**
 	 * Returns members, sorted according to their internal position in the reflected TypeInfo
 	 */
-	public function get allMembersByPosition():Vector.<AbstractMemberInfo>
+	public function get allMembersSortedByPosition():Vector.<AbstractMemberInfo>
 	{
 		if(m_allMembersSortedByPosition == null)
 		{
@@ -127,7 +127,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	/**
 	 * Returns members, sorted according to their name
 	 */
-	public function get allMembersByName():Vector.<AbstractMemberInfo>
+	public function get allMembersSortedByName():Vector.<AbstractMemberInfo>
 	{
 		if(m_allMembersSortedByName == null)
 		{
