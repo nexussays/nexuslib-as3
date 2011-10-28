@@ -191,21 +191,25 @@ public class JsonSerializer implements ISerializer
 		{
 			result = "null";
 		}
-		else if(Reflection.isPrimitive(sourceObject) || sourceObject is Date)
+		else if(Reflection.isPrimitive(sourceObject)
+			|| sourceObject is Date
+			|| sourceObject is IJsonSerializable
+			|| "toJSON" in sourceObject)
 		{
 			result = JSON.stringify(sourceObject);
 		}
 		else
 		{
+			result = "";
+			
 			//if a max line length has been set, use the native encoder to very quickly roughly determine the string length
 			//of the current object and then use that to determine if we need to run the pretty formatter or not
-			//result = objectToString(sourceObject, (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength));
-			pretty = (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength);
-			result = "";
+			//TODO: find a faster way to determine this
+			pretty = (s_maxLineLength == 0 || (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength));
 			
 			if(pretty)
 			{
-				indent();
+				s_indentation += s_spaceCharacters;
 			}
 			
 			if(Reflection.isArray(sourceObject))
@@ -222,7 +226,8 @@ public class JsonSerializer implements ISerializer
 				
 				if(pretty)
 				{
-					unindent();
+					//unindent
+					s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
 					result = "[" + "\n" + result + "\n" + s_indentation + "]";
 				}
 				else
@@ -233,8 +238,7 @@ public class JsonSerializer implements ISerializer
 			else
 			{
 				//iterate over the keys in a native object, use reflection if it is typed
-				//if(Reflection.isAssociativeArray())
-				if(sourceObject is Dictionary || sourceObject is Object)
+				if(Reflection.isAssociativeArray(sourceObject))
 				{
 					var key : String;
 					//alphabetize output
@@ -285,7 +289,8 @@ public class JsonSerializer implements ISerializer
 				
 				if(pretty)
 				{
-					unindent();
+					//unindent
+					s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
 					result = "{" + "\n" + result + "\n" + s_indentation + "}";
 				}
 				else
@@ -312,16 +317,6 @@ public class JsonSerializer implements ISerializer
 			result += serializeObject(value);
 		}
 		return result;
-	}
-	
-	static private function indent():void
-	{
-		s_indentation += s_spaceCharacters;
-	}
-	
-	static private function unindent():void
-	{
-		s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
 	}
 }
 
