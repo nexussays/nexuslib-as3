@@ -71,10 +71,11 @@ public class JsonSerializer implements ISerializer
 	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	static private var s_indentationLevel : int;
+	//static private var s_indentationLevel : int;
 	static private var s_spaceCharacters : String;
 	static private var s_maxLineLength : int;
-	static private var s_includeReadOnly : Boolean;
+	static private var s_serializeConstants : Boolean;
+	static private var s_indentation:String;
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -82,7 +83,7 @@ public class JsonSerializer implements ISerializer
 	
 	private var m_indentationCharacters:String;
 	private var m_maxLineLength:int;
-	private var m_includeReadOnlyFields:Boolean;
+	private var m_serializeConstants:Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -92,7 +93,7 @@ public class JsonSerializer implements ISerializer
 	{
 		m_indentationCharacters = indentationCharacters;
 		m_maxLineLength = lineLength;
-		m_includeReadOnlyFields = false;
+		m_serializeConstants = false;
 	}
 	
 	//--------------------------------------
@@ -110,10 +111,10 @@ public class JsonSerializer implements ISerializer
 		m_indentationCharacters = value;
 	}
 	
-	public function get includeReadOnlyFields():Boolean { return m_includeReadOnlyFields; }
-	public function set includeReadOnlyFields(value:Boolean):void
+	public function get serializeConstants():Boolean { return m_serializeConstants; }
+	public function set serializeConstants(value:Boolean):void
 	{
-		m_includeReadOnlyFields = value;
+		m_serializeConstants = value;
 	}
 	
 	/**
@@ -134,7 +135,7 @@ public class JsonSerializer implements ISerializer
 	 */
 	public function serialize(sourceObject:Object):Object
 	{
-		return JsonSerializer.serialize(sourceObject, m_indentationCharacters, m_maxLineLength, m_includeReadOnlyFields);
+		return JsonSerializer.serialize(sourceObject, m_indentationCharacters, m_maxLineLength, m_serializeConstants);
 	}
 	
 	public function deserialize(serializedData:Object):Object
@@ -153,13 +154,14 @@ public class JsonSerializer implements ISerializer
 	 * @param	includeReadOnlyFields
 	 * @return
 	 */
-	static public function serialize(sourceObject:Object, space:String = "", maxLineLength:int = int.MAX_VALUE, includeReadOnlyFields:Boolean = false):String
+	static public function serialize(sourceObject:Object, space:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
 	{
-		s_indentationLevel = 0;
+		//s_indentationLevel = 0;
+		s_indentation = "";
 		s_spaceCharacters = space || "";
 		s_maxLineLength = maxLineLength;
-		s_includeReadOnly = includeReadOnlyFields;
-		return serializeObject(sourceObject) + "";
+		s_serializeConstants = serializeConstants;
+		return serializeObject(sourceObject);
 	}
 	
 	static public function deserialize(json:String):Object
@@ -182,6 +184,8 @@ public class JsonSerializer implements ISerializer
 	static private function serializeObject(sourceObject:Object):String
 	{
 		var result:String;
+		var pretty : Boolean;
+		var x : int;
 		
 		if(sourceObject == null)
 		{
@@ -191,116 +195,106 @@ public class JsonSerializer implements ISerializer
 		{
 			result = JSON.stringify(sourceObject);
 		}
-		//else if(sourceObject is RegExp)
-		//{
-			//return JSON.stringify( {
-				//"pattern":RegExp(sourceObject).source,
-				//"options": RegExp(sourceObject).dotall ? "s" : ""
-					//+ RegExp(sourceObject).global ? "g" : ""
-					//+ RegExp(sourceObject).ignoreCase ? "i" : ""
-					//+ RegExp(sourceObject).multiline ? "m" : ""
-				//} );
-		//}
-		else if(Reflection.isArray(sourceObject))
-		{
-			//if a max line length has been set, use the native encoder to very quickly roughly determine the string length
-			//of the current object and then use that to determine if we need to run the pretty formatter or not
-			result = arrayToString(sourceObject, (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength));
-		}
 		else
 		{
 			//if a max line length has been set, use the native encoder to very quickly roughly determine the string length
 			//of the current object and then use that to determine if we need to run the pretty formatter or not
-			result = objectToString(sourceObject, (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength));
-		}
-		return result;
-	}
-	
-	static private function arrayToString(array:Object, pretty:Boolean):String
-	{
-		//create a string to store the array's jsonstring value
-		var result:String = "";
-		
-		s_indentationLevel++;
-		
-		for(var x:int = 0; x < array.length; x++)
-		{
-			if(result.length > 0)
+			//result = objectToString(sourceObject, (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength));
+			pretty = (s_maxLineLength < int.MAX_VALUE && JSON.stringify(sourceObject).length > s_maxLineLength);
+			result = "";
+			
+			if(pretty)
 			{
-				result += pretty ? ",\n" : ",";
+				indent();
 			}
-			result += pretty ? getSpacingForIndentationLevel() : "";
-			result += serializeObject(array[x]);
-		}
-		
-		//close the array and return it's string value
-		s_indentationLevel--;
-		
-		return pretty
-			? "[" + "\n" + result + "\n" + getSpacingForIndentationLevel() + "]"
-			: "[" + result + "]";
-	}
-	
-	static private function objectToString(obj:Object, pretty:Boolean):String
-	{
-		var result:String = "";
-		
-		s_indentationLevel++;
-		
-		//iterate over the keys in a native object, use reflection if it is typed
-		if(Reflection.isAssociativeArray(obj))
-		{
-			var key : String;
-			//alphabetize output
-			//don't check if(pretty) here because we want to sort on case if the entire serialize call is pretty printed
-			//even if this specific object we are recursing over is not
-			if(s_maxLineLength < int.MAX_VALUE)
+			
+			if(Reflection.isArray(sourceObject))
 			{
-				var keys : Array = [];
-				for(key in obj)
+				for(x = 0; x < sourceObject.length; x++)
 				{
-					keys.push(key);
+					if(result.length > 0)
+					{
+						result += pretty ? ",\n" : ",";
+					}
+					result += pretty ? s_indentation : "";
+					result += serializeObject(sourceObject[x]);
 				}
-				keys.sort(Array.CASEINSENSITIVE);
 				
-				for(var x : int = 0; x < keys.length; ++x)
+				if(pretty)
 				{
-					key = keys[x];
-					result += setupObjectString(result, key, obj[key], pretty);
+					unindent();
+					result = "[" + "\n" + result + "\n" + s_indentation + "]";
+				}
+				else
+				{
+					result = "[" + result + "]";
 				}
 			}
 			else
 			{
-				for(key in obj)
+				//iterate over the keys in a native object, use reflection if it is typed
+				//if(Reflection.isAssociativeArray())
+				if(sourceObject is Dictionary || sourceObject is Object)
 				{
-					result += setupObjectString(result, key, obj[key], pretty);
+					var key : String;
+					//alphabetize output
+					//don't check if(pretty) here because we want to sort on case if the entire serialize call is pretty printed
+					//even if this specific object we are recursing over is not
+					if(s_maxLineLength < int.MAX_VALUE)
+					{
+						var keys : Array = [];
+						for(key in sourceObject)
+						{
+							keys.push(key);
+						}
+						keys.sort(Array.CASEINSENSITIVE);
+						
+						for(x = 0; x < keys.length; ++x)
+						{
+							key = keys[x];
+							result += setupObjectString(result, key, sourceObject[key], pretty);
+						}
+					}
+					else
+					{
+						for(key in sourceObject)
+						{
+							result += setupObjectString(result, key, sourceObject[key], pretty);
+						}
+					}
+				}
+				else
+				{
+					//Loop over all of the variables and accessors in the class and
+					//serialize them along with their values.
+					var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+					var memberNames : Vector.<AbstractMemberInfo> = s_maxLineLength < int.MAX_VALUE ? typeInfo.allMembersSortedByName : typeInfo.allMembers;
+					for each(var field : AbstractMemberInfo in memberNames)
+					{
+						if(	field is AbstractFieldInfo
+							&& !AbstractFieldInfo(field).isStatic
+							&& AbstractFieldInfo(field).canRead
+							//don't serialize constant fields if told not to, but always serialize read-only properties
+							&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
+							&& field.getMetadataByName("Transient") == null)
+						{
+							result += setupObjectString(result, field.name, sourceObject[field.name], pretty);
+						}
+					}
+				}
+				
+				if(pretty)
+				{
+					unindent();
+					result = "{" + "\n" + result + "\n" + s_indentation + "}";
+				}
+				else
+				{
+					result = "{" + result + "}";
 				}
 			}
 		}
-		else
-		{
-			//Loop over all of the variables and accessors in the class and
-			//serialize them along with their values.
-			var typeInfo : TypeInfo = Reflection.getTypeInfo(obj);
-			var memberNames : Vector.<AbstractMemberInfo> = s_maxLineLength < int.MAX_VALUE ? typeInfo.allMembersByName : typeInfo.allMembers;
-			for each(var field : AbstractMemberInfo in memberNames)
-			{
-				if(	field is AbstractFieldInfo
-					&& !AbstractFieldInfo(field).isStatic
-					&& AbstractFieldInfo(field).canRead
-					&& (s_includeReadOnly || AbstractFieldInfo(field).canWrite)
-					&& field.getMetadataByName("Transient") == null)
-				{
-					result += setupObjectString(result, field.name, obj[field.name], pretty);
-				}
-			}
-		}
-		
-		s_indentationLevel--;
-		
-		return pretty
-			? "{" + "\n" + result + "\n" + getSpacingForIndentationLevel() + "}"
-			: "{" + result + "}";
+		return result;
 	}
 	
 	static private function setupObjectString(current:String, key:String, value:Object, pretty:Boolean):String
@@ -312,7 +306,7 @@ public class JsonSerializer implements ISerializer
 			{
 				result += pretty ? ",\n" : ",";
 			}
-			result += pretty ? getSpacingForIndentationLevel() : "";
+			result += pretty ? s_indentation : "";
 			result += JSON.stringify(key);
 			result += pretty ? ": " : ":";
 			result += serializeObject(value);
@@ -320,14 +314,14 @@ public class JsonSerializer implements ISerializer
 		return result;
 	}
 	
-	static private function getSpacingForIndentationLevel():String
+	static private function indent():void
 	{
-		var result : String = "";
-		for(var x:int = 0; x < s_indentationLevel; ++x)
-		{
-			result += s_spaceCharacters;
-		}
-		return result;
+		s_indentation += s_spaceCharacters;
+	}
+	
+	static private function unindent():void
+	{
+		s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
 	}
 }
 
