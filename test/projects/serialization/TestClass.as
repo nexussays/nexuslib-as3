@@ -18,6 +18,8 @@ public class TestClass// implements IJsonSerializable
 	private var m_d : Dictionary;
 	public var date : Date;
 	
+	private var m_sub : TestSub;
+	
 	[Transient]
 	public var reg : RegExp = /test\\\(regex\).?(?:\d)*[a-zA-Z]$/g;
 	
@@ -35,6 +37,9 @@ public class TestClass// implements IJsonSerializable
 		m_d["foo"] = "foo";
 		m_d["Fop"] = "Fop";
 		m_d["z"] = "z";
+		
+		m_sub = new TestSub();
+		m_sub.foo = Math.random() + "";
 	}
 	
 	/* INTERFACE nexus.utils.serialization.json.IJsonSerializable */
@@ -68,6 +73,11 @@ public class TestClass// implements IJsonSerializable
 	public function set zdict(value:Dictionary):void
 	{
 		m_d = value;
+	}
+	
+	public function get sub():TestSub
+	{
+		return m_sub;
 	}
 }
 
