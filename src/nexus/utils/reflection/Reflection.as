@@ -285,13 +285,12 @@ public class Reflection
 	 */
 	public static function isArray(value:Object):Boolean
 	{
-		var type : Class = getClassInternal(value, false);
-		if(type == Array)
+		if(value is Array || value == Array)
 		{
 			return true;
 		}
 		//if it's not an Array, see if it's a vector
-		var typePrefix:String = getQualifiedClassName(type).substr(0, VECTOR_PREFIX.length);
+		var typePrefix:String = flash.utils.getQualifiedClassName(value).substr(0, VECTOR_PREFIX.length);
 		return typePrefix == VECTOR_PREFIX;
 	}
 	
@@ -302,8 +301,7 @@ public class Reflection
 	 */
 	public static function isAssociativeArray(value:Object):Boolean
 	{
-		var type : Class = getClassInternal(value, false);
-		return type == Dictionary || type == Object;
+		return value is Dictionary || value == Dictionary || getClassInternal(value, false) == Object;
 	}
 	
 	//--------------------------------------
