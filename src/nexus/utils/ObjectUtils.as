@@ -25,10 +25,7 @@ package nexus.utils
 {
 
 import nexus.errors.NotImplementedError;
-import nexus.utils.reflection.AbstractFieldInfo;
-import nexus.utils.reflection.AbstractMemberInfo;
-import nexus.utils.reflection.Reflection;
-import nexus.utils.reflection.TypeInfo;
+import nexus.utils.reflection.*;
 
 /**
  * ...
@@ -70,21 +67,12 @@ public class ObjectUtils
 		else if(Reflection.isArray(type))
 		{
 			result = new type();
-			for(var x:int = 0; x < source.length; ++x)
-			{
-				if(x in source && source[x] !== undefined)
-				{
-					result[x] = createTypedObjectFromNativeObject(Reflection.getVectorClass(type), source[x]);
-				}
-			}
+			assignTypedObjectFromNativeObject(result, source);
 		}
 		else if(Reflection.isAssociativeArray(type))
 		{
 			result = new type();
-			for(var key : String in source)
-			{
-				result[key] = createTypedObjectFromNativeObject(Reflection.getClass(source[key]), source[key]);
-			}
+			assignTypedObjectFromNativeObject(result, source);
 		}
 		else
 		{
@@ -99,32 +87,7 @@ public class ObjectUtils
 			
 			if(result != null)
 			{
-				var typeInfo:TypeInfo = Reflection.getTypeInfo(type);
-				//if(typeInfo.implementedInterfaces.indexOf(IJsonDeserializable) != -1)
-				//{
-					//return IJsonDeserializable(result).createFromJson(data);
-				//}
-				//else
-				//{
-					for each(var member:AbstractMemberInfo in typeInfo.allMembers)
-					{
-						if(	member is AbstractFieldInfo
-							&& AbstractFieldInfo(member).canWrite
-							//ensure the field exists in the data
-							&& member.name in source && source[member.name] !== undefined)
-						{
-							var resultValue:Object = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
-							try
-							{
-								result[member.name] = resultValue;
-							}
-							catch(e:Error)
-							{
-								//TODO: is a catch-all here ok?
-							}
-						}
-					}
-				//}
+				assignTypedObjectFromNativeObject(result, source);
 			}
 		}
 		return result;
@@ -138,7 +101,66 @@ public class ObjectUtils
 	 */
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
 	{
-		throw new NotImplementedError();
+		//assigning primitices is pointless without references
+		if(source == null || Reflection.isPrimitive(instance) || instance == Date)
+		{
+			return;
+		}
+		else if(Reflection.isArray(instance))
+		{
+			if(instance != null && instance.length > 0)
+			{
+				instance.splice(0, instance.length);
+			}
+			
+			for(var x:int = 0; x < source.length; ++x)
+			{
+				if(x in source && source[x] !== undefined)
+				{
+					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorClass(instance), source[x]);
+				}
+			}
+		}
+		else if(Reflection.isAssociativeArray(instance))
+		{
+			//TODO: Need to clear out existing values, re-instantiate?
+			for(var key:String in source)
+			{
+				instance[key] = createTypedObjectFromNativeObject(Reflection.getClass(source[key]), source[key]);
+			}
+		}
+		else
+		{
+			var typeInfo:TypeInfo = Reflection.getTypeInfo(instance);
+			for each(var member:AbstractMemberInfo in typeInfo.allMembers)
+			{
+				if(member is AbstractFieldInfo && !member.isStatic)
+				{
+					var resultValue:Object;
+					//if the field exists in the data, assign it
+					if(source != null && source[member.name] !== undefined)
+					{
+						resultValue = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
+					}
+					
+					if(AbstractFieldInfo(member).canWrite)
+					{
+						try
+						{
+							instance[member.name] = resultValue;
+						}
+						catch(e:Error)
+						{
+							//TODO: is a catch-all here ok?
+						}
+					}
+					else
+					{
+						assignTypedObjectFromNativeObject(instance[member.name], resultValue);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -180,7 +202,7 @@ public class ObjectUtils
 	{
 		throw new NotImplementedError();
 	}
-	
+
 	//--------------------------------------
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
