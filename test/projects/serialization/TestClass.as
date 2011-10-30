@@ -62,12 +62,12 @@ public class TestClass// implements IJsonSerializable
 	}
 	
 	public function get bar():int  { return m_bar; }
+	public function set bar(value:int):void
+	{
+		m_bar = value;
+	}
 	
 	public function get baz():Vector.<String>  { return m_baz; }
-	public function set baz(value:Vector.<String>):void
-	{
-		m_baz = value;
-	}
 	
 	public function get zdict():Dictionary { return m_d; }
 	public function set zdict(value:Dictionary):void

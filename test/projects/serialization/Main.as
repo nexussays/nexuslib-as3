@@ -16,7 +16,7 @@ import nexus.utils.serialization.json.*;
  */
 public class Main extends Sprite
 {
-	static public const COUNT:int = 10;
+	static public const COUNT:int = 5;
 	
 	private var txt:TextField;
 	public function Main()
@@ -46,14 +46,20 @@ public class Main extends Sprite
 		var str : String;
 		
 		foo = new TestClass();
-		trace(foo.sub.foo);
 		
 		/**
 		 * Test typed object conversion
 		 */
+		
 		json = JsonSerializer.serialize(foo, "\t", 20, false);
 		var bar : TestClass = ObjectUtils.createTypedObjectFromNativeObject(TestClass, JsonSerializer.deserialize(json)) as TestClass;
-		trace(bar);
+		trace(foo.sub.foo, foo.bar, foo.baz);
+		trace(bar.sub.foo, bar.bar, foo.baz);
+		bar = new TestClass(4);
+		bar.baz.push("another value");
+		trace(bar.sub.foo, bar.bar, bar.baz);
+		ObjectUtils.assignTypedObjectFromNativeObject(bar, JsonSerializer.deserialize(json));
+		trace(bar.sub.foo, bar.bar, bar.baz);
 		
 		/**
 		 * Test output
