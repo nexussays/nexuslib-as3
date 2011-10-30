@@ -45,7 +45,6 @@ public class MethodInfo extends AbstractMemberInfo
 	private var m_returnType:Class;
 	private var m_returnTypeName : String;
 	private var m_parameters : Vector.<MethodParameterInfo>;
-	private var m_isStatic : Boolean;
 	
 	///@see toString
 	private var m_parametersString : String;
@@ -56,10 +55,9 @@ public class MethodInfo extends AbstractMemberInfo
 	
 	public function MethodInfo(name:String, isStatic:Boolean, returnType:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, paramCount:int, metadataCount:int)
 	{
-		super(name, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, isStatic, declaringType, reflectedTypeInfo, metadataCount);
 		
 		m_returnType = returnType;
-		m_isStatic = isStatic;
 		m_parameters = new Vector.<MethodParameterInfo>(paramCount, true);
 	}
 	
@@ -76,8 +74,6 @@ public class MethodInfo extends AbstractMemberInfo
 	 * The parameters this method takes, indexed by their order they are passed to the method
 	 */
 	public function get parameters():Vector.<MethodParameterInfo> { return m_parameters; }
-	
-	public function get isStatic():Boolean { return m_isStatic; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS

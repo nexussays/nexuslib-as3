@@ -45,8 +45,6 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	protected var m_type:Class;
 	protected var m_typeName : String;
 	
-	protected var m_isStatic : Boolean;
-	
 	protected var m_canRead : Boolean;
 	protected var m_canWrite : Boolean;
 	
@@ -56,10 +54,9 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	
 	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
 	{
-		super(name, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, isStatic, declaringType, reflectedTypeInfo, metadataCount);
 		
 		m_type = type;
-		m_isStatic = isStatic;
 		
 		m_canRead = read;
 		m_canWrite = write;
@@ -73,8 +70,6 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	public function get isStatic():Boolean { return m_isStatic; }
 	
 	public function get type():Class { return m_type; }
 	

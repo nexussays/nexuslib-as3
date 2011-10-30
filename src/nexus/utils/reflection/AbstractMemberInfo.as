@@ -40,13 +40,17 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	protected var m_declaringType:Class;
 	protected var m_reflectedFrom : TypeInfo;
 	
+	protected var m_isStatic : Boolean;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractMemberInfo(name:String, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
+	public function AbstractMemberInfo(name:String, isStatic:Boolean, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
 	{
 		super(name, metadataCount);
+		
+		m_isStatic = isStatic;
 		
 		m_declaringType = declaringType;
 		m_reflectedFrom  = reflectedTypeInfo;
@@ -65,6 +69,8 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	 * The TypeInfo that was created to derive this member info
 	 */
 	public function get reflectedFrom():TypeInfo { return m_reflectedFrom; }
+	
+	public function get isStatic():Boolean { return m_isStatic; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
