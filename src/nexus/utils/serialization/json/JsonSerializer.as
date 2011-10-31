@@ -138,6 +138,9 @@ public class JsonSerializer implements ISerializer
 		return JsonSerializer.serialize(sourceObject, m_indentationCharacters, m_maxLineLength, m_serializeConstants);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	public function deserialize(serializedData:Object):Object
 	{
 		return JsonSerializer.deserialize(serializedData as String);
@@ -194,7 +197,7 @@ public class JsonSerializer implements ISerializer
 		else if(Reflection.isPrimitive(sourceObject)
 			|| sourceObject is Date
 			|| sourceObject is IJsonSerializable
-			|| "toJSON" in sourceObject)
+			|| ("toJSON" in sourceObject && !sourceObject is Dictionary))
 		{
 			result = JSON.stringify(sourceObject);
 		}
