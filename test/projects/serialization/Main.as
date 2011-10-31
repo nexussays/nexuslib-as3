@@ -5,9 +5,11 @@ import flash.events.*;
 import flash.events.KeyboardEvent;
 import flash.text.TextField;
 import flash.text.TextFormat;
+import flash.utils.Dictionary;
 import flash.utils.getTimer;
 import nexus.utils.ObjectUtils;
 import nexus.utils.serialization.json.*;
+import nexus.utils.serialization.xml.XmlSerializer;
 //import by.blooddy.crypto.serialization.JSON;
 
 /**
@@ -23,7 +25,9 @@ public class Main extends Sprite
 	{
 		trace(stuff.JSON_TEST.length);
 		
-		stage.addEventListener(Event.ENTER_FRAME, frame1);
+		//stage.addEventListener(Event.ENTER_FRAME, jsonTest);
+		stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		txt = new TextField();
 		txt.defaultTextFormat = new TextFormat("Consolas", 12, 0);
@@ -32,11 +36,35 @@ public class Main extends Sprite
 		this.addChild(txt);
 	}
 	
-	private function frame1(e:Event):void
+	private function xmlTest(e:Event):void
 	{
-		stage.removeEventListener(Event.ENTER_FRAME, frame1);
+		stage.removeEventListener(Event.ENTER_FRAME, xmlTest);
 		
-		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
+		var start : int;
+		var end : int;
+		var x : int;
+		var xml : XML;
+		var foo : TestClass;
+		var str : String;
+		
+		foo = new TestClass();
+		foo["dynamicField"] = "field value";
+		foo["dynamicField2"] = new Dictionary();
+		foo["dynamicField2"]["bar"] = "value";
+		foo["dynamicField2"]["foo"] = 56.74;
+		
+		/**
+		 * Test output
+		 */
+		
+		xml = XmlSerializer.serialize(foo);
+		out(xml.toXMLString());
+		out(JsonSerializer.serialize(foo, "\t", 20, false));
+	}
+	
+	private function jsonTest(e:Event):void
+	{
+		stage.removeEventListener(Event.ENTER_FRAME, jsonTest);
 		
 		var start : int;
 		var end : int;

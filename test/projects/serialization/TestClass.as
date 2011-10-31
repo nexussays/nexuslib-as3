@@ -7,7 +7,7 @@ import nexus.utils.serialization.json.IJsonSerializable;
  * ...
  * @author ...
  */
-public class TestClass// implements IJsonSerializable
+public dynamic class TestClass// implements IJsonSerializable
 {
 	public static const STATIC_CONST : String = "sc";
 	public const INSTANCE_CONST : String = "ic";

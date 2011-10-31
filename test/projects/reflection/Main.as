@@ -3,6 +3,8 @@ package
 
 import flash.display.*;
 import flash.events.*;
+import flash.text.TextField;
+import flash.text.TextFormat;
 import flash.utils.*;
 
 import foo.*;
@@ -17,23 +19,18 @@ import nexus.utils.reflection.*;
  */
 public class Main extends Sprite
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
 	static public const COUNT:int = 5678;
 	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
+	private var txt:TextField;
 	public function Main()
 	{
 		stage.addEventListener(Event.ENTER_FRAME, frame1);
+		
+		txt = new TextField();
+		txt.defaultTextFormat = new TextFormat("Consolas", 12, 0);
+		txt.width = stage.stageWidth;
+		txt.height = stage.stageHeight;
+		this.addChild(txt);
 	}
 	
 	private function frame1(e:Event):void
@@ -45,14 +42,14 @@ public class Main extends Sprite
 		var start : int;
 		
 		//call it once first in case there is any internal caching going on
-		trace(describeType(TestClass).toXMLString());
+		out(describeType(TestClass).toXMLString());
 		
 		start = getTimer();
 		describeType(TestClass);
-		trace("took " + (getTimer() - start) + "ms for describeType");
+		out("took " + (getTimer() - start) + "ms for describeType");
 		start = getTimer();
 		Reflection.getTypeInfo(TestClass);
-		trace("took " + (getTimer() - start) + "ms for Reflection");
+		out("took " + (getTimer() - start) + "ms for Reflection");
 		
 		/*
 		var x : int;
@@ -62,7 +59,7 @@ public class Main extends Sprite
 			//took 3025ms for 11234, 0.2692718533024746ms each
 			describeType(TestClass);
 		}
-		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
+		out("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		/*
 		start = getTimer();
@@ -72,7 +69,7 @@ public class Main extends Sprite
 			//cached: took 5ms for 11234, 0.0004450774434751647ms each
 			Reflection.getTypeInfo(TestClass);
 		}
-		trace("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
+		out("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
 		//*/
 		
 		var testClass : TestClass = new TestClass(false);
@@ -81,47 +78,47 @@ public class Main extends Sprite
 		/*
 		typeInfo.getMethodByName("publicFun").invoke(testClass, testClass, 5);
 		var type : Class = Reflection.getClass(typeInfo.getMethodByName("publicFinalFun").parameters[0].type);
-		trace(type);
+		out(type);
 		var bar : Object = new type();
 		//*/
 		
 		/*
-		trace("testClass.declaringType", testClass.declaringType);
-		trace("testClass.implementedInterfaces", testClass.implementedInterfaces);
-		trace("testClass.methods", testClass.methods);
-		trace("testClass.properties", testClass.properties);
-		trace("testClass.fields", testClass.fields);
-		trace("testClass.name", testClass.name);
-		trace(testClass.extendedClasses.indexOf(Object));
-		trace(testClass.extendedClasses.indexOf(Sprite));
-		trace(testClass.extendedClasses.indexOf(BaseClass));
+		out("testClass.declaringType", testClass.declaringType);
+		out("testClass.implementedInterfaces", testClass.implementedInterfaces);
+		out("testClass.methods", testClass.methods);
+		out("testClass.properties", testClass.properties);
+		out("testClass.fields", testClass.fields);
+		out("testClass.name", testClass.name);
+		out(testClass.extendedClasses.indexOf(Object));
+		out(testClass.extendedClasses.indexOf(Sprite));
+		out(testClass.extendedClasses.indexOf(BaseClass));
 		//*/
 		
 		/*
-		trace(Reflection.getClass(testClass));
-		trace(Reflection.getClass(TypeInfo));
-		trace(Reflection.getClass("dna.utils.reflection::TypeInfo"));
-		trace(Reflection.getClass("TypeInfo"));
-		trace(Reflection.getSuperClass(testClass));
-		trace(Reflection.getSuperClass(TypeInfo));
-		trace(Reflection.getSuperClass("dna.utils.reflection::TypeInfo"));
-		trace(Reflection.getSuperClass("TypeInfo"));
+		out(Reflection.getClass(testClass));
+		out(Reflection.getClass(TypeInfo));
+		out(Reflection.getClass("dna.utils.reflection::TypeInfo"));
+		out(Reflection.getClass("TypeInfo"));
+		out(Reflection.getSuperClass(testClass));
+		out(Reflection.getSuperClass(TypeInfo));
+		out(Reflection.getSuperClass("dna.utils.reflection::TypeInfo"));
+		out(Reflection.getSuperClass("TypeInfo"));
 		//*/
 		
 		/*
-		trace(Reflection.getUnqualifiedClassName(testClass) + "|");
-		trace(Reflection.getUnqualifiedClassName(TestClass) + "|");
-		trace(Reflection.getUnqualifiedClassName("[class TestClass]") + "|");
-		trace(Reflection.getUnqualifiedClassName("foo::TestClass") + "|");
-		trace(Reflection.getUnqualifiedClassName("TestClass") + "|");
+		out(Reflection.getUnqualifiedClassName(testClass) + "|");
+		out(Reflection.getUnqualifiedClassName(TestClass) + "|");
+		out(Reflection.getUnqualifiedClassName("[class TestClass]") + "|");
+		out(Reflection.getUnqualifiedClassName("foo::TestClass") + "|");
+		out(Reflection.getUnqualifiedClassName("TestClass") + "|");
 		//*/
 		
 		/*
-		trace(Reflection.isPrimitive(TypeInfo));
-		trace(Reflection.isPrimitive(int));
-		trace(Reflection.isPrimitive(uint));
-		trace(Reflection.isPrimitive(String));
-		trace(Reflection.isPrimitive(Number));
+		out(Reflection.isPrimitive(TypeInfo));
+		out(Reflection.isPrimitive(int));
+		out(Reflection.isPrimitive(uint));
+		out(Reflection.isPrimitive(String));
+		out(Reflection.isPrimitive(Number));
 		//*/
 	}
 	
@@ -130,21 +127,16 @@ public class Main extends Sprite
 		Reflection.getTypeInfo(MovieClip);
 	}
 	
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
+	private final function out(...params): void
+	{
+		params.map(output);
+		txt.appendText("\n");
+	}
 	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	EVENT HANDLERS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+	private function output(d:Object, ...params):void
+	{
+		txt.appendText(d + "");
+	}
 }
 
 }
