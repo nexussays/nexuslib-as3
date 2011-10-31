@@ -23,7 +23,7 @@ public class Main extends Sprite
 	private var txt:TextField;
 	public function Main()
 	{
-		trace(stuff.JSON_TEST.length);
+		trace("JSON test string is " + stuff.JSON_TEST.length + " characters long");
 		
 		//stage.addEventListener(Event.ENTER_FRAME, jsonTest);
 		stage.addEventListener(Event.ENTER_FRAME, xmlTest);
@@ -46,12 +46,13 @@ public class Main extends Sprite
 		var xml : XML;
 		var foo : TestClass;
 		var str : String;
+		var obj : Object;
 		
 		foo = new TestClass();
-		foo["dynamicField"] = "field value";
-		foo["dynamicField2"] = new Dictionary();
-		foo["dynamicField2"]["bar"] = "value";
-		foo["dynamicField2"]["foo"] = 56.74;
+		//foo["dynamicField"] = "field value";
+		//foo["dynamicField2"] = new Dictionary();
+		//foo["dynamicField2"]["bar"] = "value";
+		//foo["dynamicField2"]["foo"] = 56.74;
 		
 		/**
 		 * Test output
@@ -59,7 +60,9 @@ public class Main extends Sprite
 		
 		xml = XmlSerializer.serialize(foo);
 		out(xml.toXMLString());
-		out(JsonSerializer.serialize(foo, "\t", 20, false));
+		out(JsonSerializer.serialize(JsonSerializer.deserialize(JsonSerializer.serialize(foo)), "\t", 30, false));
+		obj = XmlSerializer.deserialize(XmlSerializer.serialize(foo));
+		out(JsonSerializer.serialize(obj, "\t", 30, false));
 	}
 	
 	private function jsonTest(e:Event):void

@@ -111,8 +111,7 @@ public class XmlSerializer implements ISerializer
 		{
 			//no-op
 		}
-		else if(sourceObject is XML
-			|| Reflection.isPrimitive(sourceObject))
+		else if(sourceObject is XML || Reflection.isPrimitive(sourceObject))
 		{
 			parent.appendChild(sourceObject);
 		}
@@ -180,50 +179,74 @@ public class XmlSerializer implements ISerializer
 	 */
 	public static function deserialize(sourceXML:XML):Object
 	{
-		/*
-		type = type || Class(getDefinitionByName(sourceXML.@type));
-		var result:* = new type();
-		var props:Object = Reflection.getPublicPropertyValues(result);
-		//loop through the properties of the object, not the XML
-		for(var prop:String in props)
+		var result : Object = { };
+		var element : XML;
+		
+		//check if the xml is formatted such that the resulting object should be an array
+		if(sourceXML.hasComplexContent())
 		{
-			if(sourceXML[prop.toLowerCase()])
+			if(sourceXML.children()[0].name().toString().charAt(0) == "_")
 			{
-				if(result[prop] is Boolean)
+				result = [];
+			}
+			else
+			{
+				var names : Dictionary = new Dictionary();
+				for each(element in sourceXML.elements())
 				{
-					result[prop] = Parse.boolean(sourceXML[prop.toLowerCase()], false);
+					if(element.name().toString() in names)
+					{
+						result = [];
+						break;
+					}
+					names[element.name().toString()] = true;
 				}
-				else if(result[prop] is Date)
+				names = null;
+			}
+		}
+		
+		for each(element in sourceXML.elements())
+		{
+			if(element.hasComplexContent())
+			{
+				result[getKey(result, element)] = deserialize(element);
+			}
+			else
+			{
+				var value : String = element.toString();
+				if(/^\d*\.?\d+$/.test(value))
 				{
-					result[prop] = new Date(Parse.number(sourceXML[prop.toLowerCase()], 0));
+					result[getKey(result, element)] = parseFloat(value);
 				}
 				else
 				{
-					try
-					{
-						result[prop] = sourceXML[prop.toLowerCase()];
-					}
-					catch(ex:Error)
-					{
-						//trace(ex);
-					}
+					result[getKey(result, element)] = value;
 				}
-				trace(prop, "xml: ", sourceXML[prop.toLowerCase()], "result: ", result[prop]);
 			}
 		}
 		return result;
-		//*/
-		throw new NotImplementedError();
 	}
 	
 	//--------------------------------------
-	//	PRIVATE INSTANCE METHODS
+	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	//private final function trace(... params):void
-	//{
-		//Debug.debug(XmlSerializer, params);
-	//}
+	static private function getKey(object:Object, element:XML):Object
+	{
+		var name : String = element.name().toString();
+		if(object is Array)
+		{
+			if(name.charAt(0) == "_")
+			{
+				return parseInt(name.substring(1));
+			}
+			else
+			{
+				return object.length;
+			}
+		}
+		return name;
+	}
 }
 
 }
