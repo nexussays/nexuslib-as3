@@ -27,6 +27,7 @@ package nexus.utils.serialization.xml
 import flash.utils.*;
 
 import nexus.errors.NotImplementedError;
+import nexus.utils.reflection.*;
 import nexus.utils.serialization.ISerializer;
 
 /**
@@ -39,6 +40,12 @@ public class XmlSerializer implements ISerializer
 	//--------------------------------------
 	//	CLASS CONSTANTS
 	//--------------------------------------
+	
+	//--------------------------------------
+	//	CLASS VARIABLES
+	//--------------------------------------
+	
+	static private var s_serializeConstants : Boolean;
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -61,14 +68,20 @@ public class XmlSerializer implements ISerializer
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
+	/**
+	 * @inheritDoc
+	 */
 	public function serialize(sourceObject:Object):Object
 	{
 		return XmlSerializer.serialize(sourceObject, false);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	public function deserialize(serializedData:Object):Object
 	{
-		return XmlSerializer.deserialize(serializedData as XML, Object);
+		return XmlSerializer.deserialize(serializedData as XML);
 	}
 	
 	//--------------------------------------
@@ -82,27 +95,81 @@ public class XmlSerializer implements ISerializer
 	 * @param	elementName		The name of the root element. If null, the name of the object's class is used.
 	 * @return
 	 */
-	public static function serialize(sourceObject:Object, includeReadOnlyFields:Boolean = false):XML
+	public static function serialize(sourceObject:Object, serializeConstants:Boolean = false):XML
 	{
-		/*
-		var type:String = getQualifiedClassName(sourceObject);
-		var xml:XML = new XML("<" + (elementName || type.toLowerCase().substring(type.lastIndexOf(":") + 1)) + " />");
-		xml.@type = type;
-		var props:Object = Reflection.getPublicPropertyValues(sourceObject, includeReadOnlyFields);
-		for(var prop:String in props)
+		s_serializeConstants = serializeConstants;
+		var xml:XML = <{Reflection.getUnqualifiedClassName(sourceObject)} />;
+		serializeObject(sourceObject, xml);
+		return xml;
+	}
+	
+	static private function serializeObject(sourceObject:Object, parent:XML, elementName:String=null):XML
+	{
+		var x : int;
+		
+		if(sourceObject == null)
 		{
-			if(props[prop] is Date)
+			//no-op
+		}
+		else if(sourceObject is XML
+			|| Reflection.isPrimitive(sourceObject))
+		{
+			parent.appendChild(sourceObject);
+		}
+		else if(sourceObject is Date)
+		{
+			parent.appendChild((sourceObject as Date).getTime());
+		}
+		else if(sourceObject is IXmlSerializable || "toXML" in sourceObject)
+		{
+			parent.appendChild(sourceObject.toXML());
+		}
+		else if(Reflection.isArray(sourceObject))
+		{
+			for(x = 0; x < sourceObject.length; x++)
 			{
-				xml[prop.toLowerCase()] = (props[prop] as Date).getTime();
-			}
-			else
-			{
-				xml[prop.toLowerCase()] = props[prop];
+				parent.appendChild(serializeObject(sourceObject[x], <{elementName||"_"+x} />));
 			}
 		}
-		return xml;
-		//*/
-		throw new NotImplementedError();
+		else if(Reflection.isAssociativeArray(sourceObject))
+		{
+			var key : String;
+			for(key in sourceObject)
+			{
+				parent.appendChild(serializeObject(sourceObject[key], <{key} />));
+			}
+		}
+		else
+		{
+			//Loop over all of the variables and accessors in the class and
+			//serialize them along with their values.
+			var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+			for each(var field : AbstractMemberInfo in typeInfo.allMembers)
+			{
+				if(	field is AbstractFieldInfo
+					&& !AbstractFieldInfo(field).isStatic
+					&& AbstractFieldInfo(field).canRead
+					//don't serialize constant fields if told not to, but always serialize read-only properties
+					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
+					&& field.getMetadataByName("Transient") == null)
+				{
+					parent.appendChild(serializeObject(sourceObject[field.name], <{field.name} />));
+				}
+			}
+			
+			if(typeInfo.isDynamic)
+			{
+				for(var dynamicField : String in sourceObject)
+				{
+					//won't this always be true if we'e able to iterate it with a for/in?
+					if(sourceObject.hasOwnProperty(dynamicField))
+					{
+						parent.appendChild(serializeObject(sourceObject[dynamicField], <{dynamicField} />));
+					}
+				}
+			}
+		}
+		return parent;
 	}
 	
 	/**
@@ -111,7 +178,7 @@ public class XmlSerializer implements ISerializer
 	 * @param	type	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
 	 * @return
 	 */
-	public static function deserialize(sourceXML:XML, type:Class = null):Object
+	public static function deserialize(sourceXML:XML):Object
 	{
 		/*
 		type = type || Class(getDefinitionByName(sourceXML.@type));

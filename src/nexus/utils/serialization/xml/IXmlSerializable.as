@@ -31,8 +31,7 @@ package nexus.utils.serialization.xml
  */
 public interface IXmlSerializable
 {
-	function toXml():XML;
-	function fromXml(xml:XML):Object;
+	function toXML():XML;
 }
 
 }
