@@ -309,20 +309,31 @@ public class Reflection
 	//--------------------------------------
 	
 	/**
+	 * Provide a class which extends Metadata, and reflected TypeInfo will parse any matching metadata into
+	 * an instance of the strongly-typed class provided.
+	 * @param	type	A class which must be a subclass of Metadata
+	 */
+	nexuslib_internal static function registerMetadataClass(type:Class):void
+	{
+		if(!classExtendsClass(type, Metadata))
+		{
+			throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
+		}
+		//TODO: store by class so similarly named metadata in different packages won't conflict
+		s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(type)] = type;
+	}
+	
+	/**
 	 * Provide a list of classes that extend Metadata and reflected TypeInfo will parse any matching metadata into
 	 * and instance of the strongly-typed class provided.
 	 * @param	types	A vector of classes, each of which must be a subclass of Metadata
 	 */
 	nexuslib_internal static function registerMetadataClasses(types:Vector.<Class>):void
 	{
+		use namespace nexuslib_internal;
 		for each(var type:Class in types)
 		{
-			if(!classExtendsClass(type, Metadata))
-			{
-				throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
-			}
-			//TODO: store by class so similarly named metadata in different packages won't conflict
-			s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(type)] = type;
+			Reflection.registerMetadataClass(type);
 		}
 	}
 	

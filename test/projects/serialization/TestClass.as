@@ -67,6 +67,7 @@ public dynamic class TestClass// implements IJsonSerializable
 		m_bar = value;
 	}
 	
+	[Xml(flattenArray=true)]
 	public function get baz():Vector.<String>  { return m_baz; }
 	
 	public function get zdict():Dictionary { return m_d; }

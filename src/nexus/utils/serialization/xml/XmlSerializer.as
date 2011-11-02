@@ -25,6 +25,7 @@ package nexus.utils.serialization.xml
 {
 
 import flash.utils.*;
+import nexus.nexuslib_internal;
 
 import nexus.errors.NotImplementedError;
 import nexus.utils.reflection.*;
@@ -38,8 +39,13 @@ import nexus.utils.serialization.ISerializer;
 public class XmlSerializer implements ISerializer
 {
 	//--------------------------------------
-	//	CLASS CONSTANTS
+	//	CLASS INITIALIZER
 	//--------------------------------------
+	
+	{
+		use namespace nexuslib_internal;
+		Reflection.registerMetadataClass(XmlMetadata);
+	}
 	
 	//--------------------------------------
 	//	CLASS VARIABLES
@@ -152,7 +158,16 @@ public class XmlSerializer implements ISerializer
 					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
 					&& field.getMetadataByName("Transient") == null)
 				{
-					parent.appendChild(serializeObject(sourceObject[field.name], <{field.name} />));
+					var metadata : XmlMetadata = field.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
+					var nodeName : String = (metadata != null ? metadata.nodeName || field.name : field.name);
+					if(metadata != null && metadata.flattenArray)
+					{
+						serializeObject(sourceObject[field.name], parent, nodeName);
+					}
+					else
+					{
+						parent.appendChild(serializeObject(sourceObject[field.name], <{nodeName} />));
+					}
 				}
 			}
 			
@@ -181,6 +196,7 @@ public class XmlSerializer implements ISerializer
 	{
 		var result : Object = { };
 		var element : XML;
+		var arrays : Dictionary = new Dictionary();
 		
 		//check if the xml is formatted such that the resulting object should be an array
 		if(sourceXML.hasComplexContent())
@@ -196,7 +212,18 @@ public class XmlSerializer implements ISerializer
 				{
 					if(element.name().toString() in names)
 					{
-						result = [];
+						//same named child element exists twice, if this element has the same name as well, then it is an array, otherwise
+						//it was flattened during serialization and we should create a child key with the name of the child elements
+						//and it should be an array
+						if(element.name().toString() == sourceXML.name().toString())
+						{
+							result = [];
+						}
+						else
+						{
+							result[element.name().toString()] = [];
+							arrays[element.name().toString()] = true;
+						}
 						break;
 					}
 					names[element.name().toString()] = true;
@@ -207,20 +234,23 @@ public class XmlSerializer implements ISerializer
 		
 		for each(element in sourceXML.elements())
 		{
+			var name : String = element.name().toString()
+			var obj : Object  = name in arrays ? result[name] : result;
+			
 			if(element.hasComplexContent())
 			{
-				result[getKey(result, element)] = deserialize(element);
+				obj[getKey(obj, name)] = deserialize(element);
 			}
 			else
 			{
 				var value : String = element.toString();
 				if(/^\d*\.?\d+$/.test(value))
 				{
-					result[getKey(result, element)] = parseFloat(value);
+					obj[getKey(obj, name)] = parseFloat(value);
 				}
 				else
 				{
-					result[getKey(result, element)] = value;
+					obj[getKey(obj, name)] = value;
 				}
 			}
 		}
@@ -231,9 +261,8 @@ public class XmlSerializer implements ISerializer
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	static private function getKey(object:Object, element:XML):Object
+	static private function getKey(object:Object, name:String):Object
 	{
-		var name : String = element.name().toString();
 		if(object is Array)
 		{
 			if(name.charAt(0) == "_")
