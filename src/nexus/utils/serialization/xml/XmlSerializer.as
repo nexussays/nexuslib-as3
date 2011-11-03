@@ -87,7 +87,7 @@ public class XmlSerializer implements ISerializer
 	 */
 	public function deserialize(serializedData:Object):Object
 	{
-		return XmlSerializer.deserialize(serializedData as XML);
+		return XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
 	}
 	
 	//--------------------------------------
@@ -104,10 +104,87 @@ public class XmlSerializer implements ISerializer
 	public static function serialize(sourceObject:Object, serializeConstants:Boolean = false):XML
 	{
 		s_serializeConstants = serializeConstants;
-		var xml:XML = <{Reflection.getUnqualifiedClassName(sourceObject)} />;
+		var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+		var metadata : XmlMetadata = typeInfo.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
+		var name : String = (metadata != null && metadata.nodeName != null ? metadata.nodeName : Reflection.getUnqualifiedClassName(typeInfo.type)).toLowerCase();
+		var xml:XML = <{name} />;
 		serializeObject(sourceObject, xml);
 		return xml;
 	}
+	
+	/**
+	 * Creates an instance of the passed class from the passed XML data
+	 * @param	sourceXML	The XML to source the object from
+	 * @param	type	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
+	 * @return
+	 */
+	public static function deserialize(sourceXML:XML):Object
+	{
+		var result : Object = { };
+		var element : XML;
+		var arrays : Dictionary;
+		
+		//check if the xml is formatted such that the resulting object should be an array
+		if(sourceXML.hasComplexContent())
+		{
+			if(sourceXML.children()[0].name().toString().charAt(0) == "_")
+			{
+				result = [];
+			}
+			else
+			{
+				arrays = new Dictionary();
+				var names : Dictionary = new Dictionary();
+				for each(element in sourceXML.elements())
+				{
+					if(element.name().toString() in names)
+					{
+						//same named child element exists twice, if this element has the same name as well, then it is an array, otherwise
+						//it was flattened during serialization and we should create a child key with the name of the child elements
+						//and it should be an array
+						if(element.name().toString() == sourceXML.name().toString())
+						{
+							result = [];
+							break;
+						}
+						else
+						{
+							result[element.name().toString()] = [];
+							arrays[element.name().toString()] = true;
+						}
+					}
+					names[element.name().toString()] = true;
+				}
+				names = null;
+			}
+		}
+		
+		for each(element in sourceXML.elements())
+		{
+			var name : String = element.name().toString()
+			var obj : Object  = name in arrays ? result[name] : result;
+			
+			if(element.hasComplexContent() || element.attributes().length() > 0)
+			{
+				obj[getKey(obj, name)] = deserialize(element);
+			}
+			else
+			{
+				setValue(obj, name, element.toString());
+			}
+		}
+		
+		for each(element in sourceXML.attributes())
+		{
+			setValue(result, element.name().toString(), element.toString());
+		}
+		
+		return result;
+	}
+	
+	//--------------------------------------
+	//	PRIVATE CLASS METHODS
+	//--------------------------------------
 	
 	static private function serializeObject(sourceObject:Object, parent:XML, elementName:String=null):XML
 	{
@@ -186,80 +263,17 @@ public class XmlSerializer implements ISerializer
 		return parent;
 	}
 	
-	/**
-	 * Creates an instance of the passed class from the passed XML data
-	 * @param	sourceXML	The XML to source the object from
-	 * @param	type	The type of object to create. If null, the Class type is derived from the "type" attribute of the root XML node
-	 * @return
-	 */
-	public static function deserialize(sourceXML:XML):Object
+	static private function setValue(obj:Object, name:String, value:String):void
 	{
-		var result : Object = { };
-		var element : XML;
-		var arrays : Dictionary = new Dictionary();
-		
-		//check if the xml is formatted such that the resulting object should be an array
-		if(sourceXML.hasComplexContent())
+		if(/^\d*\.?\d+$/.test(value))
 		{
-			if(sourceXML.children()[0].name().toString().charAt(0) == "_")
-			{
-				result = [];
-			}
-			else
-			{
-				var names : Dictionary = new Dictionary();
-				for each(element in sourceXML.elements())
-				{
-					if(element.name().toString() in names)
-					{
-						//same named child element exists twice, if this element has the same name as well, then it is an array, otherwise
-						//it was flattened during serialization and we should create a child key with the name of the child elements
-						//and it should be an array
-						if(element.name().toString() == sourceXML.name().toString())
-						{
-							result = [];
-						}
-						else
-						{
-							result[element.name().toString()] = [];
-							arrays[element.name().toString()] = true;
-						}
-						break;
-					}
-					names[element.name().toString()] = true;
-				}
-				names = null;
-			}
+			obj[getKey(obj, name)] = parseFloat(value);
 		}
-		
-		for each(element in sourceXML.elements())
+		else
 		{
-			var name : String = element.name().toString()
-			var obj : Object  = name in arrays ? result[name] : result;
-			
-			if(element.hasComplexContent())
-			{
-				obj[getKey(obj, name)] = deserialize(element);
-			}
-			else
-			{
-				var value : String = element.toString();
-				if(/^\d*\.?\d+$/.test(value))
-				{
-					obj[getKey(obj, name)] = parseFloat(value);
-				}
-				else
-				{
-					obj[getKey(obj, name)] = value;
-				}
-			}
+			obj[getKey(obj, name)] = value;
 		}
-		return result;
 	}
-	
-	//--------------------------------------
-	//	PRIVATE CLASS METHODS
-	//--------------------------------------
 	
 	static private function getKey(object:Object, name:String):Object
 	{

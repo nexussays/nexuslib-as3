@@ -101,6 +101,8 @@ public class ObjectUtils
 	 */
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
 	{
+		var resultValue:Object;
+		
 		//assigning primitices is pointless without references
 		if(source == null || Reflection.isPrimitive(instance) || instance == Date)
 		{
@@ -136,7 +138,7 @@ public class ObjectUtils
 			{
 				if(member is AbstractFieldInfo && !member.isStatic)
 				{
-					var resultValue:Object;
+					resultValue = null;
 					//if the field exists in the data, assign it
 					if(source != null && source[member.name] !== undefined)
 					{
