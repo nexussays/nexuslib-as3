@@ -139,26 +139,25 @@ public class ObjectUtils
 				if(member is AbstractFieldInfo && !member.isStatic)
 				{
 					resultValue = null;
-					//if the field exists in the data, assign it
+					//only assign the field if it exists in the source data
 					if(source != null && source[member.name] !== undefined)
 					{
 						resultValue = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
-					}
-					
-					if(AbstractFieldInfo(member).canWrite)
-					{
-						try
+						if(AbstractFieldInfo(member).canWrite)
 						{
-							instance[member.name] = resultValue;
+							try
+							{
+								instance[member.name] = resultValue;
+							}
+							catch(e:Error)
+							{
+								//TODO: is a catch-all here ok?
+							}
 						}
-						catch(e:Error)
+						else
 						{
-							//TODO: is a catch-all here ok?
+							assignTypedObjectFromNativeObject(instance[member.name], resultValue);
 						}
-					}
-					else
-					{
-						assignTypedObjectFromNativeObject(instance[member.name], resultValue);
 					}
 				}
 			}
