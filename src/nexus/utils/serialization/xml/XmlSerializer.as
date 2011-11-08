@@ -26,6 +26,7 @@ package nexus.utils.serialization.xml
 
 import flash.utils.*;
 import nexus.nexuslib_internal;
+import nexus.utils.ObjectUtils;
 
 import nexus.errors.NotImplementedError;
 import nexus.utils.reflection.*;
@@ -51,7 +52,7 @@ public class XmlSerializer implements ISerializer
 	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	static private var s_serializeConstants : Boolean;
+	static private var s_serializeConstants:Boolean;
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -85,12 +86,12 @@ public class XmlSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function deserialize(serializedData:Object, type : Class = null):Object
+	public function deserialize(serializedData:Object, type:Class = null):Object
 	{
-		var object : Object = XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
+		var object:Object = XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
 		if(type != null)
 		{
-			return object;
+			return ObjectUtils.createTypedObjectFromNativeObject(type, object);
 		}
 		else
 		{
@@ -112,10 +113,10 @@ public class XmlSerializer implements ISerializer
 	public static function serialize(sourceObject:Object, serializeConstants:Boolean = false):XML
 	{
 		s_serializeConstants = serializeConstants;
-		var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
-		var metadata : XmlMetadata = typeInfo.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
-		var name : String = (metadata != null && metadata.nodeName != null ? metadata.nodeName : Reflection.getUnqualifiedClassName(typeInfo.type)).toLowerCase();
-		var xml:XML = <{name} />;
+		var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);
+		var metadata:XmlMetadata = typeInfo.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
+		var name:String = (metadata != null && metadata.nodeName != null ? metadata.nodeName : Reflection.getUnqualifiedClassName(typeInfo.type)).toLowerCase();
+		var xml:XML =  <{name}/>;
 		serializeObject(sourceObject, xml);
 		return xml;
 	}
@@ -128,9 +129,9 @@ public class XmlSerializer implements ISerializer
 	 */
 	public static function deserialize(sourceXML:XML):Object
 	{
-		var result : Object = { };
-		var element : XML;
-		var arrays : Dictionary;
+		var result:Object = {};
+		var element:XML;
+		var arrays:Dictionary;
 		
 		//check if the xml is formatted such that the resulting object should be an array
 		if(sourceXML.hasComplexContent())
@@ -142,7 +143,7 @@ public class XmlSerializer implements ISerializer
 			else
 			{
 				arrays = new Dictionary();
-				var names : Dictionary = new Dictionary();
+				var names:Dictionary = new Dictionary();
 				for each(element in sourceXML.elements())
 				{
 					if(element.name().toString() in names)
@@ -169,8 +170,8 @@ public class XmlSerializer implements ISerializer
 		
 		for each(element in sourceXML.elements())
 		{
-			var name : String = element.name().toString()
-			var obj : Object  = name in arrays ? result[name] : result;
+			var name:String = element.name().toString()
+			var obj:Object = name in arrays ? result[name] : result;
 			
 			if(element.hasComplexContent() || element.attributes().length() > 0)
 			{
@@ -194,9 +195,9 @@ public class XmlSerializer implements ISerializer
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	static private function serializeObject(sourceObject:Object, parent:XML, elementName:String=null):XML
+	static private function serializeObject(sourceObject:Object, parent:XML, elementName:String = null):XML
 	{
-		var x : int;
+		var x:int;
 		
 		if(sourceObject == null)
 		{
@@ -218,52 +219,49 @@ public class XmlSerializer implements ISerializer
 		{
 			for(x = 0; x < sourceObject.length; x++)
 			{
-				parent.appendChild(serializeObject(sourceObject[x], <{elementName||"_"+x} />));
+				parent.appendChild(serializeObject(sourceObject[x],  <{elementName || "_" + x}/>));
 			}
 		}
 		else if(Reflection.isAssociativeArray(sourceObject))
 		{
-			var key : String;
+			var key:String;
 			for(key in sourceObject)
 			{
-				parent.appendChild(serializeObject(sourceObject[key], <{key} />));
+				parent.appendChild(serializeObject(sourceObject[key],  <{key}/>));
 			}
 		}
 		else
 		{
 			//Loop over all of the variables and accessors in the class and
 			//serialize them along with their values.
-			var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
-			for each(var field : AbstractMemberInfo in typeInfo.allMembers)
+			var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);
+			for each(var field:AbstractMemberInfo in typeInfo.allMembers)
 			{
-				if(	field is AbstractFieldInfo
-					&& !AbstractFieldInfo(field).isStatic
-					&& AbstractFieldInfo(field).canRead
+				if(field is AbstractFieldInfo && !AbstractFieldInfo(field).isStatic && AbstractFieldInfo(field).canRead
 					//don't serialize constant fields if told not to, but always serialize read-only properties
-					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
-					&& field.getMetadataByName("Transient") == null)
+					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo) && field.getMetadataByName("Transient") == null)
 				{
-					var metadata : XmlMetadata = field.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
-					var nodeName : String = (metadata != null ? metadata.nodeName || field.name : field.name);
+					var metadata:XmlMetadata = field.getTypdMetadataByClass(XmlMetadata) as XmlMetadata;
+					var nodeName:String = (metadata != null ? metadata.nodeName || field.name : field.name);
 					if(metadata != null && metadata.flattenArray)
 					{
 						serializeObject(sourceObject[field.name], parent, nodeName);
 					}
 					else
 					{
-						parent.appendChild(serializeObject(sourceObject[field.name], <{nodeName} />));
+						parent.appendChild(serializeObject(sourceObject[field.name],  <{nodeName}/>));
 					}
 				}
 			}
 			
 			if(typeInfo.isDynamic)
 			{
-				for(var dynamicField : String in sourceObject)
+				for(var dynamicField:String in sourceObject)
 				{
 					//won't this always be true if we'e able to iterate it with a for/in?
 					if(sourceObject.hasOwnProperty(dynamicField))
 					{
-						parent.appendChild(serializeObject(sourceObject[dynamicField], <{dynamicField} />));
+						parent.appendChild(serializeObject(sourceObject[dynamicField],  <{dynamicField}/>));
 					}
 				}
 			}

@@ -72,7 +72,6 @@ public class JsonSerializer implements ISerializer
 	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	//static private var s_indentationLevel : int;
 	static private var s_spaceCharacters : String;
 	static private var s_maxLineLength : int;
 	static private var s_serializeConstants : Boolean;
@@ -168,7 +167,6 @@ public class JsonSerializer implements ISerializer
 	 */
 	static public function serialize(sourceObject:Object, space:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
 	{
-		//s_indentationLevel = 0;
 		s_indentation = "";
 		s_spaceCharacters = space || "";
 		s_maxLineLength = maxLineLength;
