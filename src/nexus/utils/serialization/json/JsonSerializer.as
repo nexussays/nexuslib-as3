@@ -25,6 +25,7 @@ package nexus.utils.serialization.json
 {
 
 import flash.utils.Dictionary;
+import nexus.utils.ObjectUtils;
 
 import nexus.utils.reflection.*;
 import nexus.utils.serialization.ISerializer;
@@ -141,9 +142,17 @@ public class JsonSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function deserialize(serializedData:Object):Object
+	public function deserialize(serializedData:Object, type:Class=null):Object
 	{
-		return JsonSerializer.deserialize(serializedData as String);
+		var object : Object = JsonSerializer.deserialize(serializedData as String);
+		if(type == null)
+		{
+			return ObjectUtils.createTypedObjectFromNativeObject(type, object);
+		}
+		else
+		{
+			return object;
+		}
 	}
 	
 	//--------------------------------------

@@ -85,9 +85,17 @@ public class XmlSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function deserialize(serializedData:Object):Object
+	public function deserialize(serializedData:Object, type : Class = null):Object
 	{
-		return XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
+		var object : Object = XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
+		if(type != null)
+		{
+			return object;
+		}
+		else
+		{
+			return object;
+		}
 	}
 	
 	//--------------------------------------
