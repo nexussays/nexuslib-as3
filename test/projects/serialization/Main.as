@@ -7,10 +7,13 @@ import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.Dictionary;
 import flash.utils.getTimer;
+
 import nexus.utils.ObjectUtils;
 import nexus.utils.serialization.json.*;
 import nexus.utils.serialization.xml.XmlSerializer;
 //import by.blooddy.crypto.serialization.JSON;
+
+import test.*;
 
 /**
  * ...
@@ -26,7 +29,8 @@ public class Main extends Sprite
 		trace("JSON test string is " + stuff.JSON_TEST.length + " characters long");
 		
 		//stage.addEventListener(Event.ENTER_FRAME, jsonTest);
-		stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		//stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		stage.addEventListener(Event.ENTER_FRAME, objectTest);
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		txt = new TextField();
@@ -34,6 +38,42 @@ public class Main extends Sprite
 		txt.width = stage.stageWidth;
 		txt.height = stage.stageHeight;
 		this.addChild(txt);
+	}
+	
+	private function objectTest(e:Event):void
+	{
+		stage.removeEventListener(Event.ENTER_FRAME, objectTest);
+		
+		var start : int;
+		var end : int;
+		var x : int;
+		var xml : XML;
+		var foo : TestClass2;
+		var str : String;
+		var obj : Object;
+		
+		foo = new TestClass2();
+		foo.x = 5;
+		foo.y = 6;
+		foo.type = "someType";
+		foo.sub.bar = 100;
+		foo.sub.foo = "foo string";
+		obj = { "x":5, "y":6, "sub": { "foo":"foo string", "bar":100 }, "type":"someType" };
+		
+		foo = ObjectUtils.createTypedObjectFromNativeObject(TestClass2, obj) as TestClass2;
+		out(JsonSerializer.serialize(foo));
+		
+		obj = { "x":5, "y":6, "sub": { "bar":500 }, type:null };
+		out(JsonSerializer.serialize(obj));
+		foo = ObjectUtils.createTypedObjectFromNativeObject(TestClass2, obj) as TestClass2;
+		out(JsonSerializer.serialize(foo));
+		foo = new TestClass2();
+		foo.type = "assigned value";
+		foo.x = 10;
+		foo.sub.foo = "2";
+		out(JsonSerializer.serialize(foo));
+		ObjectUtils.assignTypedObjectFromNativeObject(foo, obj);
+		out(JsonSerializer.serialize(foo));
 	}
 	
 	private function xmlTest(e:Event):void
