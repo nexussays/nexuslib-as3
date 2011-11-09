@@ -129,6 +129,11 @@ public class XmlSerializer implements ISerializer
 	 */
 	public static function deserialize(sourceXML:XML):Object
 	{
+		if(sourceXML == null)
+		{
+			return null;
+		}
+		
 		var result:Object = {};
 		var element:XML;
 		var arrays:Dictionary;

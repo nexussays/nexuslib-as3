@@ -80,7 +80,7 @@ public class ObjectUtils
 			{
 				result = new type();
 			}
-			catch(e:ArgumentError)
+			catch(e:Error)
 			{
 				//probably because ctor requires arguments
 			}
@@ -101,8 +101,6 @@ public class ObjectUtils
 	 */
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
 	{
-		var resultValue:Object;
-		
 		//assigning primitices is pointless without references
 		if(source == null || Reflection.isPrimitive(instance) || instance == Date)
 		{
@@ -138,16 +136,14 @@ public class ObjectUtils
 			{
 				if(member is AbstractFieldInfo && !member.isStatic)
 				{
-					resultValue = null;
 					//only assign the field if it exists in the source data
 					if(source != null && source[member.name] !== undefined)
 					{
-						resultValue = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
 						if(AbstractFieldInfo(member).canWrite)
 						{
 							try
 							{
-								instance[member.name] = resultValue;
+								instance[member.name] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
 							}
 							catch(e:Error)
 							{
@@ -156,7 +152,7 @@ public class ObjectUtils
 						}
 						else
 						{
-							assignTypedObjectFromNativeObject(instance[member.name], resultValue);
+							assignTypedObjectFromNativeObject(instance[member.name], source[member.name]);
 						}
 					}
 				}

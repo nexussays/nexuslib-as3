@@ -144,7 +144,7 @@ public class JsonSerializer implements ISerializer
 	public function deserialize(serializedData:Object, type:Class=null):Object
 	{
 		var object : Object = JsonSerializer.deserialize(serializedData as String);
-		if(type == null)
+		if(type != null)
 		{
 			return ObjectUtils.createTypedObjectFromNativeObject(type, object);
 		}
