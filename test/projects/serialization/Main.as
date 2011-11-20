@@ -29,8 +29,8 @@ public class Main extends Sprite
 		trace("JSON test string is " + stuff.JSON_TEST.length + " characters long");
 		
 		//stage.addEventListener(Event.ENTER_FRAME, jsonTest);
-		//stage.addEventListener(Event.ENTER_FRAME, xmlTest);
-		stage.addEventListener(Event.ENTER_FRAME, objectTest);
+		stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		//stage.addEventListener(Event.ENTER_FRAME, objectTest);
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		txt = new TextField();

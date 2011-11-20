@@ -40,15 +40,15 @@ public class Reflection
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	static private const VECTOR_PREFIX : String = flash.utils.getQualifiedClassName(Vector);
-	static private const UNTYPED_VECTOR_CLASSNAME : String = VECTOR_PREFIX + ".<*>";
+	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
+	static private const UNTYPED_VECTOR_CLASSNAME:String = VECTOR_PREFIX + ".<*>";
 	
 	///cache all TypeInfo information so the describeType() call and processing it into a TypeInfo only happens once
 	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary();
 	///store strongly-typed classes that represent metadata on members
 	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
 	///store all calls to getClass() so the lookup is quicker if the same object is provided a second time
-	static private const s_cachedObjectClasses : Dictionary = new Dictionary(true);
+	static private const s_cachedObjectClasses:Dictionary = new Dictionary(true);
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -76,7 +76,7 @@ public class Reflection
 		{
 			//use getClass to handle parsing string values that are qualified class names
 			obj = getClass(obj);
-			var superClassName : String = getQualifiedSuperclassName(obj);
+			var superClassName:String = getQualifiedSuperclassName(obj);
 			try
 			{
 				return Class(getDefinitionByName(superClassName));
@@ -105,7 +105,7 @@ public class Reflection
 	 */
 	public static function getVectorClass(data:Object):Class
 	{
-		var type : Class = getClassInternal(data, false);
+		var type:Class = getClassInternal(data, false);
 		var typePrefix:String = getQualifiedClassName(type);
 		//parse out class between "Vector.<" and ">"
 		typePrefix = typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1);
@@ -126,9 +126,9 @@ public class Reflection
 	 */
 	public static function getUnqualifiedClassName(object:Object):String
 	{
-		var str : String;
+		var str:String;
 		//special handling of strings
-		if(	object is String
+		if(object is String
 			//allow allow formatted class names to be provided
 			&& (String(object).substr(0, 7) == "[class " || String(object).indexOf("::") != -1))
 		{
@@ -147,7 +147,7 @@ public class Reflection
 		str = str.substring(str.lastIndexOf(":") + 1);
 		
 		//parse out class when in format "[class ClassName]"
-		var closingBracketIndex : int = str.lastIndexOf("]");
+		var closingBracketIndex:int = str.lastIndexOf("]");
 		if(closingBracketIndex != -1)
 		{
 			str = str.substring(str.lastIndexOf(" ") + 1, closingBracketIndex);
@@ -218,6 +218,7 @@ public class Reflection
 			var xml:XML = describeType(type);
 			
 			reflectedType = new TypeInfo(xml.@name, type, Parse.boolean(xml.@isDynamic, false), Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
+			addMetadata(reflectedType, xml);
 			
 			//add constructor
 			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, true, false));
@@ -264,7 +265,7 @@ public class Reflection
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
-		var type : Class = getClassInternal(value, false);
+		var type:Class = getClassInternal(value, false);
 		switch(type)
 		{
 			case int:
@@ -348,42 +349,47 @@ public class Reflection
 			var member:AbstractMemberInfo = method(xmlItem, typeInfo, isStatic, isConstant);
 			if(member != null)
 			{
-				//add metadata
-				for each(var metadataXml:XML in xmlItem.metadata)
-				{
-					//this is a default matadata tag added by the compiler in a debug build
-					if(metadataXml.@name == "__go_to_definition_help")
-					{
-						member.setPosition(parseInt(metadataXml.arg[0].@value));
-					}
-					else
-					{
-						//add metadata info
-						var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
-						for each(var argXml:XML in metadataXml.arg)
-						{
-							metadataInfo.addValue(argXml.@key, argXml.@value);
-						}
-						member.addMetadataInfo(metadataInfo);
-						
-						//see if there is a registered strongly-typed class for this metadata
-						for(var registeredMetadataName:String in s_registeredMetadataTypes)
-						{
-							//implementers of metadata should omit the "Metadata" suffix, it is added here
-							if(metadataInfo.name + "Metadata" == registeredMetadataName)
-							{
-								var metadata:Metadata = new s_registeredMetadataTypes[registeredMetadataName](metadataInfo);
-								member.addMetadataInstance(metadata, metadataInfo.name);
-								break;
-							}
-						}
-					}
-				}
+				addMetadata(member, xmlItem);
 				
 				//add member to typeinfo
 				typeInfo.addMember(member);
 				
-				//trace(member);
+					//trace(member);
+			}
+		}
+	}
+	
+	static private function addMetadata(member:AbstractMemberInfo, xmlItem:XML):void
+	{
+		//add metadata
+		for each(var metadataXml:XML in xmlItem.metadata)
+		{
+			//this is a default matadata tag added by the compiler in a debug build
+			if(metadataXml.@name == "__go_to_definition_help")
+			{
+				member.setPosition(parseInt(metadataXml.arg[0].@value));
+			}
+			else
+			{
+				//add metadata info
+				var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
+				for each(var argXml:XML in metadataXml.arg)
+				{
+					metadataInfo.addValue(argXml.@key, argXml.@value);
+				}
+				member.addMetadataInfo(metadataInfo);
+				
+				//see if there is a registered strongly-typed class for this metadata
+				for(var registeredMetadataName:String in s_registeredMetadataTypes)
+				{
+					//implementers of metadata should omit the "Metadata" suffix, it is added here
+					if(metadataInfo.name + "Metadata" == registeredMetadataName)
+					{
+						var metadata:Metadata = new s_registeredMetadataTypes[registeredMetadataName](metadataInfo);
+						member.addMetadataInstance(metadata, metadataInfo.name);
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -465,7 +471,7 @@ public class Reflection
 			}
 			else
 			{
-				var def : Object;
+				var def:Object;
 				//allow passing in a class name as the argument if castStrings is true
 				if(castStrings && obj is String)
 				{
