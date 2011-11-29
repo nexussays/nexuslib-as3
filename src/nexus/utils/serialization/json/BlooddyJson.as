@@ -34,18 +34,12 @@ import by.blooddy.crypto.serialization.JSON;
 internal class BlooddyJson
 {
 	//--------------------------------------
-	//	PUBLIC CLASS METHODS
+	//	INTERNAL CLASS METHODS
 	//--------------------------------------
 	
-	static internal function encode(obj:Object):String
-	{
-		return by.blooddy.crypto.serialization.JSON.encode(obj);
-	}
-	
-	static internal function decode(json:String):Object
-	{
-		return by.blooddy.crypto.serialization.JSON.decode(json);
-	}
+	internal static const encode : Function = by.blooddy.crypto.serialization.JSON.encode;
+	internal static const decode : Function = by.blooddy.crypto.serialization.JSON.decode;
+
 }
 
 }

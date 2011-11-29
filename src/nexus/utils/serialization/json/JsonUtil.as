@@ -42,11 +42,13 @@ internal class JsonUtil
 		{
 			encodeMethod = JSON.stringify;
 			decodeMethod = JSON.parse;
+			trace("Using native JSON");
 		}
 		catch(e:Error)
 		{
 			encodeMethod = BlooddyJson.encode
 			decodeMethod = BlooddyJson.decode;
+			trace("Using blooddy JSON");
 		}
 	}
 	
