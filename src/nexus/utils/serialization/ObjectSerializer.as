@@ -67,7 +67,7 @@ public class ObjectSerializer implements ISerializer
 		return ObjectSerializer.serialize(sourceObject, false);
 	}
 	
-	public function deserialize(serializedData:Object):Object
+	public function deserialize(serializedData:Object, type:Class=null):Object
 	{
 		return ObjectSerializer.deserialize(serializedData, Object);
 	}

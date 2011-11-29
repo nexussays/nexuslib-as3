@@ -21,55 +21,48 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package nexus.utils.serialization.xml
+package nexus.utils.serialization.json
 {
-
-import nexus.utils.Parse;
-import nexus.utils.reflection.Metadata;
-import nexus.utils.reflection.MetadataInfo;
 
 /**
  * ...
  * @author	Malachi Griffie
- * @since	11/2/2011 2:38 AM
+ * @since	11/29/2011 3:55 AM
  */
-public class XmlMetadata extends Metadata
+internal class JsonUtil
 {
 	//--------------------------------------
-	//	CLASS CONSTANTS
+	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	public var nodeName : String;
-	public var isAttribute : Boolean;
-	public var flattenArray : Boolean;
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function XmlMetadata(info:MetadataInfo)
+	private static var encodeMethod : Function;
+	private static var decodeMethod : Function;
 	{
-		super(info);
-		this.nodeName = info.getValue("nodeName");
-		this.isAttribute = Parse.boolean(info.getValue("isAttribute"), false);
-		this.flattenArray = Parse.boolean(info.getValue("flattenArray"), false);
+		try
+		{
+			encodeMethod = JSON.stringify;
+			decodeMethod = JSON.parse;
+		}
+		catch(e:Error)
+		{
+			encodeMethod = BlooddyJson.encode
+			decodeMethod = BlooddyJson.decode;
+		}
 	}
 	
 	//--------------------------------------
-	//	GETTER/SETTERS
+	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
+	public static function encode(value:Object):String
+	{
+		return encodeMethod(value);
+	}
 	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+	public static function decode(value:String):Object
+	{
+		return decodeMethod(value);
+	}
 }
 
 }
