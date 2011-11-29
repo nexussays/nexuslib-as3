@@ -11,7 +11,6 @@ import flash.utils.getTimer;
 import nexus.utils.ObjectUtils;
 import nexus.utils.serialization.json.*;
 import nexus.utils.serialization.xml.XmlSerializer;
-//import by.blooddy.crypto.serialization.JSON;
 
 import test.*;
 
@@ -190,8 +189,7 @@ public class Main extends Sprite
 		start = getTimer();
 		for(x = 0; x < COUNT; ++x)
 		{
-			//str = by.blooddy.crypto.serialization.JSON.encode(stuff.OBJECT_TEST);
-			str = JSON.stringify(stuff.OBJECT_TEST);
+			//str = JSON.stringify(stuff.OBJECT_TEST);
 		}
 		end = (getTimer() - start);
 		out("native took " + end + "ms, " + (end / COUNT) + "ms per object on " + str.length + " characters");

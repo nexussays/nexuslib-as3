@@ -13,7 +13,7 @@ import nexus.utils.serialization.*;
  * @since 7/28/2011 8:46 PM
  */
 [classMetadata(param="value", param2="value2")]
-public class TestClass extends BaseClass implements IFoo
+public dynamic class TestClass extends BaseClass implements IFoo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS

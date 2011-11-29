@@ -9,6 +9,7 @@ import foo.bar.TestClass;
  */
 public interface IFoo
 {
+	[MetadataOnInterface(foo="foo")]
 	function get publicProperty():int;
 	function publicFun(param:TestClass, param2:Number = 556, param3:* = null):Vector.<*>;
 }

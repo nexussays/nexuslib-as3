@@ -1,11 +1,13 @@
 package
 {
 
+import avmplus.AVMDescribeType;
 import flash.display.*;
 import flash.events.*;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.*;
+import nexus.utils.serialization.json.JsonSerializer;
 
 import foo.*;
 import foo.bar.*;
@@ -42,7 +44,53 @@ public class Main extends Sprite
 		var start : int;
 		
 		//call it once first in case there is any internal caching going on
-		out(describeType(TestClass).toXMLString());
+		//out(describeType(IFoo).toXMLString());
+		//out(describeType(new TestClass(false)).toXMLString());// .split("\n")[0]);
+		//out(describeType(TestClass).toXMLString());// .split("\n")[0]);
+		
+		//out(AVMDescribeType.HIDE_NSURI_METHODS);
+		//out(AVMDescribeType.INCLUDE_BASES);
+		//out(AVMDescribeType.INCLUDE_INTERFACES);
+		//out(AVMDescribeType.INCLUDE_VARIABLES);
+		//out(AVMDescribeType.INCLUDE_ACCESSORS);
+		//out(AVMDescribeType.INCLUDE_METHODS);
+		//out(AVMDescribeType.INCLUDE_METADATA);
+		//out(AVMDescribeType.INCLUDE_CONSTRUCTOR);
+		//out(AVMDescribeType.INCLUDE_TRAITS);
+		//out(AVMDescribeType.USE_ITRAITS);
+		//out(AVMDescribeType.HIDE_OBJECT);
+		//out(AVMDescribeType.FLASH10_FLAGS);
+		//out(AVMDescribeType.HIDE_NSURI_METHODS |
+			//AVMDescribeType.INCLUDE_BASES |
+			//AVMDescribeType.INCLUDE_INTERFACES |
+			//AVMDescribeType.INCLUDE_VARIABLES |
+			//AVMDescribeType.INCLUDE_ACCESSORS |
+			//AVMDescribeType.INCLUDE_METHODS |
+			//AVMDescribeType.INCLUDE_METADATA |
+			//AVMDescribeType.INCLUDE_CONSTRUCTOR |
+			//AVMDescribeType.INCLUDE_TRAITS |
+			//AVMDescribeType.HIDE_OBJECT);
+		//out(AVMDescribeType.GET_CLASS_INFO);
+		//out(AVMDescribeType.GET_INSTANCE_INFO);
+		
+		//var flags : uint = AVMDescribeType.INCLUDE_INTERFACES |
+			//AVMDescribeType.INCLUDE_VARIABLES |
+			//AVMDescribeType.INCLUDE_ACCESSORS |
+			//AVMDescribeType.INCLUDE_METHODS |
+			//AVMDescribeType.INCLUDE_METADATA |
+			//AVMDescribeType.INCLUDE_TRAITS |
+			//AVMDescribeType.HIDE_OBJECT;
+		out(JsonSerializer.serialize(AVMDescribeType.getClassJson(TestClass), "  ", 100));
+		
+		//flags ^= AVMDescribeType.INCLUDE_BASES;
+		//flags ^= AVMDescribeType.INCLUDE_CONSTRUCTOR;
+		//out(flags, "\n", JsonSerializer.serialize(AVMDescribeType.json(TestClass, flags), "  ", 100));
+		
+		//flags |= AVMDescribeType.INCLUDE_CONSTRUCTOR | AVMDescribeType.INCLUDE_BASES | AVMDescribeType.USE_ITRAITS;
+		out(JsonSerializer.serialize(AVMDescribeType.getInstanceJson(TestClass), "  ", 100));
+		
+		//out(AVMDescribeType.xml(BaseClass, flags).toXMLString());
+		//out(describeType(BaseClass).toXMLString());
 		
 		start = getTimer();
 		describeType(TestClass);
