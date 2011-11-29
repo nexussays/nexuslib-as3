@@ -359,7 +359,7 @@ public class Reflection
 		}
 	}
 	
-	static private function addMetadata(member:AbstractMemberInfo, xmlItem:XML):void
+	static private function addMetadata(member:AbstractMetadataRecipient, xmlItem:XML):void
 	{
 		//add metadata
 		for each(var metadataXml:XML in xmlItem.metadata)
@@ -465,12 +465,12 @@ public class Reflection
 		else
 		{
 			//TODO: do performance testing to see if this caching is actually getting us anything
-			if(obj in s_cachedObjectClasses)
-			{
-				return Class(s_cachedObjectClasses[obj]);
-			}
-			else
-			{
+			//if(obj in s_cachedObjectClasses)
+			//{
+			//	return Class(s_cachedObjectClasses[obj]);
+			//}
+			//else
+			//{
 				var def:Object;
 				//allow passing in a class name as the argument if castStrings is true
 				if(castStrings && obj is String)
@@ -490,9 +490,9 @@ public class Reflection
 					def = getDefinitionByName(flash.utils.getQualifiedClassName(obj));
 				}
 				
-				s_cachedObjectClasses[obj] = def;
+				//s_cachedObjectClasses[obj] = def;
 				return Class(def);
-			}
+			//}
 		}
 	}
 	
