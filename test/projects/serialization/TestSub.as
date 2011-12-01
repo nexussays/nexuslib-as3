@@ -4,7 +4,7 @@ package
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	10/28/2011 12:38 AM
  */
 public class TestSub //implements IJsonSerializable

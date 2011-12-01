@@ -3,7 +3,7 @@ package
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	10/28/2011 2:05 AM
  */
 public class stuff

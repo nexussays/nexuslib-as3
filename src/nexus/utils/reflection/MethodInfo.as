@@ -71,7 +71,7 @@ public class MethodInfo extends AbstractMemberInfo
 	public function get returnType():Class { return m_returnType; }
 	
 	/**
-	 * The parameters this method takes, indexed by their order they are passed to the method
+	 * The parameters this method takes, indexed by their order in the method signature
 	 */
 	public function get parameters():Vector.<MethodParameterInfo> { return m_parameters; }
 	
@@ -87,11 +87,12 @@ public class MethodInfo extends AbstractMemberInfo
 	 */
 	public function invoke(scope:Object, ...params):Object
 	{
-		//TODO: Decide if this is all necessary or if we can let errors fall through and throw when apply() is called
+		//TODO: Decide if this is necessary or if we can let errors fall through and throw when apply() is called
 		if(!(scope is m_declaringType))
 		{
 			throw new ArgumentError("Cannot invoke " + this.toString() + ", declared on " + Reflection.getQualifiedClassName(m_declaringType) + ", on an object of type " + Reflection.getQualifiedClassName(scope) + ".");
 		}
+		//TODO: Decide if this is necessary or if we can let errors fall through and throw when apply() is called
 		/*
 		for(var x : int = 0; x < m_parameters.length; ++x)
 		{

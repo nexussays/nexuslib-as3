@@ -28,7 +28,7 @@ import flash.utils.*;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	11/9/2011 12:43 AM
  */
 public class SubObject
