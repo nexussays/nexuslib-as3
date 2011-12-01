@@ -12,9 +12,6 @@
   <MXIAuthor />
   <MXIDescription />
   <MXIUIAccessText />
-  <Flex_IgnoreClasses>
-    <string>src\nexus\utils\serialization\objectserializer.as</string>
-  </Flex_IgnoreClasses>
   <CS3_IgnoreClasses />
   <CS3_ComponentClass />
   <CS3_ComponentName />
