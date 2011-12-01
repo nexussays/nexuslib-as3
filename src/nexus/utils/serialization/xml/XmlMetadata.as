@@ -30,7 +30,7 @@ import nexus.utils.reflection.MetadataInfo;
 
 /**
  * ...
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	11/2/2011 2:38 AM
  */
 public class XmlMetadata extends Metadata

@@ -25,29 +25,41 @@ package nexus.utils.serialization.json
 {
 
 /**
- * ...
- * @author	Malachi Griffie
+ * Provides an API to access the native JSON parser or fallback to the blooddy-crypto library JSON parser
+ * if running on a version of flash without native JSON.
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	11/29/2011 3:55 AM
  */
-internal class JsonUtil
+internal class JsonParser
 {
 	//--------------------------------------
 	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	private static var encodeMethod : Function;
-	private static var decodeMethod : Function;
+	/**
+	 * Signature => public static function encode(object:Object):String
+	 */
+	internal static var encode : Function;
+	/**
+	 * Signature => public static function decode(json:String):Object
+	 */
+	internal static var decode : Function;
+	
+	//--------------------------------------
+	//	STATIC INITIALIZER
+	//--------------------------------------
+	
 	{
 		try
 		{
-			encodeMethod = JSON.stringify;
-			decodeMethod = JSON.parse;
+			encode = JSON.stringify;
+			decode = JSON.parse;
 			trace("Using native JSON");
 		}
 		catch(e:Error)
 		{
-			encodeMethod = BlooddyJson.encode
-			decodeMethod = BlooddyJson.decode;
+			encode = JsonParserBlooddy.encode;
+			decode = JsonParserBlooddy.decode;
 			trace("Using blooddy JSON");
 		}
 	}
@@ -56,15 +68,6 @@ internal class JsonUtil
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	public static function encode(value:Object):String
-	{
-		return encodeMethod(value);
-	}
-	
-	public static function decode(value:String):Object
-	{
-		return decodeMethod(value);
-	}
 }
 
 }

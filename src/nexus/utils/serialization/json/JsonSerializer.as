@@ -178,7 +178,7 @@ public class JsonSerializer implements ISerializer
 	{
 		try
 		{
-			return JsonUtil.decode(json);
+			return JsonParser.decode(json);
 		}
 		catch(e:SyntaxError)
 		{
@@ -206,7 +206,7 @@ public class JsonSerializer implements ISerializer
 			|| sourceObject is IJsonSerializable
 			|| ("toJSON" in sourceObject && !sourceObject is Dictionary))
 		{
-			result = JsonUtil.encode(sourceObject);
+			result = JsonParser.encode(sourceObject);
 		}
 		else
 		{
@@ -215,7 +215,7 @@ public class JsonSerializer implements ISerializer
 			//if a max line length has been set, use the native encoder to very quickly roughly determine the string length
 			//of the current object and then use that to determine if we need to run the pretty formatter or not
 			//TODO: find a faster way to determine this
-			pretty = (s_maxLineLength == 0 || (s_maxLineLength < int.MAX_VALUE && JsonUtil.encode(sourceObject).length > s_maxLineLength));
+			pretty = (s_maxLineLength == 0 || (s_maxLineLength < int.MAX_VALUE && JsonParser.encode(sourceObject).length > s_maxLineLength));
 			
 			if(pretty)
 			{
@@ -322,7 +322,7 @@ public class JsonSerializer implements ISerializer
 				result += pretty ? ",\n" : ",";
 			}
 			result += pretty ? s_indentation : "";
-			result += JsonUtil.encode(key);
+			result += JsonParser.encode(key);
 			result += pretty ? ": " : ":";
 			result += serializeObject(value);
 		}

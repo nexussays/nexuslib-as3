@@ -26,7 +26,7 @@ package avmplus
 
 /**
  * Provides access to the avmplus.describeTypeJSON method which was (accidentally?) exposed in Flash 10.2
- * @author	Malachi Griffie
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	11/29/2011 1:15 AM
  */
 public final class AVMDescribeType
@@ -37,6 +37,11 @@ public final class AVMDescribeType
 	
 	private static var describeJson : Function;
 	private static var describeXml : Function;
+	
+	//--------------------------------------
+	//	STATIC INITIALIZER
+	//--------------------------------------
+	
 	{
 		try
 		{
@@ -60,24 +65,26 @@ public final class AVMDescribeType
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	public static function getClassJson(type:Object):Object
+	public static function getClassJson(object:Object):Object
 	{
-		return describeJson(type, 1404);
+		//1404 represents the bitwise flags to display class-level information but no instance data, base classes, or constructor
+		return describeJson(object, 1404);
 	}
 	
-	public static function getInstanceJson(type:Object):Object
+	public static function getInstanceJson(object:Object):Object
 	{
-		return describeJson(type, 2046);
+		//2046 represents the bitwise flags to display instance information
+		return describeJson(object, 2046);
 	}
 	
-	public static function getClassXml(type:Object):XML
+	public static function getClassXml(object:Object):XML
 	{
-		return describeXml(type, 1404);
+		return describeXml(object, 1404);
 	}
 	
-	public static function getInstanceXml(type:Object):XML
+	public static function getInstanceXml(object:Object):XML
 	{
-		return describeXml(type, 2046);
+		return describeXml(object, 2046);
 	}
 }
 
