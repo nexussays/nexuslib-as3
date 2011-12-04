@@ -40,6 +40,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_type:Class;
 	
 	private var m_isDynamic : Boolean;
+	private var m_isDynamicHasBeenSet : Boolean;
 	private var m_isFinal : Boolean;
 	
 	private var m_inheritedInterfaces : Vector.<Class>;
@@ -67,13 +68,12 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function TypeInfo(name:String, type:Class, isDynamic:Boolean, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
+	public function TypeInfo(name:String, type:Class, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
 		super(name, metadataCount);
 		
 		m_type = type;
 		
-		m_isDynamic = isDynamic;
 		m_isFinal = isFinal;
 		
 		m_allMembers = new Vector.<AbstractMemberInfo>();
@@ -243,6 +243,12 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
 	
+	internal function setIsDynamic(value:Boolean):void
+	{
+		m_isDynamic = value;
+		m_isDynamicHasBeenSet = true;
+	}
+
 	internal function setConstructor(constructor:MethodInfo):void
 	{
 		m_constructor = constructor;

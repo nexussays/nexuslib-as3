@@ -64,12 +64,7 @@ public class ObjectUtils
 		{
 			result = new Date(source);
 		}
-		else if(Reflection.isArray(type))
-		{
-			result = new type();
-			assignTypedObjectFromNativeObject(result, source);
-		}
-		else if(Reflection.isAssociativeArray(type))
+		else if(Reflection.isArray(type) || Reflection.isAssociativeArray(type))
 		{
 			result = new type();
 			assignTypedObjectFromNativeObject(result, source);
@@ -78,6 +73,7 @@ public class ObjectUtils
 		{
 			try
 			{
+				//TODO: Handle constuctors with arguments?
 				result = new type();
 			}
 			catch(e:Error)
@@ -101,13 +97,14 @@ public class ObjectUtils
 	 */
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
 	{
-		//assigning primitices is pointless without references
+		//assigning primitives is pointless without pass by ref
 		if(source == null || Reflection.isPrimitive(instance) || instance == Date)
 		{
 			return;
 		}
 		else if(Reflection.isArray(instance))
 		{
+			//clear out the existing array if there is anything in it
 			if(instance != null && instance.length > 0)
 			{
 				instance.splice(0, instance.length);

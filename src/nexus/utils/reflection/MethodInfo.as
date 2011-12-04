@@ -44,7 +44,9 @@ public class MethodInfo extends AbstractMemberInfo
 	
 	private var m_returnType:Class;
 	private var m_returnTypeName : String;
+	
 	private var m_parameters : Vector.<MethodParameterInfo>;
+	private var m_requiredParametersCount : int;
 	
 	///@see toString
 	private var m_parametersString : String;
@@ -74,6 +76,11 @@ public class MethodInfo extends AbstractMemberInfo
 	 * The parameters this method takes, indexed by their order in the method signature
 	 */
 	public function get parameters():Vector.<MethodParameterInfo> { return m_parameters; }
+	
+	/**
+	 * The number of method parameters that are required
+	 */
+	public function get requiredParametersCount():int { return m_requiredParametersCount; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -113,11 +120,11 @@ public class MethodInfo extends AbstractMemberInfo
 		
 		if(m_returnType != null)
 		{
-			return scope[m_name].apply(scope, params);
+			return Function(scope[m_name]).apply(scope, params);
 		}
 		else
 		{
-			scope[m_name].apply(scope, params);
+			Function(scope[m_name]).apply(scope, params);
 			return null;
 		}
 	}
@@ -149,6 +156,10 @@ public class MethodInfo extends AbstractMemberInfo
 	internal function addMethodParameter(param:MethodParameterInfo):void
 	{
 		m_parameters[param.position] = param;
+		if(!param.isOptional)
+		{
+			m_requiredParametersCount++;
+		}
 	}
 }
 

@@ -24,6 +24,7 @@
 package nexus.utils.reflection
 {
 
+import avmplus.AVMDescribeType;
 import nexus.nexuslib_internal;
 import nexus.utils.Parse;
 
@@ -40,15 +41,18 @@ public class Reflection
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
+	//call flash.utils.getQualifiedClassName(Vector) instead of hardcoding the string just in case Adobe ever changes the class
+	///__AS3__.vec::Vector
 	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
+	///__AS3__.vec::Vector.<*>
 	static private const UNTYPED_VECTOR_CLASSNAME:String = VECTOR_PREFIX + ".<*>";
 	
-	///cache all TypeInfo information so the describeType() call and processing it into a TypeInfo only happens once
+	///cache all TypeInfo information so parsing in the describeType() call only happens once
 	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary();
 	///store strongly-typed classes that represent metadata on members
 	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
 	///store all calls to getClass() so the lookup is quicker if the same object is provided a second time
-	static private const s_cachedObjectClasses:Dictionary = new Dictionary(true);
+	//static private const s_cachedObjectClasses:Dictionary = new Dictionary(true);
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -61,7 +65,7 @@ public class Reflection
 	 */
 	public static function getClass(obj:Object):Class
 	{
-		return getClassInternal(obj, true);
+		return getClassFromObject(obj, true);
 	}
 	
 	/**
@@ -105,23 +109,33 @@ public class Reflection
 	 */
 	public static function getVectorClass(data:Object):Class
 	{
-		var type:Class = getClassInternal(data, false);
-		var typePrefix:String = getQualifiedClassName(type);
+		var type:Class = getClassFromObject(data, false);
+		var typePrefix:String = flash.utils.getQualifiedClassName(type);
 		//parse out class between "Vector.<" and ">"
 		typePrefix = typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1);
 		return typePrefix == "*" ? Object : (getClass(typePrefix) || Object);
 	}
 	
 	/**
-	 * Given a Class or a fully qualified class name, this will return the unqualified class name.
+	 * Returns the fully qualified class name of an object. Convenience method that wraps flash.utils.getQualifiedClassName
+	 * @param	value	The object for which a fully qualified class name is desired.
+	 * @return	A string containing the fully qualified class name.
+	 */
+	public static function getQualifiedClassName(value:Object):String
+	{
+		return flash.utils.getQualifiedClassName(value);
+	}
+	
+	/**
+	 * Given a Class, object instance, or a fully qualified class name, this will return the class name without the package names attached.
 	 * @example	<pre>
 	 * getUnqualifiedClassName(SomeClass) => "SomeClass"
 	 * getUnqualifiedClassName(instanceOfSomeClass) => "SomeClass"
-	 * getUnqualifiedClassName("com.example.pkg::SomeClass") => "SomeClass"
+	 * getUnqualifiedClassName("com.example.as3::SomeClass") => "SomeClass"
 	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
 	 * getUnqualifiedClassName("some string value") => "String"
 	 * </pre>
-	 * @param	className	The fully qualified class name or Class to parse
+	 * @param	object	An object instance, a Class, or a String representing a class name
 	 * @return
 	 */
 	public static function getUnqualifiedClassName(object:Object):String
@@ -140,7 +154,7 @@ public class Reflection
 		}
 		else
 		{
-			str = getQualifiedClassName(object);
+			str = flash.utils.getQualifiedClassName(object);
 		}
 		
 		//parse out class when in format "package.package.package::ClassName"
@@ -154,16 +168,6 @@ public class Reflection
 		}
 		
 		return str;
-	}
-	
-	/**
-	 * Returns the fully qualified class name of an object. Convenience method that wraps flash.utils.getQualifiedClassName
-	 * @param	value	The object for which a fully qualified class name is desired.
-	 * @return	A string containing the fully qualified class name.
-	 */
-	public static function getQualifiedClassName(value:Object):String
-	{
-		return flash.utils.getQualifiedClassName(value);
 	}
 	
 	/**
@@ -217,7 +221,7 @@ public class Reflection
 		{
 			var xml:XML = describeType(type);
 			
-			reflectedType = new TypeInfo(xml.@name, type, Parse.boolean(xml.@isDynamic, false), Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
+			reflectedType = new TypeInfo(xml.@name, type, Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
 			addMetadata(reflectedType, xml);
 			
 			//add constructor
@@ -251,6 +255,24 @@ public class Reflection
 			}
 			//trace(reflectedType.implementedInterfaces);
 			
+			//isDynamic info is incorrect if doing a describeType of a Class
+			if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
+			{
+				try
+				{
+					object = new type();
+				}
+				catch(e:Error)
+				{
+					
+				}
+			}
+			
+			if(!(object is Class))
+			{
+				reflectedType.setIsDynamic(Parse.boolean(describeType(object).@isDynamic, false));
+			}
+			
 			s_cachedTypeInfoObjects[type] = reflectedType;
 			
 			xml = null;
@@ -265,7 +287,7 @@ public class Reflection
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
-		var type:Class = getClassInternal(value, false);
+		var type:Class = getClassFromObject(value, false);
 		switch(type)
 		{
 			case int:
@@ -302,7 +324,7 @@ public class Reflection
 	 */
 	public static function isAssociativeArray(value:Object):Boolean
 	{
-		return value is Dictionary || value == Dictionary || getClassInternal(value, false) == Object;
+		return value is Dictionary || value == Dictionary || getClassFromObject(value, false) == Object;
 	}
 	
 	//--------------------------------------
@@ -452,7 +474,7 @@ public class Reflection
 	 * @param	castStrings	If true, a string value that contains a valid qualified class name will be cast to that class
 	 * @return
 	 */
-	private static function getClassInternal(obj:Object, castStrings:Boolean):Class
+	private static function getClassFromObject(obj:Object, castStrings:Boolean):Class
 	{
 		if(obj == null)
 		{
