@@ -4,7 +4,7 @@
   <output>
     <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="..\..\bin\nexuslib_reflection.swf" />
+    <movie path="bin\nexuslib_reflection.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
@@ -15,7 +15,7 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="." />
+    <class path="src" />
   </classpaths>
   <!-- Build options -->
   <build>
