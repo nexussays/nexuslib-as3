@@ -72,9 +72,10 @@ public class JsonSerializer implements ISerializer
 	//	CLASS VARIABLES
 	//--------------------------------------
 	
-	static private var s_spaceCharacters : String;
+	static private var s_indentationCharacters : String;
 	static private var s_maxLineLength : int;
 	static private var s_serializeConstants : Boolean;
+	///the current indentation characters, defined as s_indentationCharacters * indentationLevel
 	static private var s_indentation:String;
 	
 	//--------------------------------------
@@ -102,15 +103,26 @@ public class JsonSerializer implements ISerializer
 	
 	/**
 	 * Entries in generated JSON objects and JSON arrays are separated by a gap derived from the space value.
-	 * This gap is always 0 to 10 characters wide. If space is longer than 10 characters only the first 10
-	 * characters of the string are used.
+	 * This gap is always 0 to 10 characters wide. If the provided string value is longer than 10 characters,
+	 * only the first 10 characters of the string value are used.
 	 */
 	public function get indentationCharacters():String { return m_indentationCharacters; }
 	public function set indentationCharacters(value:String):void
 	{
-		m_indentationCharacters = value;
+		if(m_indentationCharacters != value)
+		{
+			m_indentationCharacters = value || "";
+			if(m_indentationCharacters.length > 10)
+			{
+				m_indentationCharacters = m_indentationCharacters.substr(0, 10);
+			}
+		}
 	}
 	
+	/**
+	 * If true, constants are serialized in the JSON output along with variables and getter properties.
+	 * @default	false
+	 */
 	public function get serializeConstants():Boolean { return m_serializeConstants; }
 	public function set serializeConstants(value:Boolean):void
 	{
@@ -118,7 +130,8 @@ public class JsonSerializer implements ISerializer
 	}
 	
 	/**
-	 * The maximum allowed length of a single line of the JSON string before the JSON data is wrapped appropriately.
+	 * The maximum allowed length of a single line of the JSON string before the JSON data is wrapped appropriately. This
+	 * value is not a hard limit but the serializer will do its best to meet the limit.
 	 */
 	public function get maxLineLength():int { return m_maxLineLength; }
 	public function set maxLineLength(value:int):void
@@ -165,10 +178,10 @@ public class JsonSerializer implements ISerializer
 	 * @param	includeReadOnlyFields
 	 * @return
 	 */
-	static public function serialize(sourceObject:Object, space:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
+	static public function serialize(sourceObject:Object, indentationCharacters:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
 	{
 		s_indentation = "";
-		s_spaceCharacters = space || "";
+		s_indentationCharacters = indentationCharacters || "";
 		s_maxLineLength = maxLineLength;
 		s_serializeConstants = serializeConstants;
 		return serializeObject(sourceObject);
@@ -219,7 +232,7 @@ public class JsonSerializer implements ISerializer
 			
 			if(pretty)
 			{
-				s_indentation += s_spaceCharacters;
+				s_indentation += s_indentationCharacters;
 			}
 			
 			if(Reflection.isArray(sourceObject))
@@ -237,7 +250,7 @@ public class JsonSerializer implements ISerializer
 				if(pretty)
 				{
 					//unindent
-					s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
+					s_indentation = s_indentation.substring(0, s_indentation.length - s_indentationCharacters.length);
 					result = "[" + "\n" + result + "\n" + s_indentation + "]";
 				}
 				else
@@ -300,7 +313,7 @@ public class JsonSerializer implements ISerializer
 				if(pretty)
 				{
 					//unindent
-					s_indentation = s_indentation.substring(0, s_indentation.length - s_spaceCharacters.length);
+					s_indentation = s_indentation.substring(0, s_indentation.length - s_indentationCharacters.length);
 					result = "{" + "\n" + result + "\n" + s_indentation + "}";
 				}
 				else

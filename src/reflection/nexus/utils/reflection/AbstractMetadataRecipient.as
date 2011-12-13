@@ -27,7 +27,7 @@ package nexus.utils.reflection
 import flash.utils.*;
 
 /**
- * ...
+ * Abstract base class for any reflected object that can be tagged with metadata
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	9/21/2011 2:57 AM
  */

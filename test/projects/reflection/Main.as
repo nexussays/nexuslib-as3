@@ -42,6 +42,7 @@ public class Main extends Sprite
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
 		var start : int;
+		var x : int;
 		
 		//call it once first in case there is any internal caching going on
 		//out(describeType(IFoo).toXMLString());
@@ -80,14 +81,14 @@ public class Main extends Sprite
 			//AVMDescribeType.INCLUDE_METADATA |
 			//AVMDescribeType.INCLUDE_TRAITS |
 			//AVMDescribeType.HIDE_OBJECT;
-		out(JsonSerializer.serialize(AVMDescribeType.getClassJson(TestClass), "  ", 100));
+		//out(JsonSerializer.serialize(AVMDescribeType.getClassJson(TestClass), "  ", 100));
 		
 		//flags ^= AVMDescribeType.INCLUDE_BASES;
 		//flags ^= AVMDescribeType.INCLUDE_CONSTRUCTOR;
 		//out(flags, "\n", JsonSerializer.serialize(AVMDescribeType.json(TestClass, flags), "  ", 100));
 		
 		//flags |= AVMDescribeType.INCLUDE_CONSTRUCTOR | AVMDescribeType.INCLUDE_BASES | AVMDescribeType.USE_ITRAITS;
-		out(JsonSerializer.serialize(AVMDescribeType.getInstanceJson(TestClass), "  ", 100));
+		//out(JsonSerializer.serialize(AVMDescribeType.getInstanceJson(TestClass), "  ", 100));
 		
 		//out(AVMDescribeType.xml(BaseClass, flags).toXMLString());
 		//out(describeType(BaseClass).toXMLString());
@@ -100,9 +101,8 @@ public class Main extends Sprite
 		out("took " + (getTimer() - start) + "ms for Reflection");
 		
 		/*
-		var x : int;
 		start = getTimer();
-		for (x = 0; x < COUNT; ++x)
+		for(x = 0; x < COUNT; ++x)
 		{
 			//took 3025ms for 11234, 0.2692718533024746ms each
 			describeType(TestClass);
@@ -111,13 +111,13 @@ public class Main extends Sprite
 		//*/
 		/*
 		start = getTimer();
-		for (x = 0; x < COUNT; ++x)
+		for(x = 0; x < COUNT; ++x)
 		{
 			//uncached: took 6953ms for 11234, 0.618924692896564ms each
 			//cached: took 5ms for 11234, 0.0004450774434751647ms each
 			Reflection.getTypeInfo(TestClass);
 		}
-		out("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each" );
+		out("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each");
 		//*/
 		
 		var testClass : TestClass = new TestClass(false);
@@ -130,16 +130,22 @@ public class Main extends Sprite
 		var bar : Object = new type();
 		//*/
 		
+		out(Reflection.getQualifiedClassName(new Vector.<*>()));
+		out(Reflection.getVectorClass(new Vector.<*>()));
+		out(Reflection.getQualifiedClassName(new Vector.<TestClass>()));
+		out(Reflection.getVectorClass(new Vector.<TestClass>()));
+		
 		/*
-		out("testClass.declaringType", testClass.declaringType);
-		out("testClass.implementedInterfaces", testClass.implementedInterfaces);
-		out("testClass.methods", testClass.methods);
-		out("testClass.properties", testClass.properties);
-		out("testClass.fields", testClass.fields);
-		out("testClass.name", testClass.name);
-		out(testClass.extendedClasses.indexOf(Object));
-		out(testClass.extendedClasses.indexOf(Sprite));
-		out(testClass.extendedClasses.indexOf(BaseClass));
+		out("testClass.type", typeInfo.type);
+		out("testClass.isDynamic", typeInfo.isDynamic);
+		out("testClass.implementedInterfaces", typeInfo.implementedInterfaces);
+		out("testClass.methods", typeInfo.methods);
+		out("testClass.properties", typeInfo.properties);
+		out("testClass.fields", typeInfo.fields);
+		out("testClass.name", typeInfo.name);
+		out(typeInfo.extendedClasses.indexOf(Object));
+		out(typeInfo.extendedClasses.indexOf(Sprite));
+		out(typeInfo.extendedClasses.indexOf(BaseClass));
 		//*/
 		
 		/*
@@ -179,6 +185,7 @@ public class Main extends Sprite
 	{
 		params.map(output);
 		txt.appendText("\n");
+		trace.apply(null, params);
 	}
 	
 	private function output(d:Object, ...params):void

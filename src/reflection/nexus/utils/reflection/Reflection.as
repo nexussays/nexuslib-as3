@@ -109,11 +109,13 @@ public class Reflection
 	 */
 	public static function getVectorClass(data:Object):Class
 	{
-		var type:Class = getClassFromObject(data, false);
-		var typePrefix:String = flash.utils.getQualifiedClassName(type);
-		//parse out class between "Vector.<" and ">"
-		typePrefix = typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1);
-		return typePrefix == "*" ? Object : (getClass(typePrefix) || Object);
+		var typePrefix:String = flash.utils.getQualifiedClassName(data);
+		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
+		{
+			return Object;
+		}
+		//parse out class between "__AS3__.vec::Vector.<" and ">"
+		return getClass(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1)) || Object;
 	}
 	
 	/**
