@@ -4,7 +4,7 @@
   <output>
     <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="bin\nexuslib_reflection.swf" />
+    <movie path="bin\nexuslib.reflection.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
@@ -74,7 +74,7 @@
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
-    <hidden path="nexuslib_reflection.lxml" />
+    <hidden path="nexuslib.reflection.lxml" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />

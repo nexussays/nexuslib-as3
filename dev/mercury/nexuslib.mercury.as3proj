@@ -4,7 +4,7 @@
   <output>
     <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="bin\nexuslib_mercury.swf" />
+    <movie path="bin\nexuslib.mercury.swf" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
@@ -72,7 +72,7 @@
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
-    <hidden path="nexuslib_mercury.lxml" />
+    <hidden path="nexuslib.mercury.lxml" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />

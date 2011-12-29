@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SWCProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <FlexBinPath>.\bin\nexuslib.reflection.swc</FlexBinPath>
-  <FlashBinPath>.\bin\nexuslib_reflection.flash.swc</FlashBinPath>
+  <FlashBinPath>.\bin\nexuslib.reflection.flash.swc</FlashBinPath>
   <FlexIncludeASI>false</FlexIncludeASI>
   <MakeCS3>false</MakeCS3>
   <MakeMXI>false</MakeMXI>
