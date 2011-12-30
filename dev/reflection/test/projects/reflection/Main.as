@@ -44,6 +44,25 @@ public class Main extends Sprite
 		var start : int;
 		var x : int;
 		
+		out("Reflection.getClassByName(\"*\") " + Reflection.getClassByName("*"));
+		out("Reflection.getClassByName(\"Object\") " + Reflection.getClassByName("Object"));
+		out("Reflection.getClassByName(\"void\") " + Reflection.getClassByName("void"));
+		out("Reflection.getClassByName(\"null\") " + Reflection.getClassByName("null"));
+		out("Reflection.getClassByName(\"undefined\") " + Reflection.getClassByName("undefined"));
+		out("Reflection.getClassByName(\"uint\") " + Reflection.getClassByName("uint"));
+		out("Reflection.getClassByName(\"foo\") " + Reflection.getClassByName("foo"));
+		out("Reflection.getClassByName(\"foo.bar.BaseClass\") " + Reflection.getClassByName("foo.bar.BaseClass"));
+		out("Reflection.getClassByName(\"foo.bar::BaseClass\") " + Reflection.getClassByName("foo.bar::BaseClass"));
+		out("Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())) " + Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())));
+		out("Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())) " + Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())));
+		
+		out(Reflection.getVectorType(new Vector.<String>()));
+		out(Reflection.getVectorType(new Vector.<BaseClass>()));
+		out(Reflection.getVectorType(new Vector.<*>()));
+		
+		out(Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())))()));
+		out(Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())))()));
+		
 		//call it once first in case there is any internal caching going on
 		//out(describeType(IFoo).toXMLString());
 		//out(describeType(new TestClass(false)).toXMLString());// .split("\n")[0]);
@@ -131,9 +150,9 @@ public class Main extends Sprite
 		//*/
 		
 		out(Reflection.getQualifiedClassName(new Vector.<*>()));
-		out(Reflection.getVectorClass(new Vector.<*>()));
+		out(Reflection.getVectorType(new Vector.<*>()));
 		out(Reflection.getQualifiedClassName(new Vector.<TestClass>()));
-		out(Reflection.getVectorClass(new Vector.<TestClass>()));
+		out(Reflection.getVectorType(new Vector.<TestClass>()));
 		
 		/*
 		out("testClass.type", typeInfo.type);

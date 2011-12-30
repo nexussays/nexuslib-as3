@@ -1,7 +1,7 @@
 package foo.bar
 {
 
-import nexus.utils.serialization.ObjectSerializer;
+import flash.globalization.DateTimeFormatter;
 
 /**
  * ...
@@ -15,7 +15,7 @@ public class BaseClass
 	
 	}
 	
-	public function baseMethod(arg1:*, arg2:Object):ObjectSerializer
+	public function baseMethod(arg1:*, arg2:Object):DateTimeFormatter
 	{
 		return null;
 	}

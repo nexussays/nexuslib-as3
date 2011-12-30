@@ -1,6 +1,7 @@
 package foo.bar
 {
 
+import flash.globalization.DateTimeFormatter;
 import flash.utils.*;
 
 import foo.*;
@@ -85,7 +86,7 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	override public function baseMethod(arg1:*, arg2:Object):ObjectSerializer
+	override public function baseMethod(arg1:*, arg2:Object):DateTimeFormatter
 	{
 		return super.baseMethod(arg1, arg2);
 	}
