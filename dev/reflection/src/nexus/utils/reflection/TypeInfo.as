@@ -24,6 +24,7 @@
 package nexus.utils.reflection
 {
 
+import flash.system.ApplicationDomain;
 import flash.utils.*;
 
 /**
@@ -42,6 +43,8 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_isDynamic : Boolean;
 	private var m_isDynamicHasBeenSet : Boolean;
 	private var m_isFinal : Boolean;
+	
+	private var m_applicationDomain : ApplicationDomain;
 	
 	private var m_inheritedInterfaces : Vector.<Class>;
 	private var m_extendedClasses : Vector.<Class>;
@@ -68,13 +71,15 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function TypeInfo(name:String, type:Class, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
+	public function TypeInfo(name:String, appDomain:ApplicationDomain, type:Class, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
 		super(name, metadataCount);
 		
 		m_type = type;
 		
 		m_isFinal = isFinal;
+		
+		m_applicationDomain = appDomain;
 		
 		m_allMembers = new Vector.<AbstractMemberInfo>();
 		m_allMemberNames = new Vector.<String>();
@@ -109,6 +114,11 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	public function get fields():Vector.<FieldInfo> { return m_fields; }
 	
 	public function get constructor():MethodInfo { return m_constructor; }
+	
+	/**
+	 * The application domain this object is a part of
+	 */
+	public function get applicationDomain():ApplicationDomain { return m_applicationDomain; }
 	
 	public function get allMembers():Vector.<AbstractMemberInfo> { return m_allMembers; }
 	

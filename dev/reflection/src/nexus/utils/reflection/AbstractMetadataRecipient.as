@@ -25,6 +25,7 @@ package nexus.utils.reflection
 {
 
 import flash.utils.*;
+import nexus.nexuslib_internal;
 
 /**
  * Abstract base class for any reflected object that can be tagged with metadata
@@ -121,7 +122,8 @@ public class AbstractMetadataRecipient
 	
 	internal function addMetadataInstance(meta:Metadata, name:String):void
 	{
-		var type:Class = Reflection.getClass(meta);
+		use namespace nexuslib_internal;
+		var type:Class = Reflection.getMetadataClass(meta);
 		if(m_metadataInstances[type] != null)
 		{
 			throw new Error("Metadata tag of type \"" + type + "\" defined twice on the same member");

@@ -114,15 +114,17 @@ public class ObjectUtils
 			{
 				if(x in source && source[x] !== undefined)
 				{
-					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorClass(instance), source[x]);
+					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorType(instance), source[x]);
 				}
 			}
 		}
+		//if the object is an associative array, iterate over all the keys in the source and assign them
 		else if(Reflection.isAssociativeArray(instance))
 		{
 			//TODO: Need to clear out existing values, re-instantiate?
 			for(var key:String in source)
 			{
+				//TODO: Does it even make any sense to get the class of the source? Won't it be Objet 99% of the time?
 				instance[key] = createTypedObjectFromNativeObject(Reflection.getClass(source[key]), source[key]);
 			}
 		}
