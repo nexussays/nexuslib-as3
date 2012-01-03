@@ -48,7 +48,7 @@ public class Reflection
 	///__AS3__.vec::Vector.<*>
 	static private const UNTYPED_VECTOR_CLASSNAME:String = VECTOR_PREFIX + ".<*>";
 	///class typed as __AS3__.vec::Vector.<Object>
-	static private const UNTYPED_VECTOR_CLASS:Class = getDefinitionByName(VECTOR_PREFIX + ".<Object>") as Class;
+	static private const OBJECT_VECTOR_CLASS:Class = getDefinitionByName(VECTOR_PREFIX + ".<Object>") as Class;
 	
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
 	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary();
@@ -125,7 +125,7 @@ public class Reflection
 			{
 				if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
 				{
-					return UNTYPED_VECTOR_CLASS;
+					return OBJECT_VECTOR_CLASS;
 				}
 				else
 				{
@@ -232,13 +232,13 @@ public class Reflection
 	 */
 	public static function getVectorType(data:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		var typePrefix:String = flash.utils.getQualifiedClassName(data);
-		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
+		var className:String = flash.utils.getQualifiedClassName(data);
+		if(className == UNTYPED_VECTOR_CLASSNAME)
 		{
 			return Object;
 		}
 		//parse out class between "__AS3__.vec::Vector.<" and ">"
-		return getClassByNameInternal(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1), applicationDomain);
+		return getClassByNameInternal(className.substring(VECTOR_PREFIX.length + 2, className.length - 1), applicationDomain);
 	}
 	
 	/**
@@ -529,7 +529,6 @@ public class Reflection
 	 */
 	static private function getClassByNameInternal(qualifiedName:String, applicationDomain:ApplicationDomain, throwOnReferenceError:Boolean=true):Class
 	{
-		applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
 		if(qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null")
 		{
 			return null;
@@ -540,13 +539,13 @@ public class Reflection
 		}
 		else if(qualifiedName == UNTYPED_VECTOR_CLASSNAME)
 		{
-			//FIXME: See if there is a way to support wildcard types
-			return UNTYPED_VECTOR_CLASS;
+			return OBJECT_VECTOR_CLASS;
 		}
 		else
 		{
 			try
 			{
+				applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
 				while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
 				{
 					applicationDomain = applicationDomain.parentDomain;
