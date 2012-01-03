@@ -50,7 +50,7 @@ public class Reflection
 	static private const OBJECT_VECTOR_CLASS:Class = getDefinitionByName(VECTOR_PREFIX + ".<Object>") as Class;
 	
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
-	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary();
+	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary(true);
 	///store strongly-typed classes that represent metadata on members
 	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
 	///store all calls to getClass() so the lookup is quicker if the same object is provided a second time
@@ -63,8 +63,7 @@ public class Reflection
 	/**
 	 * Returns a Class of the given object instance or the provided object itself if it is already a Class.
 	 * @param	object An object instance or Class
-	 * @param	applicationDomain	The application domain in which to look for the class, ApplicationDomain.current is used if none is provided
-	 * @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
+	 * @param	applicationDomain	The application domain in which to look for the class. ApplicationDomain.current is used if none is provided.
 	 * @return	The class for the given object, or null if none can be found
 	 */
 	public static function getClass(object:Object, applicationDomain:ApplicationDomain = null):Class
@@ -89,8 +88,8 @@ public class Reflection
 	
 	/**
 	 * Returns a class when provided a string formatted as a fully-qualified class name. If no application domain is provided, ApplicationDomain.currentDomain is used.
-	 * @param	string	A valid qualified class name.
-	 * @param	applicationDomain	The application domain in which to look for the class, ApplicationDomain.current is used if none is provided
+	 * @param	qualifiedName	A valid qualified class name.
+	 * @param	applicationDomain	The application domain in which to look for the class. ApplicationDomain.current is used if none is provided.
 	 * @return	The class, or null if none can be found
 	 */
 	public static function getClassByName(qualifiedName:String, applicationDomain:ApplicationDomain = null):Class
@@ -108,32 +107,31 @@ public class Reflection
 			//FIXME: See if there is a way to support wildcard types
 			return OBJECT_VECTOR_CLASS;
 		}
-		else
+		
+		try
 		{
-			try
+			applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
+			while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
 			{
-				applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
-				while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
-				{
-					applicationDomain = applicationDomain.parentDomain;
-				}
-				return applicationDomain.getDefinition(qualifiedName) as Class;
+				applicationDomain = applicationDomain.parentDomain;
 			}
-			catch(e:ReferenceError)
-			{
-				//Should we be throwing here?
-				//* @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
-				//e.message = "Cannot find definition for " + qualifiedName + " in the provided application domain or its parent domains, "
-					//+ "the class is either not present or not public.";
-				//throw e;
-			}
-			return null;
+			return applicationDomain.getDefinition(qualifiedName) as Class;
 		}
+		catch(e:ReferenceError)
+		{
+			//Should we be throwing here?
+			//* @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
+			//e.message = "Cannot find definition for " + qualifiedName + " in the provided application domain or its parent domains, "
+				//+ "the class is either not present or not public.";
+			//throw e;
+		}
+		return null;
 	}
 	
 	/**
 	 * Returns Class(getDefinitionByName(getQualifiedSuperclassName(obj))) with special handling of Vectors
 	 * @param	object			The object whose super class you want to find
+	 * @param	applicationDomain	The application domain in which to look. ApplicationDomain.current is used if none is provided.
 	 * @return	The super class of the provided object or null if none can be found.
 	 */
 	public static function getSuperClass(object:Object, applicationDomain:ApplicationDomain = null):Class
@@ -152,6 +150,24 @@ public class Reflection
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Return the object type of the provided vector. If the provided value is not a vector
+	 * or is untyped, Object is returned.
+	 * @param	data
+	 * @param	applicationDomain	The application domain in which to look. ApplicationDomain.current is used if none is provided.
+	 * @return	The type of the vector or Object if no type is present in the value provided
+	 */
+	public static function getVectorType(data:Object, applicationDomain:ApplicationDomain = null):Class
+	{
+		var typePrefix:String = flash.utils.getQualifiedClassName(data);
+		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
+		{
+			return Object;
+		}
+		//parse out class between "__AS3__.vec::Vector.<" and ">"
+		return getClassByName(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1), applicationDomain);
 	}
 	
 	/**
@@ -213,6 +229,7 @@ public class Reflection
 	 * To check if a class implements an interface, get the TypeInfo of the class and check implementedInterfaces.
 	 * @param	potentialSubclass
 	 * @param	potentialSuperClass
+	 * @param	applicationDomain	The application domain in which to look for these classes, ApplicationDomain.current is used if none is provided
 	 * @return
 	 */
 	public static function classExtendsClass(potentialSubclass:Class, potentialSuperClass:Class, applicationDomain:ApplicationDomain = null):Boolean
@@ -249,23 +266,6 @@ public class Reflection
 	}
 	
 	/**
-	 * Return the object type of the provided vector. If the provided value is not a vector
-	 * or is untyped, Object is returned.
-	 * @param	data
-	 * @return	The type of the vector or Object if no type is present in the value provided
-	 */
-	public static function getVectorType(data:Object, applicationDomain:ApplicationDomain = null):Class
-	{
-		var typePrefix:String = flash.utils.getQualifiedClassName(data);
-		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
-		{
-			return Object;
-		}
-		//parse out class between "__AS3__.vec::Vector.<" and ">"
-		return getClassByName(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1), applicationDomain);
-	}
-	
-	/**
 	 * Reflects into the given object and returns a TypeInfo object
 	 * @param	obj	The object to reflect
 	 * @return	A TypeInfo that represents the given object's Class information
@@ -274,15 +274,18 @@ public class Reflection
 	{
 		applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
 		var type:Class = getClass(object, applicationDomain);
+		
 		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo, applicationDomain))
 		{
 			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
 		}
+		
 		//var s : int = getTimer();
 		if(!(applicationDomain in s_cachedTypeInfoObjects))
 		{
 			s_cachedTypeInfoObjects[applicationDomain] = new Dictionary();
 		}
+		
 		var types : Dictionary = s_cachedTypeInfoObjects[applicationDomain];
 		var reflectedType:TypeInfo = types[type];
 		if(reflectedType == null)
