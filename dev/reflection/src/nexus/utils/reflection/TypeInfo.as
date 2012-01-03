@@ -187,7 +187,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		var superTypes : Vector.<TypeInfo> = new Vector.<TypeInfo>();
 		for each(var superClass : Class in m_extendedClasses)
 		{
-			superTypes.push(Reflection.getTypeInfo(superClass));
+			superTypes.push(Reflection.getTypeInfo(superClass, m_applicationDomain));
 		}
 		superTypes.push(this);
 		

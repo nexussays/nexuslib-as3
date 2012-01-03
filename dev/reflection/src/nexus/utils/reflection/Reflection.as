@@ -24,12 +24,11 @@
 package nexus.utils.reflection
 {
 
-import avmplus.AVMDescribeType;
 import flash.system.ApplicationDomain;
+import flash.utils.*;
+
 import nexus.nexuslib_internal;
 import nexus.utils.Parse;
-
-import flash.utils.*;
 
 /**
  * ...
@@ -64,7 +63,9 @@ public class Reflection
 	/**
 	 * Returns a Class of the given object instance or the provided object itself if it is already a Class.
 	 * @param	object An object instance or Class
-	 * @return
+	 * @param	applicationDomain	The application domain in which to look for the class, ApplicationDomain.current is used if none is provided
+	 * @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
+	 * @return	The class for the given object, or null if none can be found
 	 */
 	public static function getClass(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
@@ -72,66 +73,82 @@ public class Reflection
 		{
 			return null;
 		}
-		else if(object is Class)
-		{
-			return Class(object);
-		}
-		else
-		{
-			//TODO: do performance testing to see if this caching is actually getting us anything
-			//if(obj in s_cachedObjectClasses)
-			//{
-			//	return Class(s_cachedObjectClasses[obj]);
-			//}
-			//else
-			//{
-				var def:Object= getClassByNameInternal(flash.utils.getQualifiedClassName(object), applicationDomain);
-				//s_cachedObjectClasses[obj] = def;
-				return Class(def);
-			//}
-		}
 		
-		return result;
+		//TODO: do performance testing to see if this caching is actually getting us anything
+		//if(obj in s_cachedObjectClasses)
+		//{
+		//	return Class(s_cachedObjectClasses[obj]);
+		//}
+		//else
+		//{
+			var def:Object= getClassByName(flash.utils.getQualifiedClassName(object), applicationDomain);
+			//s_cachedObjectClasses[obj] = def;
+			return Class(def);
+		//}
 	}
 	
 	/**
-	 * Returns a class when provided a string formatted as a fully-qualified class name or null if on is not
-	 * found in the provided ApplicationDomain
+	 * Returns a class when provided a string formatted as a fully-qualified class name. If no application domain is provided, ApplicationDomain.currentDomain is used.
 	 * @param	string	A valid qualified class name.
 	 * @param	applicationDomain	The application domain in which to look for the class, ApplicationDomain.current is used if none is provided
-	 * @return
+	 * @return	The class, or null if none can be found
 	 */
 	public static function getClassByName(qualifiedName:String, applicationDomain:ApplicationDomain = null):Class
 	{
-		return getClassByNameInternal(qualifiedName, applicationDomain, false);
+		if(qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null")
+		{
+			return null;
+		}
+		else if(qualifiedName == "*" || qualifiedName == "Object")
+		{
+			return Object;
+		}
+		else if(qualifiedName == UNTYPED_VECTOR_CLASSNAME)
+		{
+			//FIXME: See if there is a way to support wildcard types
+			return OBJECT_VECTOR_CLASS;
+		}
+		else
+		{
+			try
+			{
+				applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
+				while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
+				{
+					applicationDomain = applicationDomain.parentDomain;
+				}
+				return applicationDomain.getDefinition(qualifiedName) as Class;
+			}
+			catch(e:ReferenceError)
+			{
+				//Should we be throwing here?
+				//* @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
+				//e.message = "Cannot find definition for " + qualifiedName + " in the provided application domain or its parent domains, "
+					//+ "the class is either not present or not public.";
+				//throw e;
+			}
+			return null;
+		}
 	}
 	
 	/**
 	 * Returns Class(getDefinitionByName(getQualifiedSuperclassName(obj))) with special handling of Vectors
 	 * @param	object			The object whose super class you want to find
-	 * @throws	ReferenceError	If the super class is not present or accessible, for example if the class is internal or not in this ApplicationDomain.
-	 * @return	The super class of the provided object
+	 * @return	The super class of the provided object or null if none can be found.
 	 */
-	public static function getSuperClass(object:Object):Class
+	public static function getSuperClass(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
 		if(object != null)
 		{
 			var superClassName:String = getQualifiedSuperclassName(object);
-			try
+			var parent : Class = getClassByName(superClassName, applicationDomain);
+			if(parent != null)
 			{
-				return getClassByNameInternal(superClassName, null);
+				return parent;
 			}
-			catch(e:ReferenceError)
+			else if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
 			{
-				if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
-				{
-					return OBJECT_VECTOR_CLASS;
-				}
-				else
-				{
-					e.message = "Cannot find definition for " + superClassName + ", the class is either not present or not public.";
-					throw e;
-				}
+				return OBJECT_VECTOR_CLASS;
 			}
 		}
 		return null;
@@ -198,7 +215,7 @@ public class Reflection
 	 * @param	potentialSuperClass
 	 * @return
 	 */
-	public static function classExtendsClass(potentialSubclass:Class, potentialSuperClass:Class):Boolean
+	public static function classExtendsClass(potentialSubclass:Class, potentialSuperClass:Class, applicationDomain:ApplicationDomain = null):Boolean
 	{
 		//if the two classes are the same instance, one does not extend the other
 		if(potentialSubclass == null || potentialSuperClass == null || potentialSubclass == potentialSuperClass)
@@ -214,10 +231,17 @@ public class Reflection
 		
 		while(potentialSubclass != Object)
 		{
-			potentialSubclass = getSuperClass(potentialSubclass);
-			if(potentialSubclass == potentialSuperClass)
+			try
 			{
-				return true;
+				potentialSubclass = getSuperClass(potentialSubclass, applicationDomain);
+				if(potentialSubclass == potentialSuperClass)
+				{
+					return true;
+				}
+			}
+			catch(e:ReferenceError)
+			{
+				return false;
 			}
 		}
 		
@@ -232,13 +256,13 @@ public class Reflection
 	 */
 	public static function getVectorType(data:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		var className:String = flash.utils.getQualifiedClassName(data);
-		if(className == UNTYPED_VECTOR_CLASSNAME)
+		var typePrefix:String = flash.utils.getQualifiedClassName(data);
+		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
 		{
 			return Object;
 		}
 		//parse out class between "__AS3__.vec::Vector.<" and ">"
-		return getClassByNameInternal(className.substring(VECTOR_PREFIX.length + 2, className.length - 1), applicationDomain);
+		return getClassByName(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1), applicationDomain);
 	}
 	
 	/**
@@ -250,7 +274,7 @@ public class Reflection
 	{
 		applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
 		var type:Class = getClass(object, applicationDomain);
-		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo))
+		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo, applicationDomain))
 		{
 			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
 		}
@@ -289,13 +313,13 @@ public class Reflection
 			
 			for each(var extendedClassXml:XML in xml.factory.extendsClass)
 			{
-				reflectedType.extendedClasses.push(getClassByNameInternal(extendedClassXml.@type, applicationDomain));
+				reflectedType.extendedClasses.push(getClassByName(extendedClassXml.@type, applicationDomain));
 			}
 			//trace(reflectedType.extendedClasses);
 			
 			for each(var implementedInterfacesXml:XML in xml.factory.implementsInterface)
 			{
-				reflectedType.implementedInterfaces.push(getClassByNameInternal(implementedInterfacesXml.@type, applicationDomain));
+				reflectedType.implementedInterfaces.push(getClassByName(implementedInterfacesXml.@type, applicationDomain));
 			}
 			//trace(reflectedType.implementedInterfaces);
 			
@@ -331,18 +355,11 @@ public class Reflection
 	 */
 	public static function isPrimitive(value:Object):Boolean
 	{
-		var type:Class = getClass(value, ApplicationDomain.currentDomain);
-		switch(type)
-		{
-			case int:
-			case uint:
-			case Number:
-			case String:
-			case Boolean:
-				return true;
-			default:
-				return false;
-		}
+		return value is int || value == int
+			|| value is uint || value == uint
+			|| value is Number || value == Number
+			|| value is String || value == String
+			|| value is Boolean || value == Boolean;
 	}
 	
 	/**
@@ -368,19 +385,27 @@ public class Reflection
 	 */
 	public static function isAssociativeArray(value:Object):Boolean
 	{
-		return value is Dictionary || value == Dictionary || getClass(value, ApplicationDomain.currentDomain) == Object;
+		if(value is Dictionary || value == Dictionary || value == Object)
+		{
+			return true;
+		}
+		
+		try
+		{
+			return getClass(value, ApplicationDomain.currentDomain) == Object;
+		}
+		catch(e:ReferenceError)
+		{
+		}
+		return false;
 	}
-	
-	//--------------------------------------
-	//	INTERNAL CLASS METHODS
-	//--------------------------------------
 	
 	/**
 	 * Provide a class which extends Metadata, and reflected TypeInfo will parse any matching metadata into
 	 * an instance of the strongly-typed class provided.
 	 * @param	type	A class which must be a subclass of Metadata
 	 */
-	nexuslib_internal static function registerMetadataClass(type:Class):void
+	public static function registerMetadataClass(type:Class):void
 	{
 		if(!classExtendsClass(type, Metadata))
 		{
@@ -395,7 +420,7 @@ public class Reflection
 	 * and instance of the strongly-typed class provided.
 	 * @param	types	A vector of classes, each of which must be a subclass of Metadata
 	 */
-	nexuslib_internal static function registerMetadataClasses(types:Vector.<Class>):void
+	public static function registerMetadataClasses(types:Vector.<Class>):void
 	{
 		use namespace nexuslib_internal;
 		for each(var type:Class in types)
@@ -403,6 +428,10 @@ public class Reflection
 			Reflection.registerMetadataClass(type);
 		}
 	}
+	
+	//--------------------------------------
+	//	INTERNAL CLASS METHODS
+	//--------------------------------------
 	
 	/**
 	 * Returns the Metadata Class registered for the given instance. Faster than a getClass() lookup and
@@ -431,7 +460,7 @@ public class Reflection
 				//add member to typeinfo
 				typeInfo.addMember(member);
 				
-					//trace(member);
+				//trace(member);
 			}
 		}
 	}
@@ -474,15 +503,15 @@ public class Reflection
 	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):FieldInfo
 	{
 		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
-		return new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassByNameInternal(xmlItem.@type, appDomain), null, typeInfo, xmlItem.metadata.length());
+		return new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassByName(xmlItem.@type, appDomain), null, typeInfo, xmlItem.metadata.length());
 	}
 	
 	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo
 	{
-		var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassByNameInternal(xmlItem.@returnType, appDomain), getClassByNameInternal(xmlItem.@declaredBy, appDomain), typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
+		var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassByName(xmlItem.@returnType, appDomain), getClassByName(xmlItem.@declaredBy, appDomain), typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
 		for each(var paramXml:XML in xmlItem.parameter)
 		{
-			method.addMethodParameter(new MethodParameterInfo(getClassByNameInternal(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
+			method.addMethodParameter(new MethodParameterInfo(getClassByName(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
 		}
 		return method;
 	}
@@ -495,7 +524,7 @@ public class Reflection
 			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
 			for each(var paramXml:XML in xmlItem.parameter)
 			{
-				method.addMethodParameter(new MethodParameterInfo(getClassByNameInternal(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
+				method.addMethodParameter(new MethodParameterInfo(getClassByName(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
 			}
 		}
 		else
@@ -512,7 +541,7 @@ public class Reflection
 		if(name != "prototype")
 		{
 			var access:String = String(xmlItem.@access).toLowerCase();
-			property = new PropertyInfo(name, isStatic, getClassByNameInternal(xmlItem.@type, appDomain), getClassByNameInternal(xmlItem.@declaredBy, appDomain), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
+			property = new PropertyInfo(name, isStatic, getClassByName(xmlItem.@type, appDomain), getClassByName(xmlItem.@declaredBy, appDomain), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
 		}
 		else
 		{
@@ -521,46 +550,6 @@ public class Reflection
 			typeInfo.properties.fixed = true;
 		}
 		return property;
-	}
-	
-	/**
-	 * Gets a definition from the provided application domain or its parents. If no application domain
-	 * is provided, ApplicationDomain.currentDomain is used.
-	 */
-	static private function getClassByNameInternal(qualifiedName:String, applicationDomain:ApplicationDomain, throwOnReferenceError:Boolean=true):Class
-	{
-		if(qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null")
-		{
-			return null;
-		}
-		else if(qualifiedName == "*" || qualifiedName == "Object")
-		{
-			return Object;
-		}
-		else if(qualifiedName == UNTYPED_VECTOR_CLASSNAME)
-		{
-			return OBJECT_VECTOR_CLASS;
-		}
-		else
-		{
-			try
-			{
-				applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
-				while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
-				{
-					applicationDomain = applicationDomain.parentDomain;
-				}
-				return applicationDomain.getDefinition(qualifiedName) as Class;
-			}
-			catch(e:ReferenceError)
-			{
-				if(throwOnReferenceError)
-				{
-					throw e;
-				}
-			}
-		}
-		return null;
 	}
 }
 }

@@ -44,7 +44,6 @@ public class XmlSerializer implements ISerializer
 	//--------------------------------------
 	
 	{
-		use namespace nexuslib_internal;
 		Reflection.registerMetadataClass(XmlMetadata);
 	}
 	
