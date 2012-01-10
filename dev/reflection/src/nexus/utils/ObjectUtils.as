@@ -56,7 +56,7 @@ public class ObjectUtils
 		{
 			result = null;
 		}
-		else if(Reflection.isScalar(type))
+		else if(Reflection.isScalar(type) || (type == null && Reflection.isScalar(source)))
 		{
 			result = source;
 		}
@@ -114,7 +114,7 @@ public class ObjectUtils
 			{
 				if(x in source && source[x] !== undefined)
 				{
-					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorType(instance), source[x]);
+					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorType(instance) || Reflection.getClass(source[x]), source[x]);
 				}
 			}
 		}
