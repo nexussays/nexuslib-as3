@@ -56,7 +56,7 @@ public class ObjectUtils
 		{
 			result = null;
 		}
-		else if(Reflection.isPrimitive(type))
+		else if(Reflection.isScalar(type))
 		{
 			result = source;
 		}
@@ -64,7 +64,7 @@ public class ObjectUtils
 		{
 			result = new Date(source);
 		}
-		else if(Reflection.isArray(type) || Reflection.isAssociativeArray(type))
+		else if(Reflection.isArrayType(type) || Reflection.isAssociativeArray(type))
 		{
 			result = new type();
 			assignTypedObjectFromNativeObject(result, source);
@@ -98,11 +98,11 @@ public class ObjectUtils
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
 	{
 		//assigning primitives is pointless without pass by ref
-		if(source == null || Reflection.isPrimitive(instance) || instance == Date)
+		if(source == null || Reflection.isScalar(instance) || instance == Date)
 		{
 			return;
 		}
-		else if(Reflection.isArray(instance))
+		else if(Reflection.isArrayType(instance))
 		{
 			//clear out the existing array if there is anything in it
 			if(instance != null && instance.length > 0)

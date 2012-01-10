@@ -214,7 +214,7 @@ public class JsonSerializer implements ISerializer
 		{
 			result = "null";
 		}
-		else if(Reflection.isPrimitive(sourceObject)
+		else if(Reflection.isScalar(sourceObject)
 			|| sourceObject is Date
 			|| sourceObject is IJsonSerializable
 			|| ("toJSON" in sourceObject && !sourceObject is Dictionary))
@@ -235,7 +235,7 @@ public class JsonSerializer implements ISerializer
 				s_indentation += s_indentationCharacters;
 			}
 			
-			if(Reflection.isArray(sourceObject))
+			if(Reflection.isArrayType(sourceObject))
 			{
 				for(x = 0; x < sourceObject.length; x++)
 				{

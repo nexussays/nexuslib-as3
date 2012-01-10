@@ -104,7 +104,7 @@ public class Reflection
 		}
 		else if(qualifiedName == UNTYPED_VECTOR_CLASSNAME)
 		{
-			//FIXME: See if there is a way to support wildcard types
+			//FIXME: See if there is a way to support wildcard vector types
 			return OBJECT_VECTOR_CLASS;
 		}
 		
@@ -153,15 +153,15 @@ public class Reflection
 	}
 	
 	/**
-	 * Return the object type of the provided vector. If the provided value is not a vector
-	 * or is untyped, Object is returned.
+	 * Return the object type of the provided vector. If the provided vector is untyped, Object is returned. If the
+	 * object is not a vector, null is returned.
 	 * @param	data
 	 * @param	applicationDomain	The application domain in which to look. ApplicationDomain.current is used if none is provided.
 	 * @return	The type of the vector or Object if no type is present in the value provided
 	 */
-	public static function getVectorType(data:Object, applicationDomain:ApplicationDomain = null):Class
+	public static function getVectorType(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		var typePrefix:String = flash.utils.getQualifiedClassName(data);
+		var typePrefix:String = flash.utils.getQualifiedClassName(object);
 		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
 		{
 			return Object;
@@ -356,7 +356,7 @@ public class Reflection
 	 * @param	value	The object to test
 	 * @return	True if the provided object is an instance of a primitive class or is a Class object of a primitive type
 	 */
-	public static function isPrimitive(value:Object):Boolean
+	public static function isScalar(value:Object):Boolean
 	{
 		return value is int || value == int
 			|| value is uint || value == uint
@@ -370,15 +370,19 @@ public class Reflection
 	 * @param	value	The object to test
 	 * @return	True if the provided object is an Array or Vector
 	 */
-	public static function isArray(value:Object):Boolean
+	public static function isArrayType(value:Object):Boolean
 	{
-		if(value is Array || value == Array)
-		{
-			return true;
-		}
-		//if it's not an Array, see if it's a vector
-		var typePrefix:String = flash.utils.getQualifiedClassName(value).substr(0, VECTOR_PREFIX.length);
-		return typePrefix == VECTOR_PREFIX;
+		return value is Array || value == Array || isVector(value);
+	}
+	
+	/**
+	 * Check if the provided object is a Vector
+	 * @param	value	The object to test
+	 * @return	True if the provided object is a Vector
+	 */
+	public static function isVector(value:Object):Boolean
+	{
+		return flash.utils.getQualifiedClassName(value).substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX;
 	}
 	
 	/**

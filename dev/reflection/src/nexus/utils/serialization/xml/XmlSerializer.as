@@ -207,7 +207,7 @@ public class XmlSerializer implements ISerializer
 		{
 			//no-op
 		}
-		else if(sourceObject is XML || Reflection.isPrimitive(sourceObject))
+		else if(sourceObject is XML || Reflection.isScalar(sourceObject))
 		{
 			parent.appendChild(sourceObject);
 		}
@@ -219,7 +219,7 @@ public class XmlSerializer implements ISerializer
 		{
 			parent.appendChild(sourceObject.toXML());
 		}
-		else if(Reflection.isArray(sourceObject))
+		else if(Reflection.isArrayType(sourceObject))
 		{
 			for(x = 0; x < sourceObject.length; x++)
 			{
