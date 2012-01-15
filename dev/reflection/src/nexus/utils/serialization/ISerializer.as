@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 package nexus.utils.serialization
 {
+	import flash.system.ApplicationDomain;
 	
 /**
  * A standardized interface for serializers
@@ -45,7 +46,7 @@ public interface ISerializer
 	 * @param	type	The type of object to deserialize to, or null if a native object should be returned
 	 * @return	An object instance parsed from the serialized data
 	 */
-	function deserialize(serializedData:Object, type:Class=null):Object;
+	function deserialize(serializedData:Object, type:Class = null, applicationDomain:ApplicationDomain = null):Object;
 }
 
 }

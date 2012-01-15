@@ -24,6 +24,7 @@
 package nexus.utils.serialization.json
 {
 
+import flash.system.ApplicationDomain;
 import flash.utils.Dictionary;
 
 import nexus.utils.ObjectUtils;
@@ -154,12 +155,12 @@ public class JsonSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function deserialize(serializedData:Object, type:Class=null):Object
+	public function deserialize(serializedData:Object, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
 		var object : Object = JsonSerializer.deserialize(serializedData as String);
 		if(type != null)
 		{
-			return ObjectUtils.createTypedObjectFromNativeObject(type, object);
+			return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
 		}
 		else
 		{

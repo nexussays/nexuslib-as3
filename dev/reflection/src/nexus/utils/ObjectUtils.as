@@ -24,6 +24,7 @@
 package nexus.utils
 {
 
+import flash.system.ApplicationDomain;
 import nexus.errors.NotImplementedError;
 import nexus.utils.reflection.*;
 
@@ -47,7 +48,7 @@ public class ObjectUtils
 	 * @param	type	The class type of the object to instantiate
 	 * @return	A newly instantiated typed object with fields assigned from the provided data object.
 	 */
-	static public function createTypedObjectFromNativeObject(type:Class, source:Object):Object
+	static public function createTypedObjectFromNativeObject(type:Class, source:Object, applicationDomain:ApplicationDomain=null):Object
 	{
 		var result:Object;
 		
@@ -66,15 +67,16 @@ public class ObjectUtils
 		}
 		else if(Reflection.isArrayType(type) || Reflection.isAssociativeArray(type))
 		{
+			//assume native types won't need application domain support
 			result = new type();
-			assignTypedObjectFromNativeObject(result, source);
+			assignTypedObjectFromNativeObject(result, source, applicationDomain);
 		}
 		else
 		{
 			try
 			{
 				//TODO: Handle constuctors with arguments?
-				result = new type();
+				result = new (Reflection.getClass(type, applicationDomain))();
 			}
 			catch(e:Error)
 			{
@@ -83,7 +85,7 @@ public class ObjectUtils
 			
 			if(result != null)
 			{
-				assignTypedObjectFromNativeObject(result, source);
+				assignTypedObjectFromNativeObject(result, source, applicationDomain);
 			}
 		}
 		return result;
@@ -95,7 +97,7 @@ public class ObjectUtils
 	 * @param	instance	A typed object instance whose members we want to assign from the provided data
 	 * @param	source	A native object which contains the values to assign into the newly created instance.
 	 */
-	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object):void
+	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object, applicationDomain:ApplicationDomain=null):void
 	{
 		//assigning primitives is pointless without pass by ref
 		if(source == null || Reflection.isScalar(instance) || instance == Date)
@@ -114,7 +116,7 @@ public class ObjectUtils
 			{
 				if(x in source && source[x] !== undefined)
 				{
-					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorType(instance) || Reflection.getClass(source[x]), source[x]);
+					instance[x] = createTypedObjectFromNativeObject(Reflection.getVectorType(instance, applicationDomain) || Reflection.getClass(source[x], applicationDomain), source[x], applicationDomain);
 				}
 			}
 		}
@@ -124,13 +126,13 @@ public class ObjectUtils
 			//TODO: Need to clear out existing values, re-instantiate?
 			for(var key:String in source)
 			{
-				//TODO: Does it even make any sense to get the class of the source? Won't it be Objet 99% of the time?
-				instance[key] = createTypedObjectFromNativeObject(Reflection.getClass(source[key]), source[key]);
+				//TODO: Does it even make any sense to get the class of the source?
+				instance[key] = createTypedObjectFromNativeObject(Reflection.getClass(source[key], applicationDomain), source[key], applicationDomain);
 			}
 		}
 		else
 		{
-			var typeInfo:TypeInfo = Reflection.getTypeInfo(instance);
+			var typeInfo:TypeInfo = Reflection.getTypeInfo(instance, applicationDomain);
 			for each(var member:AbstractMemberInfo in typeInfo.allMembers)
 			{
 				if(member is AbstractFieldInfo && !member.isStatic)
@@ -142,7 +144,7 @@ public class ObjectUtils
 						{
 							try
 							{
-								instance[member.name] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name]);
+								instance[member.name] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
 							}
 							catch(e:Error)
 							{
@@ -151,7 +153,7 @@ public class ObjectUtils
 						}
 						else
 						{
-							assignTypedObjectFromNativeObject(instance[member.name], source[member.name]);
+							assignTypedObjectFromNativeObject(instance[member.name], source[member.name], applicationDomain);
 						}
 					}
 				}

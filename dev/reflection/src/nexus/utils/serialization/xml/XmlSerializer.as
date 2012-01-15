@@ -24,6 +24,7 @@
 package nexus.utils.serialization.xml
 {
 
+import flash.system.ApplicationDomain;
 import flash.utils.*;
 import nexus.nexuslib_internal;
 import nexus.utils.ObjectUtils;
@@ -85,12 +86,12 @@ public class XmlSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function deserialize(serializedData:Object, type:Class = null):Object
+	public function deserialize(serializedData:Object, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
 		var object:Object = XmlSerializer.deserialize(serializedData is XML ? serializedData as XML : new XML(serializedData));
 		if(type != null)
 		{
-			return ObjectUtils.createTypedObjectFromNativeObject(type, object);
+			return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
 		}
 		else
 		{
