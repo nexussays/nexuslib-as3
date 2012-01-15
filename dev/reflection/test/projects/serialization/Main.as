@@ -5,8 +5,12 @@ import flash.events.*;
 import flash.events.KeyboardEvent;
 import flash.text.TextField;
 import flash.text.TextFormat;
+import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 import flash.utils.getTimer;
+import foo.pkg.TestClass;
+import nexus.utils.reflection.Reflection;
+import nexus.utils.serialization.amf.AmfSerializer;
 
 import nexus.utils.ObjectUtils;
 import nexus.utils.serialization.json.*;
@@ -28,7 +32,8 @@ public class Main extends Sprite
 		trace("JSON test string is " + stuff.JSON_TEST.length + " characters long");
 		
 		//stage.addEventListener(Event.ENTER_FRAME, jsonTest);
-		stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		//stage.addEventListener(Event.ENTER_FRAME, xmlTest);
+		stage.addEventListener(Event.ENTER_FRAME, amfTest);
 		//stage.addEventListener(Event.ENTER_FRAME, objectTest);
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
@@ -39,6 +44,41 @@ public class Main extends Sprite
 		this.addChild(txt);
 	}
 	
+	private function amfTest(e:Event):void
+	{
+		stage.removeEventListener(Event.ENTER_FRAME, amfTest);
+		
+		var start : int;
+		var end : int;
+		var x : int;
+		var bytes : ByteArray;
+		var foo : TestClass;
+		var str : String;
+		var obj : Object;
+		
+		foo = new TestClass();
+		foo["dynamicField"] = "field value";
+		foo["dynamicField2"] = new Dictionary();
+		foo["dynamicField2"]["bar"] = "value";
+		foo["dynamicField2"]["foo"] = 56.74;
+		
+		/**
+		 * Test deserialization
+		 */
+		
+		/**
+		 * Test serialization
+		 */
+		
+		obj = AmfSerializer.serialize(foo);
+		out(">>>>>>>>>>>>>BYTES START");
+		out(obj.toString());
+		out("<<<<<<<<<<<<<<<BYTES END")
+		obj = AmfSerializer.deserialize(obj);
+		out(Reflection.getQualifiedClassName(obj));
+		out(JsonSerializer.serialize(obj, "\t", 30, false));
+	}
+	
 	private function objectTest(e:Event):void
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, objectTest);
@@ -46,7 +86,6 @@ public class Main extends Sprite
 		var start : int;
 		var end : int;
 		var x : int;
-		var xml : XML;
 		var foo : TestClass2;
 		var str : String;
 		var obj : Object;

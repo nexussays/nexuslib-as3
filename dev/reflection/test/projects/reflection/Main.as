@@ -4,6 +4,7 @@ package
 import avmplus.AVMDescribeType;
 import flash.display.*;
 import flash.events.*;
+import flash.system.ApplicationDomain;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.*;
@@ -27,6 +28,7 @@ public class Main extends Sprite
 	public function Main()
 	{
 		stage.addEventListener(Event.ENTER_FRAME, frame1);
+		//stage.addEventListener(Event.ENTER_FRAME, frame_avm);
 		
 		txt = new TextField();
 		txt.defaultTextFormat = new TextFormat("Consolas", 12, 0);
@@ -43,74 +45,6 @@ public class Main extends Sprite
 		
 		var start : int;
 		var x : int;
-		
-		out("Reflection.getClassByName(\"*\") " + Reflection.getClassByName("*"));
-		out("Reflection.getClassByName(\"Object\") " + Reflection.getClassByName("Object"));
-		out("Reflection.getClassByName(\"void\") " + Reflection.getClassByName("void"));
-		out("Reflection.getClassByName(\"null\") " + Reflection.getClassByName("null"));
-		out("Reflection.getClassByName(\"undefined\") " + Reflection.getClassByName("undefined"));
-		out("Reflection.getClassByName(\"uint\") " + Reflection.getClassByName("uint"));
-		out("Reflection.getClassByName(\"foo\") " + Reflection.getClassByName("foo"));
-		out("Reflection.getClassByName(\"foo.bar.BaseClass\") " + Reflection.getClassByName("foo.bar.BaseClass"));
-		out("Reflection.getClassByName(\"foo.bar::BaseClass\") " + Reflection.getClassByName("foo.bar::BaseClass"));
-		out("Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())) " + Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())));
-		out("Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())) " + Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())));
-		
-		out(Reflection.getVectorType(new Vector.<String>()));
-		out(Reflection.getVectorType(new Vector.<BaseClass>()));
-		out(Reflection.getVectorType(new Vector.<*>()));
-		
-		out(Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())))()));
-		out(Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())))()));
-		
-		//call it once first in case there is any internal caching going on
-		//out(describeType(IFoo).toXMLString());
-		//out(describeType(new TestClass(false)).toXMLString());// .split("\n")[0]);
-		//out(describeType(TestClass).toXMLString());// .split("\n")[0]);
-		
-		//out(AVMDescribeType.HIDE_NSURI_METHODS);
-		//out(AVMDescribeType.INCLUDE_BASES);
-		//out(AVMDescribeType.INCLUDE_INTERFACES);
-		//out(AVMDescribeType.INCLUDE_VARIABLES);
-		//out(AVMDescribeType.INCLUDE_ACCESSORS);
-		//out(AVMDescribeType.INCLUDE_METHODS);
-		//out(AVMDescribeType.INCLUDE_METADATA);
-		//out(AVMDescribeType.INCLUDE_CONSTRUCTOR);
-		//out(AVMDescribeType.INCLUDE_TRAITS);
-		//out(AVMDescribeType.USE_ITRAITS);
-		//out(AVMDescribeType.HIDE_OBJECT);
-		//out(AVMDescribeType.FLASH10_FLAGS);
-		//out(AVMDescribeType.HIDE_NSURI_METHODS |
-			//AVMDescribeType.INCLUDE_BASES |
-			//AVMDescribeType.INCLUDE_INTERFACES |
-			//AVMDescribeType.INCLUDE_VARIABLES |
-			//AVMDescribeType.INCLUDE_ACCESSORS |
-			//AVMDescribeType.INCLUDE_METHODS |
-			//AVMDescribeType.INCLUDE_METADATA |
-			//AVMDescribeType.INCLUDE_CONSTRUCTOR |
-			//AVMDescribeType.INCLUDE_TRAITS |
-			//AVMDescribeType.HIDE_OBJECT);
-		//out(AVMDescribeType.GET_CLASS_INFO);
-		//out(AVMDescribeType.GET_INSTANCE_INFO);
-		
-		//var flags : uint = AVMDescribeType.INCLUDE_INTERFACES |
-			//AVMDescribeType.INCLUDE_VARIABLES |
-			//AVMDescribeType.INCLUDE_ACCESSORS |
-			//AVMDescribeType.INCLUDE_METHODS |
-			//AVMDescribeType.INCLUDE_METADATA |
-			//AVMDescribeType.INCLUDE_TRAITS |
-			//AVMDescribeType.HIDE_OBJECT;
-		//out(JsonSerializer.serialize(AVMDescribeType.getClassJson(TestClass), "  ", 100));
-		
-		//flags ^= AVMDescribeType.INCLUDE_BASES;
-		//flags ^= AVMDescribeType.INCLUDE_CONSTRUCTOR;
-		//out(flags, "\n", JsonSerializer.serialize(AVMDescribeType.json(TestClass, flags), "  ", 100));
-		
-		//flags |= AVMDescribeType.INCLUDE_CONSTRUCTOR | AVMDescribeType.INCLUDE_BASES | AVMDescribeType.USE_ITRAITS;
-		//out(JsonSerializer.serialize(AVMDescribeType.getInstanceJson(TestClass), "  ", 100));
-		
-		//out(AVMDescribeType.xml(BaseClass, flags).toXMLString());
-		//out(describeType(BaseClass).toXMLString());
 		
 		start = getTimer();
 		describeType(TestClass);
@@ -148,51 +82,60 @@ public class Main extends Sprite
 		out(type);
 		var bar : Object = new type();
 		//*/
+	}
+	
+	private function frame_avm(e:Event):void
+	{
+		stage.removeEventListener(Event.ENTER_FRAME, frame_avm);
 		
-		out(Reflection.getQualifiedClassName(new Vector.<*>()));
-		out(Reflection.getVectorType(new Vector.<*>()));
-		out(Reflection.getQualifiedClassName(new Vector.<TestClass>()));
-		out(Reflection.getVectorType(new Vector.<TestClass>()));
+		//call it once first in case there is any internal caching going on
+		out(describeType(IFoo).toXMLString());
+		out(describeType(new TestClass(false)).toXMLString());// .split("\n")[0]);
+		out(describeType(TestClass).toXMLString());// .split("\n")[0]);
 		
-		/*
-		out("testClass.type", typeInfo.type);
-		out("testClass.isDynamic", typeInfo.isDynamic);
-		out("testClass.implementedInterfaces", typeInfo.implementedInterfaces);
-		out("testClass.methods", typeInfo.methods);
-		out("testClass.properties", typeInfo.properties);
-		out("testClass.fields", typeInfo.fields);
-		out("testClass.name", typeInfo.name);
-		out(typeInfo.extendedClasses.indexOf(Object));
-		out(typeInfo.extendedClasses.indexOf(Sprite));
-		out(typeInfo.extendedClasses.indexOf(BaseClass));
-		//*/
+		out(AVMDescribeType.HIDE_NSURI_METHODS);
+		out(AVMDescribeType.INCLUDE_BASES);
+		out(AVMDescribeType.INCLUDE_INTERFACES);
+		out(AVMDescribeType.INCLUDE_VARIABLES);
+		out(AVMDescribeType.INCLUDE_ACCESSORS);
+		out(AVMDescribeType.INCLUDE_METHODS);
+		out(AVMDescribeType.INCLUDE_METADATA);
+		out(AVMDescribeType.INCLUDE_CONSTRUCTOR);
+		out(AVMDescribeType.INCLUDE_TRAITS);
+		out(AVMDescribeType.USE_ITRAITS);
+		out(AVMDescribeType.HIDE_OBJECT);
+		out(AVMDescribeType.FLASH10_FLAGS);
+		out(AVMDescribeType.HIDE_NSURI_METHODS |
+			AVMDescribeType.INCLUDE_BASES |
+			AVMDescribeType.INCLUDE_INTERFACES |
+			AVMDescribeType.INCLUDE_VARIABLES |
+			AVMDescribeType.INCLUDE_ACCESSORS |
+			AVMDescribeType.INCLUDE_METHODS |
+			AVMDescribeType.INCLUDE_METADATA |
+			AVMDescribeType.INCLUDE_CONSTRUCTOR |
+			AVMDescribeType.INCLUDE_TRAITS |
+			AVMDescribeType.HIDE_OBJECT);
+		out(AVMDescribeType.GET_CLASS_INFO);
+		out(AVMDescribeType.GET_INSTANCE_INFO);
 		
-		/*
-		out(Reflection.getClass(testClass));
-		out(Reflection.getClass(TypeInfo));
-		out(Reflection.getClass("dna.utils.reflection::TypeInfo"));
-		out(Reflection.getClass("TypeInfo"));
-		out(Reflection.getSuperClass(testClass));
-		out(Reflection.getSuperClass(TypeInfo));
-		out(Reflection.getSuperClass("dna.utils.reflection::TypeInfo"));
-		out(Reflection.getSuperClass("TypeInfo"));
-		//*/
+		var flags : uint = AVMDescribeType.INCLUDE_INTERFACES |
+			AVMDescribeType.INCLUDE_VARIABLES |
+			AVMDescribeType.INCLUDE_ACCESSORS |
+			AVMDescribeType.INCLUDE_METHODS |
+			AVMDescribeType.INCLUDE_METADATA |
+			AVMDescribeType.INCLUDE_TRAITS |
+			AVMDescribeType.HIDE_OBJECT;
+		out(JsonSerializer.serialize(AVMDescribeType.getClassJson(TestClass), "  ", 100));
 		
-		/*
-		out(Reflection.getUnqualifiedClassName(testClass) + "|");
-		out(Reflection.getUnqualifiedClassName(TestClass) + "|");
-		out(Reflection.getUnqualifiedClassName("[class TestClass]") + "|");
-		out(Reflection.getUnqualifiedClassName("foo::TestClass") + "|");
-		out(Reflection.getUnqualifiedClassName("TestClass") + "|");
-		//*/
+		flags ^= AVMDescribeType.INCLUDE_BASES;
+		flags ^= AVMDescribeType.INCLUDE_CONSTRUCTOR;
+		out(flags, "\n", JsonSerializer.serialize(AVMDescribeType.json(TestClass, flags), "  ", 100));
 		
-		/*
-		out(Reflection.isPrimitive(TypeInfo));
-		out(Reflection.isPrimitive(int));
-		out(Reflection.isPrimitive(uint));
-		out(Reflection.isPrimitive(String));
-		out(Reflection.isPrimitive(Number));
-		//*/
+		flags |= AVMDescribeType.INCLUDE_CONSTRUCTOR | AVMDescribeType.INCLUDE_BASES | AVMDescribeType.USE_ITRAITS;
+		out(JsonSerializer.serialize(AVMDescribeType.getInstanceJson(TestClass), "  ", 100));
+		
+		out(AVMDescribeType.xml(BaseClass, flags).toXMLString());
+		out(describeType(BaseClass).toXMLString());
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void
@@ -204,7 +147,7 @@ public class Main extends Sprite
 	{
 		params.map(output);
 		txt.appendText("\n");
-		trace.apply(null, params);
+		//trace.apply(null, params);
 	}
 	
 	private function output(d:Object, ...params):void
