@@ -41,20 +41,23 @@ public class Reflection
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
+	//TODO: Probably need to do some checking here to make sure this is the domain we want
+	static public const SYSTEM_DOMAIN : ApplicationDomain = ApplicationDomain.currentDomain;
+	
 	//call flash.utils.getQualifiedClassName(Vector) instead of hardcoding the string just in case Adobe ever changes the class or package
 	///__AS3__.vec::Vector
 	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
 	///__AS3__.vec::Vector.<*>
-	static private const UNTYPED_VECTOR_CLASSNAME:String = VECTOR_PREFIX + ".<*>";
+	static private const UNTYPEDVECTOR_CLASSNAME_QUALIFIED:String = flash.utils.getQualifiedClassName(Vector.<*>);
+	///Vector.<*>
+	static private const UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED:String = "Vector.<*>";
 	///class typed as __AS3__.vec::Vector.<Object>
-	static private const OBJECT_VECTOR_CLASS:Class = getDefinitionByName(VECTOR_PREFIX + ".<Object>") as Class;
+	static private const OBJECTVECTOR_CLASS:Class = getDefinitionByName(flash.utils.getQualifiedClassName(Vector.<Object>)) as Class;
 	
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
-	static private const s_cachedTypeInfoObjects:Dictionary = new Dictionary(true);
+	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
 	///store strongly-typed classes that represent metadata on members
-	static private const s_registeredMetadataTypes:Dictionary = new Dictionary();
-	///store all calls to getClass() so the lookup is quicker if the same object is provided a second time
-	//static private const s_cachedObjectClasses:Dictionary = new Dictionary(true);
+	static private const REGISTERED_METADATA:Dictionary = new Dictionary();
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -68,33 +71,19 @@ public class Reflection
 	 */
 	public static function getClass(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		if(object == null)
-		{
-			return null;
-		}
-		
-		//TODO: do performance testing to see if this caching is actually getting us anything
-		//if(obj in s_cachedObjectClasses)
-		//{
-		//	return Class(s_cachedObjectClasses[obj]);
-		//}
-		//else
-		//{
-			var def:Object= getClassByName(flash.utils.getQualifiedClassName(object), applicationDomain);
-			//s_cachedObjectClasses[obj] = def;
-			return Class(def);
-		//}
+		return object == null ? null : getClassByName(flash.utils.getQualifiedClassName(object), applicationDomain);
 	}
 	
 	/**
-	 * Returns a class when provided a string formatted as a fully-qualified class name. If no application domain is provided, ApplicationDomain.currentDomain is used.
+	 * Returns a class when provided a string formatted as a fully-qualified class name. If no application domain is provided, the system domain is used.
 	 * @param	qualifiedName	A valid qualified class name.
 	 * @param	applicationDomain	The application domain in which to look for the class. ApplicationDomain.current is used if none is provided.
 	 * @return	The class, or null if none can be found
+	 * @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or the system ApplicationDomain if none is provided)
 	 */
 	public static function getClassByName(qualifiedName:String, applicationDomain:ApplicationDomain = null):Class
 	{
-		if(qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null")
+		if(qualifiedName == null || qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null")
 		{
 			return null;
 		}
@@ -102,16 +91,18 @@ public class Reflection
 		{
 			return Object;
 		}
-		else if(qualifiedName == UNTYPED_VECTOR_CLASSNAME)
+		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED)
 		{
-			//FIXME: See if there is a way to support wildcard vector types
-			return OBJECT_VECTOR_CLASS;
+			//TODO: See if there is a way to support wildcard vector types
+			return OBJECTVECTOR_CLASS;
 		}
 		
 		try
 		{
-			applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
-			while(!applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
+			applicationDomain = applicationDomain || SYSTEM_DOMAIN;
+			//Walk up parent app domains while the class is still defined. If we get it from a child app domain there may be
+			//other classes that it references that we won't have
+			while(applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
 			{
 				applicationDomain = applicationDomain.parentDomain;
 			}
@@ -119,11 +110,9 @@ public class Reflection
 		}
 		catch(e:ReferenceError)
 		{
-			//Should we be throwing here?
-			//* @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or ApplicationDomain.current if none is provided)
-			//e.message = "Cannot find definition for " + qualifiedName + " in the provided application domain or its parent domains, "
-				//+ "the class is either not present or not public.";
-			//throw e;
+			e.message = "Cannot find definition for " + qualifiedName + ", the class is either not present in the "
+				+ "application domain or its parent domains or is not public.";
+			throw e;
 		}
 		return null;
 	}
@@ -146,7 +135,7 @@ public class Reflection
 			}
 			else if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
 			{
-				return OBJECT_VECTOR_CLASS;
+				return OBJECTVECTOR_CLASS;
 			}
 		}
 		return null;
@@ -161,13 +150,17 @@ public class Reflection
 	 */
 	public static function getVectorType(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		var typePrefix:String = flash.utils.getQualifiedClassName(object);
-		if(typePrefix == UNTYPED_VECTOR_CLASSNAME)
+		var typeName:String = flash.utils.getQualifiedClassName(object);
+		if(typeName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED)
 		{
 			return Object;
 		}
-		//parse out class between "__AS3__.vec::Vector.<" and ">"
-		return getClassByName(typePrefix.substring(VECTOR_PREFIX.length + 2, typePrefix.length - 1), applicationDomain);
+		if(typeName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
+		{
+			//parse out class between "__AS3__.vec::Vector.<" and ">"
+			return getClassByName(typeName.substring(VECTOR_PREFIX.length + 2, typeName.length - 1), applicationDomain);
+		}
+		return null;
 	}
 	
 	/**
@@ -272,7 +265,7 @@ public class Reflection
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
-		applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
+		applicationDomain = applicationDomain || SYSTEM_DOMAIN;
 		var type:Class = getClass(object, applicationDomain);
 		
 		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo, applicationDomain))
@@ -281,12 +274,12 @@ public class Reflection
 		}
 		
 		//var s : int = getTimer();
-		if(!(applicationDomain in s_cachedTypeInfoObjects))
+		if(!(applicationDomain in CACHED_TYPEINFO))
 		{
-			s_cachedTypeInfoObjects[applicationDomain] = new Dictionary();
+			CACHED_TYPEINFO[applicationDomain] = new Dictionary();
 		}
 		
-		var types : Dictionary = s_cachedTypeInfoObjects[applicationDomain];
+		var types : Dictionary = CACHED_TYPEINFO[applicationDomain];
 		var reflectedType:TypeInfo = types[type];
 		if(reflectedType == null)
 		{
@@ -344,7 +337,7 @@ public class Reflection
 				reflectedType.setIsDynamic(Parse.boolean(describeType(object).@isDynamic, false));
 			}
 			
-			s_cachedTypeInfoObjects[applicationDomain][type] = reflectedType;
+			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 			
 			xml = null;
 		}
@@ -399,7 +392,7 @@ public class Reflection
 		
 		try
 		{
-			return getClass(value, ApplicationDomain.currentDomain) == Object;
+			return getClass(value, SYSTEM_DOMAIN) == Object;
 		}
 		catch(e:ReferenceError)
 		{
@@ -419,7 +412,7 @@ public class Reflection
 			throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
 		}
 		//TODO: store by class so similarly named metadata in different packages won't conflict
-		s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(type)] = type;
+		REGISTERED_METADATA[Reflection.getUnqualifiedClassName(type)] = type;
 	}
 	
 	/**
@@ -448,7 +441,7 @@ public class Reflection
 	 */
 	nexuslib_internal static function getMetadataClass(instance:Metadata):Class
 	{
-		return s_registeredMetadataTypes[Reflection.getUnqualifiedClassName(instance)];
+		return REGISTERED_METADATA[Reflection.getUnqualifiedClassName(instance)];
 	}
 	
 	//--------------------------------------
@@ -493,12 +486,12 @@ public class Reflection
 				member.addMetadataInfo(metadataInfo);
 				
 				//see if there is a registered strongly-typed class for this metadata
-				for(var registeredMetadataName:String in s_registeredMetadataTypes)
+				for(var registeredMetadataName:String in REGISTERED_METADATA)
 				{
 					//implementers of metadata should omit the "Metadata" suffix, it is added here
 					if(metadataInfo.name + "Metadata" == registeredMetadataName)
 					{
-						var metadata:Metadata = new s_registeredMetadataTypes[registeredMetadataName](metadataInfo);
+						var metadata:Metadata = new REGISTERED_METADATA[registeredMetadataName](metadataInfo);
 						member.addMetadataInstance(metadata, metadataInfo.name);
 						break;
 					}
