@@ -48,7 +48,7 @@ public class AmfSerializer implements ISerializer
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_serializeType : Boolean;
+	private var m_isTypeSerialized : Boolean;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -56,7 +56,7 @@ public class AmfSerializer implements ISerializer
 	
 	public function AmfSerializer(serializeType:Boolean=true)
 	{
-		m_serializeType = serializeType;
+		m_isTypeSerialized = serializeType;
 	}
 	
 	//--------------------------------------
@@ -66,10 +66,10 @@ public class AmfSerializer implements ISerializer
 	/**
 	 * If true, the object is serialized with its qualified type information. If false, it is serialized as a native Object
 	 */
-	public function get serializeType():Boolean { return m_serializeType; }
-	public function set serializeType(value:Boolean):void
+	public function get isTypeSerialized():Boolean { return m_isTypeSerialized; }
+	public function set isTypeSerialized(value:Boolean):void
 	{
-		m_serializeType = value;
+		m_isTypeSerialized = value;
 	}
 	
 	//--------------------------------------
@@ -81,7 +81,7 @@ public class AmfSerializer implements ISerializer
 	 */
 	public function serialize(sourceObject:Object):Object
 	{
-		return AmfSerializer.serialize(sourceObject, m_serializeType);
+		return AmfSerializer.serialize(sourceObject, m_isTypeSerialized);
 	}
 	
 	/**
@@ -89,46 +89,47 @@ public class AmfSerializer implements ISerializer
 	 */
 	public function deserialize(serializedData:Object, type:Class=null, applicationDomain:ApplicationDomain = null):Object
 	{
-		var object : Object = AmfSerializer.deserialize(serializedData as String);
-		if(type != null && !(object is type))
-		{
-			return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
-		}
-		else
-		{
-			return object;
-		}
+		return AmfSerializer.deserialize(serializedData, type, applicationDomain);
 	}
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	static public function serialize(sourceObject:Object, serializeType:Boolean=true, applicationDomain:ApplicationDomain = null):Object
+	static public function serialize(sourceObject:Object, typeIsSerialized:Boolean=true, applicationDomain:ApplicationDomain = null):Object
 	{
+		if(typeIsSerialized)
+		{
+			registerType(sourceObject);
+		}
+		
 		var bytes : ByteArray = new ByteArray();
 		bytes.objectEncoding = ObjectEncoding.AMF3;
-		if(serializeType && !Reflection.isScalar(sourceObject))
-		{
-			var typeName : String = Reflection.getQualifiedClassName(sourceObject);
-			if(typeName != "Object" && typeName != "Array")
-			{
-				var type : Class = Reflection.getClassByName(typeName, applicationDomain);
-				registerClassAlias(typeName, type);
-			}
-		}
 		bytes.writeObject(sourceObject);
 		bytes.position = 0;
 		return bytes;
 	}
 	
-	static public function deserialize(sourceObject:Object):Object
+	static public function deserialize(serializedData:Object, type:Class=null, applicationDomain:ApplicationDomain = null):Object
 	{
-		if(sourceObject is ByteArray)
+		if(serializedData is ByteArray)
 		{
-			var bytes : ByteArray = sourceObject as ByteArray;
+			var bytes : ByteArray = serializedData as ByteArray;
 			bytes.position = 0;
-			return bytes.readObject();
+			var object : Object = bytes.readObject();
+			if(type != null && !(object is type))
+			{
+				//object is not of the correct type, try to register it and read it out again
+				registerType(type, applicationDomain);
+				bytes.position = 0;
+				object = bytes.readObject();
+				//still no? then parse it ourselves
+				if(!(object is type))
+				{
+					return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
+				}
+			}
+			return object;
 		}
 		else
 		{
@@ -137,8 +138,21 @@ public class AmfSerializer implements ISerializer
 	}
 	
 	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
+	//	PRIVATE CLASS METHODS
 	//--------------------------------------
+	
+	static private function registerType(sourceObject:Object, applicationDomain:ApplicationDomain = null):void
+	{
+		if(!Reflection.isScalar(sourceObject))
+		{
+			var typeName : String = Reflection.getQualifiedClassName(sourceObject);
+			if(typeName != "Object" && typeName != "Array")
+			{
+				var type : Class = Reflection.getClassByName(typeName, applicationDomain);
+				registerClassAlias(typeName, type);
+			}
+		}
+	}
 }
 
 }

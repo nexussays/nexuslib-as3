@@ -71,6 +71,13 @@ public class ReflectionCoreTest extends TestCase
 		m_baseTypeInfo = Reflection.getTypeInfo(BaseClass);
 	}
 	
+	override protected function tearDown():void
+	{
+		m_testTypeInfo = null;
+		m_baseTypeInfo = null;
+		m_test = null;
+	}
+	
 	//--------------------------------------
 	//	TESTS
 	//--------------------------------------
