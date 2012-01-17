@@ -1,8 +1,8 @@
-package test_classes.foo.bar
+package mock.foo.bar
 {
 
-import test_classes.foo.IFoo;
-import test_classes.testing_namespace;
+import mock.foo.IFoo;
+import mock.testing_namespace;
 
 [classMetadata(param="value", param2="value2")]
 public dynamic class TestClass extends BaseClass implements IFoo

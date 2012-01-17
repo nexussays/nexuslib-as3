@@ -1,4 +1,4 @@
-package test_classes.foo
+package mock.foo
 {
 
 public interface IFoo

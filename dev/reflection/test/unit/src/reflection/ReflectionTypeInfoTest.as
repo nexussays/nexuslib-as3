@@ -31,9 +31,9 @@ import flash.utils.*;
 
 import nexus.utils.reflection.*;
 
-import test_classes.foo.bar.BaseClass;
-import test_classes.foo.bar.TestClass;
-import test_classes.foo.IFoo;
+import mock.foo.bar.BaseClass;
+import mock.foo.bar.TestClass;
+import mock.foo.IFoo;
 
 /**
  * ...
@@ -92,8 +92,8 @@ public class ReflectionTypeInfoTest extends TestCase
 	
 	public function test_name():void
 	{
-		assertEquals("test_classes.foo.bar::TestClass", m_testTypeInfo.name);
-		assertEquals("test_classes.foo.bar::BaseClass", m_baseTypeInfo.name);
+		assertEquals("mock.foo.bar::TestClass", m_testTypeInfo.name);
+		assertEquals("mock.foo.bar::BaseClass", m_baseTypeInfo.name);
 	}
 	
 	public function test_extendedClasses():void

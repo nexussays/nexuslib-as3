@@ -1,4 +1,4 @@
-package test_classes.foo.bar
+package mock.foo.bar
 {
 
 public class BaseClass

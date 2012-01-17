@@ -32,9 +32,9 @@ import flash.utils.Dictionary;
 
 import nexus.utils.reflection.*;
 
-import test_classes.foo.bar.BaseClass;
-import test_classes.foo.bar.TestClass;
-import test_classes.foo.IFoo;
+import mock.foo.bar.BaseClass;
+import mock.foo.bar.TestClass;
+import mock.foo.IFoo;
 
 /**
  * Test the utility methods in Reflection, aside from getTypeInfo()
@@ -85,23 +85,23 @@ public class ReflectionCoreTest extends TestCase
 	
 	public function test_getClassByNameWithApplicationDomain():void
 	{
-		assertSame(BaseClass,		Reflection.getClassByName("test_classes.foo.bar::BaseClass", Reflection.SYSTEM_DOMAIN));
-		assertSame(BaseClass,		Reflection.getClassByName("test_classes.foo.bar::BaseClass", ApplicationDomain.currentDomain));
+		assertSame(BaseClass,		Reflection.getClassByName("mock.foo.bar::BaseClass", Reflection.SYSTEM_DOMAIN));
+		assertSame(BaseClass,		Reflection.getClassByName("mock.foo.bar::BaseClass", ApplicationDomain.currentDomain));
 		
 		//FIXME: I feel like this should work. Is it my bug or do I misunderstand something about app domains?
-		//assertSame(TestClass,		Reflection.getClassByName("test_classes.foo.bar::TestClass", new ApplicationDomain(ApplicationDomain.currentDomain)));
+		//assertSame(TestClass,		Reflection.getClassByName("mock.foo.bar::TestClass", new ApplicationDomain(ApplicationDomain.currentDomain)));
 	}
 	
 	public function test_getClassByName():void
 	{
-		assertSame(BaseClass,	Reflection.getClassByName("test_classes.foo.bar.BaseClass"));
-		assertSame(BaseClass,	Reflection.getClassByName("test_classes.foo.bar::BaseClass"));
-		assertSame(TestClass,	Reflection.getClassByName("test_classes.foo.bar::TestClass"));
+		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar.BaseClass"));
+		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar::BaseClass"));
+		assertSame(TestClass,	Reflection.getClassByName("mock.foo.bar::TestClass"));
 		
 		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("foo") } );
 		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("TestClass") } );
 		
-		assertSame(IFoo,		Reflection.getClassByName("test_classes.foo::IFoo"));
+		assertSame(IFoo,		Reflection.getClassByName("mock.foo::IFoo"));
 		
 		assertSame(Object,	Reflection.getClassByName("*"));
 		assertSame(Object,	Reflection.getClassByName("Object"));
@@ -130,7 +130,7 @@ public class ReflectionCoreTest extends TestCase
 		assertSame(BaseClass,	Reflection.getSuperClass(m_test));
 		assertSame(BaseClass,	Reflection.getSuperClass(TestClass));
 		assertSame(Object,		Reflection.getSuperClass(BaseClass));
-		assertSame(Object,		Reflection.getSuperClass("test_classes.foo.bar::TestClass"));
+		assertSame(Object,		Reflection.getSuperClass("mock.foo.bar::TestClass"));
 		assertSame(Object,		Reflection.getSuperClass("TestClass"));
 	}
 	
@@ -148,9 +148,9 @@ public class ReflectionCoreTest extends TestCase
 	
 	public function test_getQualifiedClassName():void
 	{
-		assertEquals("test_classes.foo.bar::BaseClass",	Reflection.getQualifiedClassName(BaseClass));
-		assertEquals("test_classes.foo.bar::BaseClass",	Reflection.getQualifiedClassName(new BaseClass()));
-		assertEquals("test_classes.foo::IFoo",			Reflection.getQualifiedClassName(IFoo));
+		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(BaseClass));
+		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(new BaseClass()));
+		assertEquals("mock.foo::IFoo",			Reflection.getQualifiedClassName(IFoo));
 		
 		assertEquals("__AS3__.vec::Vector.<Object>",	Reflection.getQualifiedClassName(Vector.<Object>));
 		assertEquals("__AS3__.vec::Vector.<Object>",	Reflection.getQualifiedClassName(new Vector.<Object>()));
@@ -184,9 +184,9 @@ public class ReflectionCoreTest extends TestCase
 		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName(TestClass));
 		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("[class TestClass]"));
 		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("foo::TestClass"));
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("test_classes.foo.bar::TestClass"));
+		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("mock.foo.bar::TestClass"));
 		//TODO: Support this case?
-		//assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("test_classes.foo.bar.TestClass"));
+		//assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("mock.foo.bar.TestClass"));
 		assertEquals("String",			Reflection.getUnqualifiedClassName("TestClass"));
 		assertEquals("Vector.<String>", Reflection.getUnqualifiedClassName("__AS3__.vec::Vector.<String>"));
 	}
