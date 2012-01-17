@@ -20,12 +20,12 @@ import nexus.utils.reflection.*;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/28/2011 8:46 PM
  */
-public class Main extends Sprite
+public class ReflectionMain extends Sprite
 {
 	static public const COUNT:int = 5678;
 	
 	private var txt:TextField;
-	public function Main()
+	public function ReflectionMain()
 	{
 		stage.addEventListener(Event.ENTER_FRAME, frame1);
 		//stage.addEventListener(Event.ENTER_FRAME, frame_avm);
@@ -71,16 +71,6 @@ public class Main extends Sprite
 			Reflection.getTypeInfo(TestClass);
 		}
 		out("took " + (getTimer() - start) + "ms for " + COUNT + ", " + ((getTimer() - start) / COUNT) + "ms each");
-		//*/
-		
-		var testClass : TestClass = new TestClass(false);
-		var typeInfo : TypeInfo = Reflection.getTypeInfo(testClass);
-		
-		/*
-		typeInfo.getMethodByName("publicFun").invoke(testClass, testClass, 5);
-		var type : Class = Reflection.getClass(typeInfo.getMethodByName("publicFinalFun").parameters[0].type);
-		out(type);
-		var bar : Object = new type();
 		//*/
 	}
 	

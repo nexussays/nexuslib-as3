@@ -37,7 +37,8 @@ public class ReflectionTests extends TestSuite
 {
 	public function ReflectionTests()
 	{
-		addTest(new ReflectionTest());
+		addTest(new ReflectionCoreTest());
+		addTest(new ReflectionTypeInfoTest());
 	}
 }
 

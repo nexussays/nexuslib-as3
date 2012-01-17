@@ -22,12 +22,12 @@ import test.*;
  * ...
  * @author Malachi Griffie
  */
-public class Main extends Sprite
+public class SerializationMain extends Sprite
 {
 	static public const COUNT:int = 5;
 	
 	private var txt:TextField;
-	public function Main()
+	public function SerializationMain()
 	{
 		trace("JSON test string is " + stuff.JSON_TEST.length + " characters long");
 		

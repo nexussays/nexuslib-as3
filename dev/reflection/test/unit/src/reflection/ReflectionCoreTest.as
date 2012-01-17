@@ -37,11 +37,11 @@ import test_classes.foo.bar.TestClass;
 import test_classes.foo.IFoo;
 
 /**
- * ...
+ * Test the utility methods in Reflection, aside from getTypeInfo()
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/14/2012 11:47 PM
  */
-public class ReflectionTest extends TestCase
+public class ReflectionCoreTest extends TestCase
 {
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -55,7 +55,7 @@ public class ReflectionTest extends TestCase
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function ReflectionTest(testMethod:String = null)
+	public function ReflectionCoreTest(testMethod:String = null)
 	{
 		super(testMethod);
 	}
@@ -212,34 +212,6 @@ public class ReflectionTest extends TestCase
 		
 		assertFalse(Reflection.isScalar(TypeInfo));
 		assertFalse(Reflection.isScalar(m_test));
-	}
-	
-	public function test_getTypeInfo1():void
-	{
-		assertSame(TestClass, m_testTypeInfo.type);
-		
-		assertEquals(true, m_testTypeInfo.isDynamic);
-		assertEquals("test_classes.foo.bar::TestClass", m_testTypeInfo.name);
-		
-		assertEquals(1, m_testTypeInfo.extendedClasses.indexOf(Object));
-		assertEquals(0, m_testTypeInfo.extendedClasses.indexOf(BaseClass));
-		assertEquals( -1, m_testTypeInfo.extendedClasses.indexOf(Sprite));
-		
-		assertEquals(0, m_testTypeInfo.implementedInterfaces.indexOf(IFoo));
-	}
-	
-	public function test_getTypeInfo2():void
-	{
-		assertSame(BaseClass, m_baseTypeInfo.type);
-		
-		assertEquals(false, m_baseTypeInfo.isDynamic);
-		assertEquals("test_classes.foo.bar::BaseClass", m_baseTypeInfo.name);
-		
-		assertEquals(0, m_baseTypeInfo.extendedClasses.indexOf(Object));
-		assertEquals( -1, m_baseTypeInfo.extendedClasses.indexOf(BaseClass));
-		assertEquals( -1, m_baseTypeInfo.extendedClasses.indexOf(Sprite));
-		
-		assertEquals(-1, m_baseTypeInfo.implementedInterfaces.indexOf(IFoo));
 	}
 }
 
