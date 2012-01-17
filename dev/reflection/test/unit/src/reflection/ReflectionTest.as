@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is PROJECT_NAME.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -25,14 +25,12 @@ package reflection
 {
 
 import asunit.framework.*;
+
 import flash.display.Sprite;
-import nexus.utils.reflection.AbstractMetadataRecipient;
-import nexus.utils.reflection.TypeInfo;
-
 import flash.system.ApplicationDomain;
-
 import flash.utils.Dictionary;
-import nexus.utils.reflection.Reflection;
+
+import nexus.utils.reflection.*;
 
 import test_classes.foo.bar.BaseClass;
 import test_classes.foo.bar.TestClass;

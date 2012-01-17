@@ -15,7 +15,9 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <!-- example: <class path="..." /> -->
+    <class path="dev\reflection\src" />
+    <class path="dev\mercury\src" />
+    <class path="dev\core\src" />
   </classpaths>
   <!-- Build options -->
   <build>
