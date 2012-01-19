@@ -100,9 +100,8 @@ public class Reflection
 		try
 		{
 			applicationDomain = applicationDomain || SYSTEM_DOMAIN;
-			//Walk up parent app domains while the class is still defined. If we get it from a child app domain there may be
-			//other classes that it references that we won't have
-			while(applicationDomain.hasDefinition(qualifiedName) && applicationDomain.parentDomain != null)
+			//walk up parent app domains while the class is still defined to get the top-most reference
+			while(applicationDomain.parentDomain != null && applicationDomain.parentDomain.hasDefinition(qualifiedName))
 			{
 				applicationDomain = applicationDomain.parentDomain;
 			}
@@ -285,8 +284,12 @@ public class Reflection
 		{
 			var xml:XML = describeType(type);
 			
-			reflectedType = new TypeInfo(xml.@name, applicationDomain, type, Parse.boolean(xml.@isFinal, false), xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(), xml.accessor.length() + xml.factory.accessor.length(), xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
-			addMetadata(reflectedType, xml);
+			reflectedType = new TypeInfo(xml.@name, applicationDomain, type, Parse.boolean(xml.@isFinal, false),
+				xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(),
+				xml.accessor.length() + xml.factory.accessor.length(),
+				xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
+				
+			addMetadata(reflectedType, xml.factory[0]);
 			
 			//add constructor
 			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, applicationDomain, true, false));
