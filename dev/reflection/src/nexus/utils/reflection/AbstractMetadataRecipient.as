@@ -42,8 +42,9 @@ public class AbstractMetadataRecipient
 	
 	private var m_metadataIndex:int = 0;
 	protected var m_metadata:Vector.<MetadataInfo>;
+	
 	protected var m_metadataByName:Dictionary;
-	///if provided, metadata tags can be parsed into classes that are registered with Metadata
+	///if provided, metadata tags can be parsed into classes that are registered with Reflection
 	protected var m_metadataInstances:Dictionary;
 	
 	///as defined in the debug-only metadata tag __go_to_definition_help
@@ -90,17 +91,17 @@ public class AbstractMetadataRecipient
 	 * @param	name	The name of the metadata tag
 	 * @return
 	 */
-	public function getMetadataByName(name:String):MetadataInfo
+	public function getMetadataInfoByName(name:String):MetadataInfo
 	{
 		return m_metadataByName[name];
 	}
 	
-	public function getTypdMetadataByClass(type:Class):Metadata
+	public function getMetadataByClass(type:Class):Metadata
 	{
 		return m_metadataInstances[type] as Metadata;
 	}
 	
-	public function getTypdMetadataByName(name:String):Metadata
+	public function getMetadataByName(name:String):Metadata
 	{
 		return m_metadataInstances[name] as Metadata;
 	}

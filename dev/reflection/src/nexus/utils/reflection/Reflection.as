@@ -25,6 +25,7 @@ package nexus.utils.reflection
 {
 
 import flash.system.ApplicationDomain;
+import flash.system.System;
 import flash.utils.*;
 
 import nexus.nexuslib_internal;
@@ -57,7 +58,8 @@ public class Reflection
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
 	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
 	///store strongly-typed classes that represent metadata on members
-	static private const REGISTERED_METADATA:Dictionary = new Dictionary();
+	static private const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
+	static private const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -284,7 +286,7 @@ public class Reflection
 		{
 			var xml:XML = describeType(type);
 			
-			reflectedType = new TypeInfo(xml.@name, applicationDomain, type, Parse.boolean(xml.@isFinal, false),
+			reflectedType = new TypeInfo(xml.@name, applicationDomain, type,
 				xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(),
 				xml.accessor.length() + xml.factory.accessor.length(),
 				xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
@@ -325,6 +327,7 @@ public class Reflection
 			//isDynamic info is incorrect if doing a describeType of a Class
 			if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
 			{
+				//try to instantiate so we can do a describe type of the instance
 				try
 				{
 					object = new type();
@@ -335,13 +338,19 @@ public class Reflection
 				}
 			}
 			
+			//if the object provided was an instance or we were able to create one above
 			if(!(object is Class))
 			{
-				reflectedType.setIsDynamic(Parse.boolean(describeType(object).@isDynamic, false));
+				System.disposeXML(xml);
+				//get the xml info for the instance
+				xml = describeType(object);
+				reflectedType.setIsDynamic(Parse.boolean(xml.@isDynamic, false));
+				reflectedType.setIsFinal(Parse.boolean(xml.@isFinal, false));
 			}
 			
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 			
+			System.disposeXML(xml);
 			xml = null;
 		}
 		return reflectedType;
@@ -414,8 +423,9 @@ public class Reflection
 		{
 			throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
 		}
-		//TODO: store by class so similarly named metadata in different packages won't conflict
-		REGISTERED_METADATA[Reflection.getUnqualifiedClassName(type)] = type;
+		var name : String = Reflection.getQualifiedClassName(type);
+		REGISTERED_METADATA_CLASSES[name] = type;
+		REGISTERED_METADATA_NAMES[name] = Reflection.getUnqualifiedClassName(name);
 	}
 	
 	/**
@@ -425,7 +435,6 @@ public class Reflection
 	 */
 	public static function registerMetadataClasses(types:Vector.<Class>):void
 	{
-		use namespace nexuslib_internal;
 		for each(var type:Class in types)
 		{
 			Reflection.registerMetadataClass(type);
@@ -444,7 +453,7 @@ public class Reflection
 	 */
 	nexuslib_internal static function getMetadataClass(instance:Metadata):Class
 	{
-		return REGISTERED_METADATA[Reflection.getUnqualifiedClassName(instance)];
+		return REGISTERED_METADATA_CLASSES[Reflection.getQualifiedClassName(instance)];
 	}
 	
 	//--------------------------------------
@@ -489,12 +498,14 @@ public class Reflection
 				member.addMetadataInfo(metadataInfo);
 				
 				//see if there is a registered strongly-typed class for this metadata
-				for(var registeredMetadataName:String in REGISTERED_METADATA)
+				for(var qualifiedName:String in REGISTERED_METADATA_CLASSES)
 				{
+					var unqualifiedName : String = REGISTERED_METADATA_NAMES[qualifiedName]
 					//implementers of metadata should omit the "Metadata" suffix, it is added here
-					if(metadataInfo.name + "Metadata" == registeredMetadataName)
+					if(	metadataInfo.name == unqualifiedName
+						|| metadataInfo.name + "Metadata" == unqualifiedName )
 					{
-						var metadata:Metadata = new REGISTERED_METADATA[registeredMetadataName](metadataInfo);
+						var metadata:Metadata = new REGISTERED_METADATA_CLASSES[qualifiedName](metadataInfo);
 						member.addMetadataInstance(metadata, metadataInfo.name);
 						break;
 					}

@@ -41,7 +41,6 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	private var m_type:Class;
 	
 	private var m_isDynamic : Boolean;
-	private var m_isDynamicHasBeenSet : Boolean;
 	private var m_isFinal : Boolean;
 	
 	private var m_applicationDomain : ApplicationDomain;
@@ -71,13 +70,11 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function TypeInfo(name:String, appDomain:ApplicationDomain, type:Class, isFinal:Boolean, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
+	public function TypeInfo(name:String, appDomain:ApplicationDomain, type:Class, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
 	{
 		super(name, metadataCount);
 		
 		m_type = type;
-		
-		m_isFinal = isFinal;
 		
 		m_applicationDomain = appDomain;
 		
@@ -175,8 +172,6 @@ public final class TypeInfo extends AbstractMetadataRecipient
 		return m_allMembersByName[name] as FieldInfo;
 	}
 	
-	
-	
 	/**
 	 * Warning! This is a very costly sort that needs to get the TypeInfo for the entire inheritance chain. Sorts members according
 	 * to the type that declares them
@@ -256,7 +251,11 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	internal function setIsDynamic(value:Boolean):void
 	{
 		m_isDynamic = value;
-		m_isDynamicHasBeenSet = true;
+	}
+	
+	internal function setIsFinal(value:Boolean):void
+	{
+		m_isFinal = value;
 	}
 
 	internal function setConstructor(constructor:MethodInfo):void
