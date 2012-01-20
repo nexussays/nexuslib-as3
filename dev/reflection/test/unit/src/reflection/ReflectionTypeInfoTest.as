@@ -156,10 +156,10 @@ public class ReflectionTypeInfoTest extends TestCase
 	
 	public function test_metadata():void
 	{
-		assertNotNull(m_testTypeInfo.getMetadataInfoByName("classMetadata"));
-		assertEquals("value2",	m_testTypeInfo.getMetadataInfoByName("classMetadata").getValue("param2"));
-		assertEquals("value",	m_testTypeInfo.getMetadataInfoByName("classMetadata").data["param"]);
-		assertEquals("classMetadata",	m_testTypeInfo.getMetadataInfoByName("classMetadata").name);
+		assertNotNull(m_testTypeInfo.getMetadataInfoByName("ClassMetadata"));
+		assertEquals("value2",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").getValue("param2"));
+		assertEquals("value",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").data["param"]);
+		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").name);
 	}
 }
 

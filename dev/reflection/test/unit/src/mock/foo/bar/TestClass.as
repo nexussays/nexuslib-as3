@@ -4,7 +4,7 @@ package mock.foo.bar
 import mock.foo.IFoo;
 import mock.testing_namespace;
 
-[classMetadata(param="value", param2="value2")]
+[ClassMetadata(param="value", param2="value2")]
 public dynamic class TestClass extends BaseClass implements IFoo
 {
 	//--------------------------------------
@@ -32,12 +32,12 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	private var m_privateVar:int;
 	protected var m_protectedVar: Class;
 	
-	[Embed(source = 'test.xml', mimeType = 'application/octet-stream')]
+	[Embed(source='test.xml', mimeType='application/octet-stream')]
 	public const instanceEmbed:Class;
 	
 	public const publicConst: String = "name";
 	
-	[CMSComponentSet(className="datamodel.schemas::CookingComponents",source="components")]
+	[FieldMetadata(className="datamodel.schemas::CookingComponents",source="components")]
 	public var publicVar:int;
 	
 	public namespace foo_namespace = "foo.testing_namespace";
@@ -46,7 +46,7 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	[ctorMetadata(param="value", param2="value2")]
+	[CtorMetadata(param="value", param2="value2")]
 	public function TestClass(ctorArgReq:Boolean=true, ctorArgOpt:String=null)
 	{
 		
@@ -61,7 +61,7 @@ public dynamic class TestClass extends BaseClass implements IFoo
 		return m_privateVar;
 	}
 	
-	[blargh(param="value", param2="value2")]
+	[FieldMetadata(param="value", param2="value2")]
 	public function set publicProperty(value:int):void
 	{
 		m_privateVar = value;

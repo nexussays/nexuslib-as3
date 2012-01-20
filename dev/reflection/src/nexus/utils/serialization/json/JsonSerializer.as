@@ -304,7 +304,7 @@ public class JsonSerializer implements ISerializer
 							&& AbstractFieldInfo(field).canRead
 							//don't serialize constant fields if told not to, but always serialize read-only properties
 							&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
-							&& field.getMetadataByName("Transient") == null)
+							&& field.getMetadataInfoByName("Transient") == null)
 						{
 							result += setupObjectString(result, field.name, sourceObject[field.name], pretty);
 						}

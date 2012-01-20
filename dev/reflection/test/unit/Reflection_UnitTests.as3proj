@@ -6,12 +6,12 @@
     <movie input="" />
     <movie path="bin\Reflection_UnitTest.swf" />
     <movie fps="30" />
-    <movie width="800" />
-    <movie height="600" />
+    <movie width="400" />
+    <movie height="300" />
     <movie version="10" />
     <movie minorVersion="1" />
     <movie platform="Flash Player" />
-    <movie background="#444444" />
+    <movie background="#FF00FF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
@@ -26,7 +26,7 @@
     <option benchmark="False" />
     <option es="False" />
     <option locale="" />
-    <option loadConfig="" />
+    <option loadConfig="mxmlc_config.xml" />
     <option optimize="True" />
     <option omitTraces="True" />
     <option showActionScriptWarnings="True" />

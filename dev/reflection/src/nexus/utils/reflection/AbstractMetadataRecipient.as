@@ -96,12 +96,12 @@ public class AbstractMetadataRecipient
 		return m_metadataByName[name];
 	}
 	
-	public function getMetadataByClass(type:Class):Metadata
+	public function getTypedMetadataByClass(type:Class):Metadata
 	{
 		return m_metadataInstances[type] as Metadata;
 	}
 	
-	public function getMetadataByName(name:String):Metadata
+	public function getTypedMetadataByName(name:String):Metadata
 	{
 		return m_metadataInstances[name] as Metadata;
 	}
