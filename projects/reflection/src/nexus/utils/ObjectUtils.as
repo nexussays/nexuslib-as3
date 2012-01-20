@@ -163,7 +163,7 @@ public class ObjectUtils
 	
 	/**
 	 * Reflects through the two objects provided and determines if objectA shares the same signature as objectB.
-	 * @example	<pre>
+	 * @example	<listing version="3.0">
 	 * var objectA : Object = {
 	 * 	"name": "Object A",
 	 * 	"value": 50,
@@ -176,8 +176,8 @@ public class ObjectUtils
 	 *
 	 * ObjectUtils.objectIsLike(objectA, objectB) ==> true
 	 * ObjectUtils.objectIsLike(objectB, objectA) ==> false
-	 * </pre>
-	 * <pre>
+	 * </listing>
+	 * <listing version="3.0">
 	 * var objectA : Object = {
 	 * 	"name": "Object A",
 	 * 	"value": 50,
@@ -191,7 +191,7 @@ public class ObjectUtils
 	 * }
 	 *
 	 * ObjectUtils.objectIsLike(objectA, IFoo) ==> true
-	 * </pre>
+	 * </listing>
 	 * @param	objectA
 	 * @param	objectB
 	 * @return

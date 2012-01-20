@@ -142,11 +142,12 @@ public class Parse
 	 * @param	entryDelimiter		A string delimiter for each key/value entry for the dictionary
 	 * @param	keyValueDelimiter	A string delimiter between each key/value pair
 	 * @return	A Dictionary or null if the source cannot be parsed
-	 * @example <pre>var str1 : String = "key1:value1|key2:value2|key3:value3|key4:value4";
+	 * @example <listing version="3.0">
+	 * var str1 : String = "key1:value1|key2:value2|key3:value3|key4:value4";
 	 * var str2 : String = "key1,value1 key2,value2 key3,value3 key4,value4";
 	 * var dict1 : Dictionary = Parse.dictionary(str1, "|", ":");
 	 * var dict2 : Dictionary = Parse.dictionary(str2, " ", ",");
-	 * </pre>
+	 * </listing>
 	 */
 	public static function dictionary(source:*, entryDelimiter:String, keyValueDelimiter:String):Dictionary
 	{

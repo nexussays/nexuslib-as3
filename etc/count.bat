@@ -1,5 +1,5 @@
 @ECHO OFF
 cd %~dp0
 cd ..
-cloc --quiet .\src
+cloc --quiet .\projects
 @PAUSE

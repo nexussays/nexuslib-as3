@@ -29,6 +29,7 @@ import nexus.nexuslib_internal;
 
 /**
  * Abstract base class for any reflected object that can be tagged with metadata
+ * @private
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	9/21/2011 2:57 AM
  */

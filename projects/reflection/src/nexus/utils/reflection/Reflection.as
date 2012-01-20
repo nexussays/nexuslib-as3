@@ -176,13 +176,13 @@ public class Reflection
 	
 	/**
 	 * Given a Class, object instance, or a fully qualified class name, this will return the class name without the package names attached.
-	 * @example	<pre>
+	 * @example	<listing version="3.0">
 	 * getUnqualifiedClassName(SomeClass) => "SomeClass"
 	 * getUnqualifiedClassName(instanceOfSomeClass) => "SomeClass"
 	 * getUnqualifiedClassName("com.example.as3::SomeClass") => "SomeClass"
 	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
 	 * getUnqualifiedClassName("some string value") => "String"
-	 * </pre>
+	 * </listing>
 	 * @param	object	An object instance, a Class, or a String representing a class name
 	 * @return
 	 */
