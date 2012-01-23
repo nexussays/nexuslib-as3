@@ -117,7 +117,7 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	{
 		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(BaseClass));
 		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(new BaseClass()));
-		assertEquals("mock.foo.bar::TestClass",	Reflection.getUnqualifiedClassName(m_test));
+		assertEquals("mock.foo.bar::TestClass",	Reflection.getQualifiedClassName(m_test));
 		assertEquals("mock.foo::IFoo",			Reflection.getQualifiedClassName(IFoo));
 		
 		assertEquals("__AS3__.vec::Vector.<Object>",	Reflection.getQualifiedClassName(Vector.<Object>));
@@ -135,17 +135,20 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	
 	public function test_getUnqualifiedClassName():void
 	{
-		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName(BaseClass));
-		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName(new BaseClass()));
-		assertEquals("TestClass",	Reflection.getUnqualifiedClassName(m_test));
-		assertEquals("IFoo",		Reflection.getUnqualifiedClassName(IFoo));
-		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName("mock.foo.bar::BaseClass"));
-		assertEquals("TestClass",	Reflection.getUnqualifiedClassName("mock.foo.bar.TestClass"));
+		assertEquals("TestClass", 	Reflection.getUnqualifiedClassName(m_test));
+		assertEquals("TestClass", 	Reflection.getUnqualifiedClassName(TestClass));
+		assertEquals("TestClass", 	Reflection.getUnqualifiedClassName(new TestClass()));
+		assertEquals("TestClass", 	Reflection.getUnqualifiedClassName("foo::TestClass"));
+		assertEquals("TestClass", 	Reflection.getUnqualifiedClassName("mock.foo.bar::TestClass"));
+		//TODO: Support this case?
+		//assertEquals("TestClass",	Reflection.getUnqualifiedClassName("mock.foo.bar.TestClass"));
 		assertEquals("TestClass",	Reflection.getUnqualifiedClassName("[class TestClass]"));
-		assertEquals("String",		Reflection.getUnqualifiedClassName("BaseClass"));
+		assertEquals("String",		Reflection.getUnqualifiedClassName("TestClass"));
 		
+		assertEquals("IFoo",		Reflection.getUnqualifiedClassName(IFoo));
+		
+		assertEquals("Vector.<*>",		Reflection.getUnqualifiedClassName(new Vector.<*>()));
 		assertEquals("Vector.<Object>",	Reflection.getUnqualifiedClassName(Vector.<Object>));
-		assertEquals("Vector.<Object>",	Reflection.getUnqualifiedClassName(new Vector.<*>()));
 		assertEquals("Vector.<Object>", Reflection.getUnqualifiedClassName("__AS3__.vec::Vector.<Object>"));
 		assertEquals("Vector.<String>",	Reflection.getUnqualifiedClassName(new <String>["foo", "bar"]));
 		
@@ -155,6 +158,94 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertEquals("int",		Reflection.getUnqualifiedClassName(5));
 		assertEquals("int",		Reflection.getUnqualifiedClassName(5.0));
 		assertEquals("Number",	Reflection.getUnqualifiedClassName(5.555));
+	}
+	
+	public function test_classExtendsClass():void
+	{
+		baseTest_classExtendsClass(null);
+	}
+	
+	public function test_classExtendsClassWithApplicationDomain():void
+	{
+		baseTest_classExtendsClass(Reflection.SYSTEM_DOMAIN);
+		baseTest_classExtendsClass(ApplicationDomain.currentDomain);
+	}
+	
+	public function test_isScalar():void
+	{
+		//scalars
+		
+		assertTrue(Reflection.isScalar(int));
+		assertTrue(Reflection.isScalar(0));
+		assertTrue(Reflection.isScalar(1));
+		assertTrue(Reflection.isScalar(uint));
+		assertTrue(Reflection.isScalar(Number));
+		assertTrue(Reflection.isScalar(5.55555));
+		
+		assertTrue(Reflection.isScalar(String));
+		assertTrue(Reflection.isScalar("foo"));
+		assertTrue(Reflection.isScalar(""));
+		
+		assertTrue(Reflection.isScalar(Boolean));
+		assertTrue(Reflection.isScalar(false));
+		assertTrue(Reflection.isScalar(true));
+		
+		//not scalars
+		
+		assertFalse(Reflection.isScalar(Object));
+		assertFalse(Reflection.isScalar({}));
+		
+		assertFalse(Reflection.isScalar(Array));
+		assertFalse(Reflection.isScalar([]));
+		
+		assertFalse(Reflection.isScalar(null));
+		
+		assertFalse(Reflection.isScalar(TestClass));
+		assertFalse(Reflection.isScalar(m_test));
+	}
+	
+	public function test_isArrayType():void
+	{
+		assertTrue(Reflection.isArrayType(new Vector.<String>()));
+		assertTrue(Reflection.isArrayType(new <TestClass>[new TestClass(), m_test]));
+		assertTrue(Reflection.isArrayType(Vector.<TestClass>));
+		
+		assertTrue(Reflection.isArrayType(Array));
+		assertTrue(Reflection.isArrayType([]));
+		
+		assertFalse(Reflection.isArrayType(Object));
+		assertFalse(Reflection.isArrayType({}));
+	}
+	
+	public function test_isVector():void
+	{
+		assertTrue(Reflection.isVector(new Vector.<String>()));
+		assertTrue(Reflection.isVector(new <TestClass>[new TestClass(), m_test]));
+		assertTrue(Reflection.isVector(Vector.<TestClass>));
+		
+		assertFalse(Reflection.isVector(Array));
+		assertFalse(Reflection.isVector([]));
+		
+		assertFalse(Reflection.isVector(Object));
+		assertFalse(Reflection.isVector({}));
+	}
+	
+	public function test_isAssociativeArray():void
+	{
+		assertTrue(Reflection.isAssociativeArray(Object));
+		assertTrue(Reflection.isAssociativeArray({}));
+		assertTrue(Reflection.isAssociativeArray(new Dictionary()));
+		assertTrue(Reflection.isAssociativeArray(Dictionary));
+		
+		assertFalse(Reflection.isAssociativeArray(new Vector.<String>()));
+		assertFalse(Reflection.isAssociativeArray(new <TestClass>[new TestClass(), m_test]));
+		assertFalse(Reflection.isAssociativeArray(Vector.<TestClass>));
+		
+		assertFalse(Reflection.isAssociativeArray(Array));
+		assertFalse(Reflection.isAssociativeArray([]));
+		
+		assertFalse(Reflection.isAssociativeArray(m_test));
+		assertFalse(Reflection.isAssociativeArray(BaseClass));
 	}
 	
 	public function test_comprehensive():void
@@ -168,42 +259,6 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		
 		assertSame(int,
 			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(5)))()) );
-	}
-	
-	public function test_getUnqualifiedClassName():void
-	{
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName(m_test));
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName(TestClass));
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("[class TestClass]"));
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("foo::TestClass"));
-		assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("mock.foo.bar::TestClass"));
-		//TODO: Support this case?
-		//assertEquals("TestClass", 		Reflection.getUnqualifiedClassName("mock.foo.bar.TestClass"));
-		assertEquals("String",			Reflection.getUnqualifiedClassName("TestClass"));
-		assertEquals("Vector.<String>", Reflection.getUnqualifiedClassName("__AS3__.vec::Vector.<String>"));
-	}
-	
-	public function test_isScalar():void
-	{
-		assertTrue(Reflection.isScalar(int));
-		assertTrue(Reflection.isScalar(1));
-		assertTrue(Reflection.isScalar(uint));
-		assertTrue(Reflection.isScalar(Number));
-		assertTrue(Reflection.isScalar(5.55555));
-		
-		assertTrue(Reflection.isScalar(String));
-		assertTrue(Reflection.isScalar("foo"));
-		
-		assertFalse(Reflection.isScalar(Object));
-		assertFalse(Reflection.isScalar({}));
-		
-		assertFalse(Reflection.isScalar(Array));
-		assertFalse(Reflection.isScalar([]));
-		
-		assertFalse(Reflection.isScalar(null));
-		
-		assertFalse(Reflection.isScalar(TypeInfo));
-		assertFalse(Reflection.isScalar(m_test));
 	}
 	
 	//--------------------------------------
@@ -275,6 +330,17 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertSame(Vector.<String>,			Reflection.getVectorType(new Vector.<Vector.<String>>()));
 		assertSame(Vector.<Vector.<Array>>,	Reflection.getVectorType(new Vector.<Vector.<Vector.<Array>>>()));
 		assertSame(Vector.<FinalClass>,		Reflection.getVectorType(new Vector.<Vector.<FinalClass>>()));
+	}
+	
+	private function baseTest_classExtendsClass(appDomain:ApplicationDomain):void
+	{
+		assertTrue(Reflection.classExtendsClass(FinalClass,	TestClass, appDomain));
+		assertTrue(Reflection.classExtendsClass(FinalClass,	BaseClass, appDomain));
+		assertTrue(Reflection.classExtendsClass(BaseClass,	Object, appDomain));
+		
+		assertFalse(Reflection.classExtendsClass(TestClass,		FinalClass, appDomain));
+		assertFalse(Reflection.classExtendsClass(TestClass,		TestClass, appDomain));
+		assertFalse(Reflection.classExtendsClass(Object,		Object, appDomain));
 	}
 }
 
