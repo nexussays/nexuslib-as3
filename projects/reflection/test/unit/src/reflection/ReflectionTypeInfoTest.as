@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is PROJECT_NAME.
+ * The Original Code is nexuslib.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -42,7 +42,7 @@ import mock.foo.IFoo;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/17/2012 3:37 AM
  */
-public class ReflectionTypeInfoTest extends TestCase
+public class ReflectionTypeInfoTest extends AbstractReflectionTest
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -51,11 +51,6 @@ public class ReflectionTypeInfoTest extends TestCase
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
-	
-	private var m_finalTypeInfo:TypeInfo;
-	private var m_testTypeInfo:TypeInfo;
-	private var m_baseTypeInfo:TypeInfo;
-	private var m_test:TestClass;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -69,22 +64,6 @@ public class ReflectionTypeInfoTest extends TestCase
 	//--------------------------------------
 	//	SETUP & TEARDOWN
 	//--------------------------------------
-	
-	override protected function setUp():void
-	{
-		m_test = new TestClass();
-		var finalClass : FinalClass = new FinalClass(false);
-		m_finalTypeInfo = Reflection.getTypeInfo(finalClass);
-		m_testTypeInfo = Reflection.getTypeInfo(m_finalTypeInfo.extendedClasses[0]);
-		m_baseTypeInfo = Reflection.getTypeInfo(BaseClass);
-	}
-	
-	override protected function tearDown():void
-	{
-		m_testTypeInfo = null;
-		m_baseTypeInfo = null;
-		m_test = null;
-	}
 	
 	//--------------------------------------
 	//	TESTS

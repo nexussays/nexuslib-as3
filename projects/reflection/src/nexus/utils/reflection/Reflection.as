@@ -95,7 +95,7 @@ public class Reflection
 		}
 		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED)
 		{
-			//TODO: See if there is a way to support wildcard vector types
+			//TODO: See if there is a way to support untyped vectors
 			return OBJECTVECTOR_CLASS;
 		}
 		
@@ -111,8 +111,7 @@ public class Reflection
 		}
 		catch(e:ReferenceError)
 		{
-			e.message = "Cannot find definition for " + qualifiedName + ", the class is either not present in the "
-				+ "application domain or its parent domains or is not public.";
+			e.message = "Cannot find definition for " + qualifiedName + ", the class is either not present in the application domain or is not public.";
 			throw e;
 		}
 		return null;
@@ -341,7 +340,10 @@ public class Reflection
 			//if the object provided was an instance or we were able to create one above
 			if(!(object is Class))
 			{
-				System.disposeXML(xml);
+				if("disposeXML" in System)
+				{
+					System["disposeXML"](xml);
+				}
 				//get the xml info for the instance
 				xml = describeType(object);
 				reflectedType.setIsDynamic(Parse.boolean(xml.@isDynamic, false));
@@ -350,7 +352,10 @@ public class Reflection
 			
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 			
-			System.disposeXML(xml);
+			if("disposeXML" in System)
+			{
+				System["disposeXML"](xml);
+			}
 			xml = null;
 		}
 		return reflectedType;

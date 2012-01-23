@@ -16,8 +16,8 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="..\..\..\..\lib\asunit\src" />
     <class path="..\..\src" />
+    <class path="..\..\..\..\lib\asunit\src" />
   </classpaths>
   <!-- Build options -->
   <build>

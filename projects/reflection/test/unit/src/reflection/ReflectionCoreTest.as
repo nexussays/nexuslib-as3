@@ -26,30 +26,24 @@ package reflection
 
 import asunit.framework.*;
 
-import flash.display.Sprite;
 import flash.system.ApplicationDomain;
 import flash.utils.Dictionary;
 
-import nexus.utils.reflection.*;
-
-import mock.foo.bar.BaseClass;
-import mock.foo.bar.TestClass;
+import mock.foo.bar.*;
 import mock.foo.IFoo;
+
+import nexus.utils.reflection.*;
 
 /**
  * Test the utility methods in Reflection, aside from getTypeInfo()
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/14/2012 11:47 PM
  */
-public class ReflectionCoreTest extends TestCase
+public class ReflectionCoreTest extends AbstractReflectionTest
 {
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
-	
-	private var m_testTypeInfo:TypeInfo;
-	private var m_baseTypeInfo:TypeInfo;
-	private var m_test:TestClass;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -64,99 +58,66 @@ public class ReflectionCoreTest extends TestCase
 	//	SETUP & TEARDOWN
 	//--------------------------------------
 	
-	override protected function setUp():void
-	{
-		m_test = new TestClass();
-		m_testTypeInfo = Reflection.getTypeInfo(m_test);
-		m_baseTypeInfo = Reflection.getTypeInfo(BaseClass);
-	}
-	
-	override protected function tearDown():void
-	{
-		m_testTypeInfo = null;
-		m_baseTypeInfo = null;
-		m_test = null;
-	}
-	
 	//--------------------------------------
 	//	TESTS
 	//--------------------------------------
 	
 	public function test_getClass():void
 	{
-		assertSame(TestClass,	Reflection.getClass(m_test));
-		assertSame(TypeInfo,	Reflection.getClass(TypeInfo));
-		assertSame(String,		Reflection.getClass("dna.utils.reflection::TypeInfo"));
-		assertSame(String,		Reflection.getClass("TypeInfo"));
+		baseTest_getClass(null);
 	}
 	
-	public function test_getClassByNameWithApplicationDomain():void
+	//TODO: Increase the scope of this test by loading in a new app domain
+	public function test_getClassWithApplicationDomain():void
 	{
-		assertSame(BaseClass,		Reflection.getClassByName("mock.foo.bar::BaseClass", Reflection.SYSTEM_DOMAIN));
-		assertSame(BaseClass,		Reflection.getClassByName("mock.foo.bar::BaseClass", ApplicationDomain.currentDomain));
-		
-		//FIXME: I feel like this should work. Is it my bug or do I misunderstand something about app domains?
-		//assertSame(TestClass,		Reflection.getClassByName("mock.foo.bar::TestClass", new ApplicationDomain(ApplicationDomain.currentDomain)));
+		baseTest_getClass(Reflection.SYSTEM_DOMAIN);
+		baseTest_getClass(ApplicationDomain.currentDomain);
+		//FIXME: I feel like this should work
+		//baseTest_getClass(new ApplicationDomain(ApplicationDomain.currentDomain));
 	}
 	
 	public function test_getClassByName():void
 	{
-		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar.BaseClass"));
-		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar::BaseClass"));
-		assertSame(TestClass,	Reflection.getClassByName("mock.foo.bar::TestClass"));
-		
-		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("foo") } );
-		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("TestClass") } );
-		
-		assertSame(IFoo,		Reflection.getClassByName("mock.foo::IFoo"));
-		
-		assertSame(Object,	Reflection.getClassByName("*"));
-		assertSame(Object,	Reflection.getClassByName("Object"));
-		
-		assertSame(Class,	Reflection.getClassByName("Class"));
-		
-		assertSame(Vector.<Object>,	Reflection.getClassByName("Vector.<*>"));
-		assertSame(Vector.<Object>,	Reflection.getClassByName("Vector.<Object>"));
-		assertSame(Vector.<Object>,	Reflection.getClassByName("__AS3__.vec::Vector.<*>"));
-		
-		assertSame(null,	Reflection.getClassByName("null"));
-		assertSame(null,	Reflection.getClassByName("void"));
-		assertSame(null,	Reflection.getClassByName("undefined"));
-		
-		assertSame(uint,		Reflection.getClassByName("uint"));
-		assertSame(int,			Reflection.getClassByName("int"));
-		assertSame(Number,		Reflection.getClassByName("Number"));
-		assertSame(Array,		Reflection.getClassByName("Array"));
-		assertSame(Date,		Reflection.getClassByName("Date"));
-		assertSame(Dictionary,	Reflection.getClassByName("flash.utils.Dictionary"));
-		assertSame(Dictionary,	Reflection.getClassByName("flash.utils::Dictionary"));
+		baseTest_getClassByName(null);
+	}
+	
+	//TODO: Increase the scope of this test by loading in a new app domain
+	public function test_getClassByNameWithApplicationDomain():void
+	{
+		baseTest_getClassByName(Reflection.SYSTEM_DOMAIN);
+		baseTest_getClassByName(ApplicationDomain.currentDomain);
+		//baseTest_getClassByName(new ApplicationDomain(ApplicationDomain.currentDomain));
 	}
 	
 	public function test_getSuperClass():void
 	{
-		assertSame(BaseClass,	Reflection.getSuperClass(m_test));
-		assertSame(BaseClass,	Reflection.getSuperClass(TestClass));
-		assertSame(Object,		Reflection.getSuperClass(BaseClass));
-		assertSame(Object,		Reflection.getSuperClass("mock.foo.bar::TestClass"));
-		assertSame(Object,		Reflection.getSuperClass("TestClass"));
+		baseTest_getSuperClass(null);
+	}
+	
+	//TODO: Increase the scope of this test by loading in a new app domain
+	public function test_getSuperClassWithApplicationDomain():void
+	{
+		baseTest_getSuperClass(Reflection.SYSTEM_DOMAIN);
+		baseTest_getSuperClass(ApplicationDomain.currentDomain);
+		//baseTest_getSuperClass(new ApplicationDomain(ApplicationDomain.currentDomain));
 	}
 	
 	public function test_getVectorType():void
 	{
-		assertSame(String,		Reflection.getVectorType(new Vector.<String>()));
-		assertSame(BaseClass,	Reflection.getVectorType(new Vector.<BaseClass>()));
-		assertSame(Object,		Reflection.getVectorType(new Vector.<*>()));
-		
-		assertSame(null,		Reflection.getVectorType([]));
-		assertSame(null,		Reflection.getVectorType("string"));
-		
-		assertSame(Vector.<String>,		Reflection.getVectorType(new Vector.<Vector.<String>>()));
+		baseTest_getVectorType(null);
+	}
+	
+	public function test_getVectorTypeWithApplicationDomain():void
+	{
+		baseTest_getVectorType(Reflection.SYSTEM_DOMAIN);
+		baseTest_getVectorType(ApplicationDomain.currentDomain);
 	}
 	
 	public function test_getQualifiedClassName():void
 	{
 		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(BaseClass));
 		assertEquals("mock.foo.bar::BaseClass",	Reflection.getQualifiedClassName(new BaseClass()));
+		assertEquals("mock.foo.bar::TestClass",	Reflection.getUnqualifiedClassName(m_test));
 		assertEquals("mock.foo::IFoo",			Reflection.getQualifiedClassName(IFoo));
 		
 		assertEquals("__AS3__.vec::Vector.<Object>",	Reflection.getQualifiedClassName(Vector.<Object>));
@@ -170,6 +131,30 @@ public class ReflectionCoreTest extends TestCase
 		assertEquals("int",		Reflection.getQualifiedClassName(5));
 		assertEquals("int",		Reflection.getQualifiedClassName(5.0));
 		assertEquals("Number",	Reflection.getQualifiedClassName(5.555));
+	}
+	
+	public function test_getUnqualifiedClassName():void
+	{
+		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName(BaseClass));
+		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName(new BaseClass()));
+		assertEquals("TestClass",	Reflection.getUnqualifiedClassName(m_test));
+		assertEquals("IFoo",		Reflection.getUnqualifiedClassName(IFoo));
+		assertEquals("BaseClass",	Reflection.getUnqualifiedClassName("mock.foo.bar::BaseClass"));
+		assertEquals("TestClass",	Reflection.getUnqualifiedClassName("mock.foo.bar.TestClass"));
+		assertEquals("TestClass",	Reflection.getUnqualifiedClassName("[class TestClass]"));
+		assertEquals("String",		Reflection.getUnqualifiedClassName("BaseClass"));
+		
+		assertEquals("Vector.<Object>",	Reflection.getUnqualifiedClassName(Vector.<Object>));
+		assertEquals("Vector.<Object>",	Reflection.getUnqualifiedClassName(new Vector.<*>()));
+		assertEquals("Vector.<Object>", Reflection.getUnqualifiedClassName("__AS3__.vec::Vector.<Object>"));
+		assertEquals("Vector.<String>",	Reflection.getUnqualifiedClassName(new <String>["foo", "bar"]));
+		
+		assertSame("null",	Reflection.getUnqualifiedClassName(null));
+		assertSame("null",	Reflection.getUnqualifiedClassName(undefined));
+		
+		assertEquals("int",		Reflection.getUnqualifiedClassName(5));
+		assertEquals("int",		Reflection.getUnqualifiedClassName(5.0));
+		assertEquals("Number",	Reflection.getUnqualifiedClassName(5.555));
 	}
 	
 	public function test_comprehensive():void
@@ -219,6 +204,77 @@ public class ReflectionCoreTest extends TestCase
 		
 		assertFalse(Reflection.isScalar(TypeInfo));
 		assertFalse(Reflection.isScalar(m_test));
+	}
+	
+	//--------------------------------------
+	//	PRIVATE INSTANCE METHODS
+	//--------------------------------------
+	
+	private function baseTest_getClass(appDomain:ApplicationDomain):void
+	{
+		assertSame(TestClass,	Reflection.getClass(m_test, appDomain));
+		assertSame(BaseClass,	Reflection.getClass(BaseClass, appDomain));
+		assertSame(String,		Reflection.getClass("TypeInfo", appDomain));
+		assertSame(String,		Reflection.getClass("dna.utils.reflection::TypeInfo", appDomain));
+	}
+	
+	private function baseTest_getClassByName(appDomain:ApplicationDomain):void
+	{
+		assertSame(uint,		Reflection.getClassByName("uint", appDomain));
+		assertSame(int,			Reflection.getClassByName("int", appDomain));
+		assertSame(Number,		Reflection.getClassByName("Number", appDomain));
+		assertSame(Array,		Reflection.getClassByName("Array", appDomain));
+		assertSame(Date,		Reflection.getClassByName("Date", appDomain));
+		assertSame(Class,		Reflection.getClassByName("Class", appDomain));
+		assertSame(Dictionary,	Reflection.getClassByName("flash.utils.Dictionary", appDomain));
+		assertSame(Dictionary,	Reflection.getClassByName("flash.utils::Dictionary", appDomain));
+		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar.BaseClass", appDomain));
+		assertSame(BaseClass,	Reflection.getClassByName("mock.foo.bar::BaseClass", appDomain));
+		assertSame(TestClass,	Reflection.getClassByName("mock.foo.bar::TestClass", appDomain));
+		assertSame(IFoo,		Reflection.getClassByName("mock.foo::IFoo", appDomain));
+		
+		assertSame(Object,	Reflection.getClassByName("*", appDomain));
+		assertSame(Object,	Reflection.getClassByName("Object", appDomain));
+		
+		assertSame(null,	Reflection.getClassByName("null", appDomain));
+		assertSame(null,	Reflection.getClassByName("void", appDomain));
+		assertSame(null,	Reflection.getClassByName("undefined", appDomain));
+		
+		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<*>", appDomain));
+		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<Object>", appDomain));
+		assertSame(Vector.<Object>,			Reflection.getClassByName("__AS3__.vec::Vector.<*>", appDomain));
+		assertSame(Vector.<FinalClass>,		Reflection.getClassByName("__AS3__.vec::Vector.<mock.foo.bar::FinalClass>", appDomain));
+		assertSame(Vector.<Vector.<Object>>,Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<Object>>", appDomain));
+		
+		//TODO: Find a fix for this?
+		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<*>>", appDomain) });
+		
+		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("foo", appDomain) } );
+		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("TestClass", appDomain) } );
+	}
+	
+	private function baseTest_getSuperClass(appDomain:ApplicationDomain):void
+	{
+		assertSame(Object,		Reflection.getSuperClass(BaseClass, appDomain));
+		assertSame(Object,		Reflection.getSuperClass("TestClass", appDomain));
+		assertSame(Object,		Reflection.getSuperClass("mock.foo.bar::TestClass", appDomain));
+		assertSame(BaseClass,	Reflection.getSuperClass(m_test, appDomain));
+		assertSame(BaseClass,	Reflection.getSuperClass(TestClass, appDomain));
+		assertSame(TestClass,	Reflection.getSuperClass(FinalClass, appDomain));
+	}
+	
+	private function baseTest_getVectorType(appDomain:ApplicationDomain):void
+	{
+		assertSame(String,		Reflection.getVectorType(new Vector.<String>()));
+		assertSame(BaseClass,	Reflection.getVectorType(new Vector.<BaseClass>()));
+		assertSame(Object,		Reflection.getVectorType(new Vector.<*>()));
+		
+		assertSame(null,		Reflection.getVectorType([]));
+		assertSame(null,		Reflection.getVectorType("string"));
+		
+		assertSame(Vector.<String>,			Reflection.getVectorType(new Vector.<Vector.<String>>()));
+		assertSame(Vector.<Vector.<Array>>,	Reflection.getVectorType(new Vector.<Vector.<Vector.<Array>>>()));
+		assertSame(Vector.<FinalClass>,		Reflection.getVectorType(new Vector.<Vector.<FinalClass>>()));
 	}
 }
 
