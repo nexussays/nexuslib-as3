@@ -132,10 +132,18 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 	
 	public function test_metadata():void
 	{
-		assertNotNull(m_testTypeInfo.getMetadataInfoByName("ClassMetadata"));
-		assertEquals("value2",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").getValue("param2"));
-		assertEquals("value",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").data["param"]);
-		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataInfoByName("ClassMetadata").name);
+		//
+		//[ClassMetadata(param="value", param2="value2")]
+		//public dynamic class TestClass extends BaseClass implements IFoo
+		//
+		
+		assertNotNull(m_testTypeInfo.getMetadataByName("ClassMetadata"));
+		
+		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataByName("ClassMetadata").name);
+		
+		assertEquals("value2",	m_testTypeInfo.getMetadataByName("ClassMetadata").getValue("param2"));
+		assertEquals("value",	m_testTypeInfo.getMetadataByName("ClassMetadata").data["param"]);
+		
 	}
 }
 

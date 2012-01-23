@@ -266,15 +266,23 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertFalse(Reflection.isAssociativeArray(BaseClass));
 	}
 	
-	public function test_comprehensive():void
+	public function testComprehensive():void
 	{
 		assertSame(Vector.<String>,
 			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<String>())))()) );
-		assertSame(Vector.<Object>,
+		assertSame(Vector.<*>,
 			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<*>())))()) );
-		assertSame(TestClass,
-			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new TestClass())))()) );
+		assertSame(Vector.<Object>,
+			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Vector.<Object>())))()) );
 		
+		assertSame(TestClass,
+			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(TestClass)))()) );
+		assertSame(Date,
+			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(new Date())))()) );
+		
+		assertSame(Object,
+			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName({})))()) );
+			
 		assertSame(int,
 			Reflection.getClass(new (Reflection.getClassByName(Reflection.getQualifiedClassName(5)))()) );
 	}
@@ -285,12 +293,12 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	
 	private function baseTest_getClass(appDomain:ApplicationDomain):void
 	{
-		assertSame(int,			Reflection.getClass(0));
-		assertSame(Array,		Reflection.getClass([]));
-		assertSame(Date,		Reflection.getClass(new Date()));
-		assertSame(Object,		Reflection.getClass({}));
+		assertSame(int,			Reflection.getClass(0, appDomain));
+		assertSame(Array,		Reflection.getClass([], appDomain));
+		assertSame(Date,		Reflection.getClass(new Date(), appDomain));
+		assertSame(Object,		Reflection.getClass({}, appDomain));
 		
-		assertNull(Reflection.getClass(null));
+		assertNull(Reflection.getClass(null, appDomain));
 		
 		assertSame(TestClass,	Reflection.getClass(m_test, appDomain));
 		assertSame(BaseClass,	Reflection.getClass(BaseClass, appDomain));
@@ -320,17 +328,16 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertNull(Reflection.getClassByName("void", appDomain));
 		assertNull(Reflection.getClassByName("undefined", appDomain));
 		
-		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<*>", appDomain));
+		assertSame(Vector.<*>,				Reflection.getClassByName("Vector.<*>", appDomain));
+		assertSame(Vector.<*>,				Reflection.getClassByName("__AS3__.vec::Vector.<*>", appDomain));
 		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<Object>", appDomain));
-		assertSame(Vector.<Object>,			Reflection.getClassByName("__AS3__.vec::Vector.<*>", appDomain));
 		assertSame(Vector.<FinalClass>,		Reflection.getClassByName("__AS3__.vec::Vector.<mock.foo.bar::FinalClass>", appDomain));
 		assertSame(Vector.<Vector.<Object>>,Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<Object>>", appDomain));
 		
-		//TODO: Find a fix for this?
-		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<*>>", appDomain) });
-		
 		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("foo", appDomain) } );
 		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("TestClass", appDomain) } );
+		//TODO: Find a fix for this?
+		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<*>>", appDomain) });
 	}
 	
 	private function baseTest_getSuperClass(appDomain:ApplicationDomain):void
@@ -342,10 +349,10 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertSame(Object,		Reflection.getSuperClass(Date, appDomain));
 		assertSame(Object,		Reflection.getSuperClass(Array, appDomain));
 		
-		//TODO: Double-check that this behavior is expected
-		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<String>, appDomain));
-		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<Vector.<TestClass>>, appDomain));
-		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<Object>, appDomain));
+		assertSame(Vector.<*>,	Reflection.getSuperClass(Vector.<String>, appDomain));
+		assertSame(Vector.<*>,	Reflection.getSuperClass(Vector.<Vector.<TestClass>>, appDomain));
+		assertSame(Vector.<*>,	Reflection.getSuperClass(Vector.<Object>, appDomain));
+		assertSame(Object,		Reflection.getSuperClass(Vector.<*>, appDomain));
 		
 		//strings
 		assertSame(Object,		Reflection.getSuperClass("TestClass", appDomain));
@@ -353,32 +360,48 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		
 		//no parent class of Object
 		assertNull(Reflection.getSuperClass(Object, appDomain));
+		
+		//should return null instead of throwing null argument error
 		assertNull(Reflection.getSuperClass(null, appDomain));
 	}
 	
 	private function baseTest_getVectorType(appDomain:ApplicationDomain):void
 	{
-		assertSame(String,		Reflection.getVectorType(new Vector.<String>()));
-		assertSame(BaseClass,	Reflection.getVectorType(new Vector.<BaseClass>()));
-		assertSame(Object,		Reflection.getVectorType(new Vector.<*>()));
+		assertSame(String,		Reflection.getVectorType(new Vector.<String>(), appDomain));
+		assertSame(BaseClass,	Reflection.getVectorType(new Vector.<BaseClass>(), appDomain));
 		
-		assertNull(Reflection.getVectorType([]));
-		assertNull(Reflection.getVectorType("string"));
+		assertSame(IFoo,		Reflection.getVectorType(new Vector.<IFoo>(), appDomain));
 		
-		assertSame(Vector.<String>,			Reflection.getVectorType(new Vector.<Vector.<String>>()));
-		assertSame(Vector.<Vector.<Array>>,	Reflection.getVectorType(new Vector.<Vector.<Vector.<Array>>>()));
-		assertSame(Vector.<FinalClass>,		Reflection.getVectorType(new Vector.<Vector.<FinalClass>>()));
+		assertSame(Object,		Reflection.getVectorType(new Vector.<Object>(), appDomain));
+		assertSame(Object,		Reflection.getVectorType(new Vector.<*>(), appDomain));
+		
+		assertNull(Reflection.getVectorType([], appDomain));
+		assertNull(Reflection.getVectorType("string", appDomain));
+		
+		assertSame(Vector.<String>,			Reflection.getVectorType(new Vector.<Vector.<String>>(), appDomain));
+		assertSame(Vector.<Vector.<Array>>,	Reflection.getVectorType(new Vector.<Vector.<Vector.<Array>>>(), appDomain));
+		assertSame(Vector.<FinalClass>,		Reflection.getVectorType(new Vector.<Vector.<FinalClass>>(), appDomain));
+		
+		assertNull(Reflection.getVectorType(null, appDomain));
 	}
 	
 	private function baseTest_classExtendsClass(appDomain:ApplicationDomain):void
 	{
-		assertTrue(Reflection.classExtendsClass(FinalClass,	TestClass, appDomain));
-		assertTrue(Reflection.classExtendsClass(FinalClass,	BaseClass, appDomain));
-		assertTrue(Reflection.classExtendsClass(BaseClass,	Object, appDomain));
+		assertTrue(Reflection.classExtendsClass(FinalClass,	TestClass,	appDomain));
+		assertTrue(Reflection.classExtendsClass(FinalClass,	BaseClass,	appDomain));
+		assertTrue(Reflection.classExtendsClass(BaseClass,	Object,		appDomain));
 		
-		assertFalse(Reflection.classExtendsClass(TestClass,		FinalClass, appDomain));
-		assertFalse(Reflection.classExtendsClass(TestClass,		TestClass, appDomain));
-		assertFalse(Reflection.classExtendsClass(Object,		Object, appDomain));
+		assertFalse(Reflection.classExtendsClass(TestClass,		FinalClass,	appDomain));
+		assertFalse(Reflection.classExtendsClass(TestClass,		TestClass,	appDomain));
+		assertFalse(Reflection.classExtendsClass(Object,		Object,		appDomain));
+		
+		assertFalse(Reflection.classExtendsClass(null,		Object,		appDomain));
+		assertFalse(Reflection.classExtendsClass(Object,	null,		appDomain));
+		assertFalse(Reflection.classExtendsClass(null,		FinalClass,	appDomain));
+		assertFalse(Reflection.classExtendsClass(FinalClass,null,		appDomain));
+		assertFalse(Reflection.classExtendsClass(null,		null,		appDomain));
+		
+		//assertFalse(Reflection.classExtendsClass(Class(Vector.<Object>),		Class(Vector.<String>),		appDomain));
 	}
 }
 

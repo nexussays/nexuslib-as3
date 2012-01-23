@@ -28,6 +28,7 @@ public class ReflectionMain extends Sprite
 	public function ReflectionMain()
 	{
 		stage.addEventListener(Event.ENTER_FRAME, frame1);
+		stage.addEventListener(Event.ENTER_FRAME, frame_timings);
 		//stage.addEventListener(Event.ENTER_FRAME, frame_avm);
 		
 		txt = new TextField();
@@ -40,6 +41,26 @@ public class ReflectionMain extends Sprite
 	private function frame1(e:Event):void
 	{
 		stage.removeEventListener(Event.ENTER_FRAME, frame1);
+		
+		var c1 : Class = Class(Vector.<*>);
+		var c2 : Class = Class(Vector.<Object>);
+		out(c1, c2);
+		out(new c1(), new c2());
+		out(Reflection.getSuperClass(Vector.<String>));
+		out(getQualifiedSuperclassName(Vector.<String>));
+		out(Reflection.getSuperClass(Vector.<TestClass>));
+		out(getQualifiedSuperclassName(Vector.<TestClass>));
+		out(Reflection.getSuperClass(Vector.<Vector.<TestClass>>));
+		out(getQualifiedSuperclassName(Vector.<Vector.<TestClass>>));
+		out(Reflection.getSuperClass(Vector.<Object>));
+		out(getQualifiedSuperclassName(Vector.<Object>));
+		out(Reflection.getSuperClass(Vector.<*>));
+		out(getQualifiedSuperclassName(Vector.<*>));
+	}
+	
+	private function frame_timings(e:Event):void
+	{
+		stage.removeEventListener(Event.ENTER_FRAME, frame_timings);
 		
 		stage.addEventListener(KeyboardEvent.KEY_UP, stage_keyUp);
 		
@@ -83,6 +104,7 @@ public class ReflectionMain extends Sprite
 		out(describeType(new TestClass(false)).toXMLString());// .split("\n")[0]);
 		out(describeType(TestClass).toXMLString());// .split("\n")[0]);
 		
+		/*
 		out(AVMDescribeType.HIDE_NSURI_METHODS);
 		out(AVMDescribeType.INCLUDE_BASES);
 		out(AVMDescribeType.INCLUDE_INTERFACES);
@@ -126,6 +148,7 @@ public class ReflectionMain extends Sprite
 		
 		out(AVMDescribeType.xml(BaseClass, flags).toXMLString());
 		out(describeType(BaseClass).toXMLString());
+		//*/
 	}
 	
 	private function stage_keyUp(e:KeyboardEvent):void
