@@ -61,6 +61,11 @@ public class Reflection
 	static private const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
 	static private const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
 	
+	static private const s_testDomainMemory:ByteArray = new ByteArray();
+	{
+		s_testDomainMemory.length = ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH;
+	}
+	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
@@ -256,6 +261,33 @@ public class Reflection
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Checks it two application domains point to the same reference.
+	 * @param	applicationDomainOne	One of the <code>ApplicationDomain</code>s to check for equality
+	 * @param	applicationDomainTwo	One of the <code>ApplicationDomain</code>s to check for equality
+	 * @return	True if the two provided application domains point to the same reference
+	 */
+	public static function applicationDomainsAreEqual(applicationDomainOne:ApplicationDomain, applicationDomainTwo:ApplicationDomain):Boolean
+	{
+		if(applicationDomainOne == null || applicationDomainTwo == null)
+		{
+			return false;
+		}
+		
+		var domainMemoryOne:ByteArray = applicationDomainOne.domainMemory;
+		
+		//assign a different ByteArray to domainMemory of the first app domain
+		applicationDomainOne.domainMemory = s_testDomainMemory;
+		
+		//see if the second app domain is pointing to the same reference
+		var result:Boolean = applicationDomainOne.domainMemory == applicationDomainTwo.domainMemory;
+		
+		//restore the domain memory
+		applicationDomainOne.domainMemory = domainMemoryOne;
+		
+		return result;
 	}
 	
 	/**

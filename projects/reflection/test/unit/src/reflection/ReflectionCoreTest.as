@@ -171,6 +171,23 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		baseTest_classExtendsClass(ApplicationDomain.currentDomain);
 	}
 	
+	public function test_applicationDomainsAreEqual():void
+	{
+		var childDomain : ApplicationDomain = new ApplicationDomain(ApplicationDomain.currentDomain);
+		
+		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, ApplicationDomain.currentDomain));
+		
+		assertTrue(Reflection.applicationDomainsAreEqual(Reflection.SYSTEM_DOMAIN, ApplicationDomain.currentDomain));
+		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, Reflection.SYSTEM_DOMAIN));
+		
+		assertTrue(Reflection.applicationDomainsAreEqual(childDomain.parentDomain, Reflection.SYSTEM_DOMAIN));
+		assertTrue(Reflection.applicationDomainsAreEqual(childDomain.parentDomain, ApplicationDomain.currentDomain));
+		
+		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, childDomain));
+		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, new ApplicationDomain(Reflection.SYSTEM_DOMAIN)));
+		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, new ApplicationDomain(null)));
+	}
+	
 	public function test_isScalar():void
 	{
 		//scalars

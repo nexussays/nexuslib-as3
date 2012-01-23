@@ -24,18 +24,14 @@
 package reflection
 {
 
-import asunit.framework.TestCase;
-import flash.system.ApplicationDomain;
-import mock.foo.bar.FinalClass;
-
 import flash.display.Sprite;
+import flash.system.ApplicationDomain;
 import flash.utils.*;
 
-import nexus.utils.reflection.*;
-
-import mock.foo.bar.BaseClass;
-import mock.foo.bar.TestClass;
+import mock.foo.bar.*;
 import mock.foo.IFoo;
+
+import nexus.utils.reflection.*;
 
 /**
  * ...
@@ -69,14 +65,12 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 	//	TESTS
 	//--------------------------------------
 	
-	/*
 	public function test_caching():void
 	{
 		assertSame(m_testTypeInfo, Reflection.getTypeInfo(m_test));
 		assertSame(m_baseTypeInfo, Reflection.getTypeInfo(m_baseTypeInfo.type, ApplicationDomain.currentDomain));
 		assertSame(m_finalTypeInfo, Reflection.getTypeInfo(FinalClass, Reflection.SYSTEM_DOMAIN));
 	}
-	//*/
 	
 	public function test_isDynamic():void
 	{
