@@ -114,7 +114,7 @@ public class XmlSerializer implements ISerializer
 	{
 		s_serializeConstants = serializeConstants;
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);
-		var metadata:XmlMetadata = typeInfo.getTypedMetadataByClass(XmlMetadata) as XmlMetadata;
+		var metadata:XmlMetadata = typeInfo.getMetadataByClass(XmlMetadata) as XmlMetadata;
 		var name:String = (metadata != null && metadata.nodeName != null ? metadata.nodeName : Reflection.getUnqualifiedClassName(typeInfo.type)).toLowerCase();
 		var xml:XML =  <{name}/>;
 		serializeObject(sourceObject, xml);
@@ -244,9 +244,9 @@ public class XmlSerializer implements ISerializer
 			{
 				if(field is AbstractFieldInfo && !AbstractFieldInfo(field).isStatic && AbstractFieldInfo(field).canRead
 					//don't serialize constant fields if told not to, but always serialize read-only properties
-					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo) && field.getTypedMetadataByName("Transient") == null)
+					&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo) && field.getMetadataByName("Transient") == null)
 				{
-					var metadata:XmlMetadata = field.getTypedMetadataByClass(XmlMetadata) as XmlMetadata;
+					var metadata:XmlMetadata = field.getMetadataByClass(XmlMetadata) as XmlMetadata;
 					var nodeName:String = (metadata != null ? metadata.nodeName || field.name : field.name);
 					if(metadata != null && metadata.flattenArray)
 					{

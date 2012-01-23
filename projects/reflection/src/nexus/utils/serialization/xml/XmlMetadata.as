@@ -24,8 +24,9 @@
 package nexus.utils.serialization.xml
 {
 
+import flash.utils.Dictionary;
+
 import nexus.utils.Parse;
-import nexus.utils.reflection.Metadata;
 import nexus.utils.reflection.MetadataInfo;
 
 /**
@@ -33,7 +34,7 @@ import nexus.utils.reflection.MetadataInfo;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	11/2/2011 2:38 AM
  */
-public class XmlMetadata extends Metadata
+public class XmlMetadata extends MetadataInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -51,12 +52,12 @@ public class XmlMetadata extends Metadata
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function XmlMetadata(info:MetadataInfo)
+	public function XmlMetadata(name:String, keyValueCollection:Dictionary)
 	{
-		super(info);
-		this.nodeName = info.getValue("nodeName");
-		this.isAttribute = Parse.boolean(info.getValue("isAttribute"), false);
-		this.flattenArray = Parse.boolean(info.getValue("flattenArray"), false);
+		super(name, keyValueCollection);
+		this.nodeName = this.getValue("nodeName");
+		this.isAttribute = Parse.boolean(this.getValue("isAttribute"), false);
+		this.flattenArray = Parse.boolean(this.getValue("flattenArray"), false);
 	}
 	
 	//--------------------------------------
