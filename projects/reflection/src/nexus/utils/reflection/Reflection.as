@@ -57,8 +57,8 @@ public class Reflection
 	static private const UNTYPEDVECTOR_CLASSNAME_QUALIFIED:String = flash.utils.getQualifiedClassName(Vector.<*>);
 	///Vector.<*>
 	static private const UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED:String = "Vector.<*>";
-	///class typed as __AS3__.vec::Vector.<Object>
-	static private const OBJECTVECTOR_CLASS:Class = getDefinitionByName(flash.utils.getQualifiedClassName(Vector.<Object>)) as Class;
+	///class typed as __AS3__.vec::Vector.<*>
+	static private const UNTYPEDVECTOR_CLASS:Class = Class(Vector.<*>);
 	
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
 	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
@@ -111,10 +111,10 @@ public class Reflection
 		{
 			return Object;
 		}
+		//looking up the class for an untyped vector currently does not work
 		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED)
 		{
-			//TODO: See if there is a way to support untyped vectors
-			return OBJECTVECTOR_CLASS;
+			return UNTYPEDVECTOR_CLASS;
 		}
 		
 		try
@@ -154,41 +154,37 @@ public class Reflection
 		if(object != null)
 		{
 			var superClassName:String = getQualifiedSuperclassName(object);
+			//superClassName will be null when the provided object argument is a native Object
 			if(superClassName != null)
 			{
-				var parent : Class = getClassByName(superClassName, applicationDomain);
-				if(parent != null)
-				{
-					return parent;
-				}
-				else if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
-				{
-					return OBJECTVECTOR_CLASS;
-				}
+				return getClassByName(superClassName, applicationDomain);
 			}
 		}
 		return null;
 	}
 	
 	/**
-	 * Return the object type of the provided vector. If the provided vector is untyped, Object is returned. If the
-	 * object is not a vector, null is returned.
-	 * @param	data
+	 * Return the object type of the provided vector. If the provided vector is untyped (<code>Vector.&lt;*&gt;</code>), Object is returned.
+	 * If the object is not a vector, null is returned.
+	 * @param	vector	The vector instance or Class for which to determine its type
 	 * @param	applicationDomain	The application domain in which to look. ApplicationDomain.current is used if none is provided.
 	 * @return	The type of the vector or Object if no type is present in the value provided
 	 */
-	public static function getVectorType(object:Object, applicationDomain:ApplicationDomain = null):Class
+	public static function getVectorType(vector:Object, applicationDomain:ApplicationDomain = null):Class
 	{
-		var typeName:String = flash.utils.getQualifiedClassName(object);
+		var typeName:String = flash.utils.getQualifiedClassName(vector);
+		
 		if(typeName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED)
 		{
 			return Object;
 		}
+		
 		if(typeName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
 		{
 			//parse out class between "__AS3__.vec::Vector.<" and ">"
 			return getClassByName(typeName.substring(VECTOR_PREFIX.length + 2, typeName.length - 1), applicationDomain);
 		}
+		
 		return null;
 	}
 	
@@ -496,9 +492,9 @@ public class Reflection
 	 */
 	public static function registerMetadataClass(type:Class):void
 	{
-		if(!classExtendsClass(type, Metadata))
+		if(!classExtendsClass(type, MetadataInfo))
 		{
-			throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + Metadata);
+			throw new ArgumentError("Cannot register metadata class \"" + type + "\", it does not extend " + MetadataInfo);
 		}
 		var name : String = Reflection.getQualifiedClassName(type);
 		REGISTERED_METADATA_CLASSES[name] = type;
@@ -528,7 +524,7 @@ public class Reflection
 	 * @param	instance
 	 * @return
 	 */
-	nexuslib_internal static function getMetadataClass(instance:Metadata):Class
+	nexuslib_internal static function getMetadataClass(instance:MetadataInfo):Class
 	{
 		return REGISTERED_METADATA_CLASSES[Reflection.getQualifiedClassName(instance)];
 	}
@@ -566,27 +562,33 @@ public class Reflection
 			}
 			else
 			{
-				//add metadata info
-				var metadataInfo:MetadataInfo = new MetadataInfo(metadataXml.@name);
+				var metadata:MetadataInfo;
+				var metadataName : String = metadataXml.@name;
+				var metadataDict : Dictionary = new Dictionary();
 				for each(var argXml:XML in metadataXml.arg)
 				{
-					metadataInfo.addValue(argXml.@key, argXml.@value);
+					metadataDict[String(argXml.@key)] = String(argXml.@value);
 				}
-				member.addMetadataInfo(metadataInfo);
 				
 				//see if there is a registered strongly-typed class for this metadata
 				for(var qualifiedName:String in REGISTERED_METADATA_CLASSES)
 				{
-					var unqualifiedName : String = REGISTERED_METADATA_NAMES[qualifiedName]
+					var unqualifiedName : String = REGISTERED_METADATA_NAMES[qualifiedName];
 					//implementers of metadata should omit the "Metadata" suffix, it is added here
-					if(	metadataInfo.name == unqualifiedName
-						|| metadataInfo.name + "Metadata" == unqualifiedName )
+					if(metadataName == unqualifiedName || metadataName + "Metadata" == unqualifiedName)
 					{
-						var metadata:Metadata = new REGISTERED_METADATA_CLASSES[qualifiedName](metadataInfo);
-						member.addMetadataInstance(metadata, metadataInfo.name);
+						metadata = new REGISTERED_METADATA_CLASSES[qualifiedName](metadataName, metadataDict);
 						break;
 					}
 				}
+				
+				//if no special metadatainfo exists, use the default class
+				if(metadata == null)
+				{
+					metadata = new MetadataInfo(metadataName, metadataDict);
+				}
+				
+				member.addMetadata(metadata);
 			}
 		}
 	}

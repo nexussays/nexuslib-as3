@@ -45,8 +45,6 @@ public class AbstractMetadataRecipient
 	protected var m_metadata:Vector.<MetadataInfo>;
 	
 	protected var m_metadataByName:Dictionary;
-	///if provided, metadata tags can be parsed into classes that are registered with Reflection
-	protected var m_metadataInstances:Dictionary;
 	
 	///as defined in the debug-only metadata tag __go_to_definition_help
 	protected var m_position:int;
@@ -61,7 +59,6 @@ public class AbstractMetadataRecipient
 		
 		m_metadata = new Vector.<MetadataInfo>(metadataCount, true);
 		m_metadataByName = new Dictionary();
-		m_metadataInstances = new Dictionary();
 	}
 	
 	//--------------------------------------
@@ -92,19 +89,19 @@ public class AbstractMetadataRecipient
 	 * @param	name	The name of the metadata tag
 	 * @return
 	 */
-	public function getMetadataInfoByName(name:String):MetadataInfo
+	public function getMetadataByName(name:String):MetadataInfo
 	{
 		return m_metadataByName[name];
 	}
 	
-	public function getTypedMetadataByClass(type:Class):Metadata
+	/**
+	 * Retrieves the MetadataInfo of a specific subclass. Be sure to register the class with Reflection.registerMetadataClass first
+	 * @param	type	A class which extends MetadataInfo
+	 * @return
+	 */
+	public function getMetadataByClass(type:Class):MetadataInfo
 	{
-		return m_metadataInstances[type] as Metadata;
-	}
-	
-	public function getTypedMetadataByName(name:String):Metadata
-	{
-		return m_metadataInstances[name] as Metadata;
+		return m_metadataByName[type];
 	}
 	
 	//--------------------------------------
@@ -116,24 +113,25 @@ public class AbstractMetadataRecipient
 		m_position = value;
 	}
 	
-	internal function addMetadataInfo(meta:MetadataInfo):void
-	{
-		m_metadata[m_metadataIndex++] = meta;
-		m_metadataByName[meta.name] = meta;
-	}
-	
-	internal function addMetadataInstance(meta:Metadata, name:String):void
+	internal function addMetadata(meta:MetadataInfo):void
 	{
 		use namespace nexuslib_internal;
+		
+		m_metadata[m_metadataIndex++] = meta;
+		m_metadataByName[meta.name] = meta;
+		
+		//if the metadata class has been registered, index it by that type as well
 		var type:Class = Reflection.getMetadataClass(meta);
-		if(m_metadataInstances[type] != null)
+		if(type != null)
 		{
-			throw new Error("Metadata tag of type \"" + type + "\" defined twice on the same member");
-		}
-		else
-		{
-			m_metadataInstances[type] = meta;
-			m_metadataInstances[name] = meta;
+			if(m_metadataByName[type] != null)
+			{
+				throw new Error("Metadata tag of type \"" + type + "\" defined twice on the same member");
+			}
+			else
+			{
+				m_metadataByName[type] = meta;
+			}
 		}
 	}
 }
