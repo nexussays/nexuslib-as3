@@ -27,6 +27,7 @@ package nexus.utils.reflection
 import flash.system.ApplicationDomain;
 import flash.system.System;
 import flash.utils.*;
+import nexus.errors.ClassNotFoundError;
 
 import nexus.nexuslib_internal;
 import nexus.utils.Parse;
@@ -43,6 +44,10 @@ public class Reflection
 	//--------------------------------------
 	
 	//TODO: Probably need to do some checking here to make sure this is the domain we want
+	/**
+	 * Reference this instead of <code>ApplicationDomain.currentDomain</code> as <code>ApplicationDomain.currentDomain</code> creates a new
+	 * instance with each call.
+	 */
 	static public const SYSTEM_DOMAIN : ApplicationDomain = ApplicationDomain.currentDomain;
 	
 	//call flash.utils.getQualifiedClassName(Vector) instead of hardcoding the string just in case Adobe ever changes the class or package
@@ -61,9 +66,16 @@ public class Reflection
 	static private const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
 	static private const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
 	
-	static private const s_testDomainMemory:ByteArray = new ByteArray();
+	///used in applicationDomainsAreEqual to check for equality
+	static private const EQUALITYTEST_DOMAINMEMORY:ByteArray = new ByteArray();
+	
+	//--------------------------------------
+	//	CLASS INITIAlIZER
+	//--------------------------------------
+	
 	{
-		s_testDomainMemory.length = ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH;
+		CACHED_TYPEINFO[SYSTEM_DOMAIN] = new Dictionary();
+		EQUALITYTEST_DOMAINMEMORY.length = ApplicationDomain.MIN_DOMAIN_MEMORY_LENGTH;
 	}
 	
 	//--------------------------------------
@@ -75,6 +87,7 @@ public class Reflection
 	 * @param	object An object instance or Class
 	 * @param	applicationDomain	The application domain in which to look for the class. ApplicationDomain.current is used if none is provided.
 	 * @return	The class for the given object, or null if none can be found
+	 * @throws	ClassNotFoundError	If the class cannot be found in the provided ApplicationDomain (or the system ApplicationDomain if none is provided)
 	 */
 	public static function getClass(object:Object, applicationDomain:ApplicationDomain = null):Class
 	{
@@ -86,7 +99,7 @@ public class Reflection
 	 * @param	qualifiedName	A valid qualified class name.
 	 * @param	applicationDomain	The application domain in which to look for the class. ApplicationDomain.current is used if none is provided.
 	 * @return	The class, or null if none can be found
-	 * @throws	ReferenceError	If the class cannot be found in the provided ApplicationDomain (or the system ApplicationDomain if none is provided)
+	 * @throws	ClassNotFoundError	If the class cannot be found in the provided ApplicationDomain (or the system ApplicationDomain if none is provided)
 	 */
 	public static function getClassByName(qualifiedName:String, applicationDomain:ApplicationDomain = null):Class
 	{
@@ -112,18 +125,26 @@ public class Reflection
 			{
 				applicationDomain = applicationDomain.parentDomain;
 			}
-			return applicationDomain.getDefinition(qualifiedName) as Class;
+			
+			var result : Class = applicationDomain.getDefinition(qualifiedName) as Class;
+			if(result == null)
+			{
+				throw new ClassNotFoundError(qualifiedName);
+			}
+			else
+			{
+				return result;
+			}
 		}
 		catch(e:ReferenceError)
 		{
-			e.message = "Cannot find definition for " + qualifiedName + ", the class is either not present in the application domain or is not public.";
-			throw e;
+			throw new ClassNotFoundError(qualifiedName);
 		}
 		return null;
 	}
 	
 	/**
-	 * Returns Class(getDefinitionByName(getQualifiedSuperclassName(obj))) with special handling of Vectors
+	 * Gets the super/parent class of the provided object, with the caveat that getSuperClass(Object) == null
 	 * @param	object			The object whose super class you want to find
 	 * @param	applicationDomain	The application domain in which to look. ApplicationDomain.current is used if none is provided.
 	 * @return	The super class of the provided object or null if none can be found.
@@ -133,14 +154,17 @@ public class Reflection
 		if(object != null)
 		{
 			var superClassName:String = getQualifiedSuperclassName(object);
-			var parent : Class = getClassByName(superClassName, applicationDomain);
-			if(parent != null)
+			if(superClassName != null)
 			{
-				return parent;
-			}
-			else if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
-			{
-				return OBJECTVECTOR_CLASS;
+				var parent : Class = getClassByName(superClassName, applicationDomain);
+				if(parent != null)
+				{
+					return parent;
+				}
+				else if(superClassName.substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX)
+				{
+					return OBJECTVECTOR_CLASS;
+				}
 			}
 		}
 		return null;
@@ -254,7 +278,7 @@ public class Reflection
 					return true;
 				}
 			}
-			catch(e:ReferenceError)
+			catch(e:ClassNotFoundError)
 			{
 				return false;
 			}
@@ -279,7 +303,7 @@ public class Reflection
 		var domainMemoryOne:ByteArray = applicationDomainOne.domainMemory;
 		
 		//assign a different ByteArray to domainMemory of the first app domain
-		applicationDomainOne.domainMemory = s_testDomainMemory;
+		applicationDomainOne.domainMemory = EQUALITYTEST_DOMAINMEMORY;
 		
 		//see if the second app domain is pointing to the same reference
 		var result:Boolean = applicationDomainOne.domainMemory == applicationDomainTwo.domainMemory;
@@ -297,32 +321,48 @@ public class Reflection
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
-		applicationDomain = applicationDomain || SYSTEM_DOMAIN;
+		if(applicationDomain == null)
+		{
+			applicationDomain = SYSTEM_DOMAIN;
+		}
+		else
+		{
+			//var s : int = getTimer();
+			var appDomainExists : Boolean = false;
+			for(var appDomainKey : Object in CACHED_TYPEINFO)
+			{
+				var appDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
+				if(Reflection.applicationDomainsAreEqual(appDomain, applicationDomain))
+				{
+					applicationDomain = appDomain;
+					appDomainExists = true;
+					break;
+				}
+			}
+			
+			if(!appDomainExists)
+			{
+				CACHED_TYPEINFO[applicationDomain] = new Dictionary();
+			}
+		}
+		
 		var type:Class = getClass(object, applicationDomain);
-		
-		if(type == AbstractMemberInfo || Reflection.classExtendsClass(type, AbstractMemberInfo, applicationDomain))
-		{
-			throw new ArgumentError("Cannot get TypeInfo of objects that themselves extend AbstractMemberInfo.");
-		}
-		
-		//var s : int = getTimer();
-		if(!(applicationDomain in CACHED_TYPEINFO))
-		{
-			CACHED_TYPEINFO[applicationDomain] = new Dictionary();
-		}
-		
-		var types : Dictionary = CACHED_TYPEINFO[applicationDomain];
-		var reflectedType:TypeInfo = types[type];
+		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
 			var xml:XML = describeType(type);
+			
+			//trace(type, xml.toXMLString(), "\n\n");
 			
 			reflectedType = new TypeInfo(xml.@name, applicationDomain, type,
 				xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(),
 				xml.accessor.length() + xml.factory.accessor.length(),
 				xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
 				
-			addMetadata(reflectedType, xml.factory[0]);
+			if(xml.factory[0] != null)
+			{
+				addMetadata(reflectedType, xml.factory[0]);
+			}
 			
 			//add constructor
 			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, applicationDomain, true, false));
@@ -443,7 +483,7 @@ public class Reflection
 		{
 			return getClass(value, SYSTEM_DOMAIN) == Object;
 		}
-		catch(e:ReferenceError)
+		catch(e:ClassNotFoundError)
 		{
 		}
 		return false;

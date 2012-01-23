@@ -32,6 +32,7 @@ import flash.utils.Dictionary;
 import mock.foo.bar.*;
 import mock.foo.IFoo;
 
+import nexus.errors.ClassNotFoundError;
 import nexus.utils.reflection.*;
 
 /**
@@ -284,6 +285,13 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	
 	private function baseTest_getClass(appDomain:ApplicationDomain):void
 	{
+		assertSame(int,			Reflection.getClass(0));
+		assertSame(Array,		Reflection.getClass([]));
+		assertSame(Date,		Reflection.getClass(new Date()));
+		assertSame(Object,		Reflection.getClass({}));
+		
+		assertNull(Reflection.getClass(null));
+		
 		assertSame(TestClass,	Reflection.getClass(m_test, appDomain));
 		assertSame(BaseClass,	Reflection.getClass(BaseClass, appDomain));
 		assertSame(String,		Reflection.getClass("TypeInfo", appDomain));
@@ -308,9 +316,9 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertSame(Object,	Reflection.getClassByName("*", appDomain));
 		assertSame(Object,	Reflection.getClassByName("Object", appDomain));
 		
-		assertSame(null,	Reflection.getClassByName("null", appDomain));
-		assertSame(null,	Reflection.getClassByName("void", appDomain));
-		assertSame(null,	Reflection.getClassByName("undefined", appDomain));
+		assertNull(Reflection.getClassByName("null", appDomain));
+		assertNull(Reflection.getClassByName("void", appDomain));
+		assertNull(Reflection.getClassByName("undefined", appDomain));
 		
 		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<*>", appDomain));
 		assertSame(Vector.<Object>,			Reflection.getClassByName("Vector.<Object>", appDomain));
@@ -319,20 +327,33 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertSame(Vector.<Vector.<Object>>,Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<Object>>", appDomain));
 		
 		//TODO: Find a fix for this?
-		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<*>>", appDomain) });
+		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("Vector.<__AS3__.vec::Vector.<*>>", appDomain) });
 		
-		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("foo", appDomain) } );
-		assertThrows(ReferenceError,	function():void { Reflection.getClassByName("TestClass", appDomain) } );
+		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("foo", appDomain) } );
+		assertThrows(ClassNotFoundError,	function():void { Reflection.getClassByName("TestClass", appDomain) } );
 	}
 	
 	private function baseTest_getSuperClass(appDomain:ApplicationDomain):void
 	{
-		assertSame(Object,		Reflection.getSuperClass(BaseClass, appDomain));
-		assertSame(Object,		Reflection.getSuperClass("TestClass", appDomain));
-		assertSame(Object,		Reflection.getSuperClass("mock.foo.bar::TestClass", appDomain));
 		assertSame(BaseClass,	Reflection.getSuperClass(m_test, appDomain));
 		assertSame(BaseClass,	Reflection.getSuperClass(TestClass, appDomain));
 		assertSame(TestClass,	Reflection.getSuperClass(FinalClass, appDomain));
+		assertSame(Object,		Reflection.getSuperClass(BaseClass, appDomain));
+		assertSame(Object,		Reflection.getSuperClass(Date, appDomain));
+		assertSame(Object,		Reflection.getSuperClass(Array, appDomain));
+		
+		//TODO: Double-check that this behavior is expected
+		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<String>, appDomain));
+		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<Vector.<TestClass>>, appDomain));
+		assertSame(Vector.<Object>,	Reflection.getSuperClass(Vector.<Object>, appDomain));
+		
+		//strings
+		assertSame(Object,		Reflection.getSuperClass("TestClass", appDomain));
+		assertSame(Object,		Reflection.getSuperClass("mock.foo.bar::TestClass", appDomain));
+		
+		//no parent class of Object
+		assertNull(Reflection.getSuperClass(Object, appDomain));
+		assertNull(Reflection.getSuperClass(null, appDomain));
 	}
 	
 	private function baseTest_getVectorType(appDomain:ApplicationDomain):void
@@ -341,8 +362,8 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		assertSame(BaseClass,	Reflection.getVectorType(new Vector.<BaseClass>()));
 		assertSame(Object,		Reflection.getVectorType(new Vector.<*>()));
 		
-		assertSame(null,		Reflection.getVectorType([]));
-		assertSame(null,		Reflection.getVectorType("string"));
+		assertNull(Reflection.getVectorType([]));
+		assertNull(Reflection.getVectorType("string"));
 		
 		assertSame(Vector.<String>,			Reflection.getVectorType(new Vector.<Vector.<String>>()));
 		assertSame(Vector.<Vector.<Array>>,	Reflection.getVectorType(new Vector.<Vector.<Vector.<Array>>>()));

@@ -70,6 +70,9 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		assertSame(m_testTypeInfo, Reflection.getTypeInfo(m_test));
 		assertSame(m_baseTypeInfo, Reflection.getTypeInfo(m_baseTypeInfo.type, ApplicationDomain.currentDomain));
 		assertSame(m_finalTypeInfo, Reflection.getTypeInfo(FinalClass, Reflection.SYSTEM_DOMAIN));
+		
+		//TODO: Add checking for child app domains
+		//assertSame(m_baseTypeInfo, Reflection.getTypeInfo(m_baseTypeInfo.type, new ApplicationDomain(ApplicationDomain.currentDomain)));
 	}
 	
 	public function test_isDynamic():void
