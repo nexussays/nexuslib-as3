@@ -562,7 +562,7 @@ public class Reflection
 			}
 			else
 			{
-				var metadata:MetadataInfo;
+				var metadata:MetadataInfo = null;
 				var metadataName : String = metadataXml.@name;
 				var metadataDict : Dictionary = new Dictionary();
 				for each(var argXml:XML in metadataXml.arg)

@@ -118,7 +118,7 @@ public class AbstractMetadataRecipient
 		use namespace nexuslib_internal;
 		
 		m_metadata[m_metadataIndex++] = meta;
-		m_metadataByName[meta.name] = meta;
+		m_metadataByName[meta.metadataName] = meta;
 		
 		//if the metadata class has been registered, index it by that type as well
 		var type:Class = Reflection.getMetadataClass(meta);

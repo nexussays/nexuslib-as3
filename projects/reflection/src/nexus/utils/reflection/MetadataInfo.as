@@ -37,8 +37,8 @@ public class MetadataInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	protected var m_name : String;
-	protected var m_data : Dictionary;
+	protected var m_metadataName : String;
+	protected var m_metadataKeyValuePairs : Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -46,17 +46,17 @@ public class MetadataInfo
 	
 	public function MetadataInfo(name:String, keyValueCollection:Dictionary)
 	{
-		m_name = name;
-		m_data = keyValueCollection;
+		m_metadataName = name;
+		m_metadataKeyValuePairs = keyValueCollection;
 	}
 
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public final function get name():String { return m_name; }
+	public final function get metadataName():String { return m_metadataName; }
 	
-	public final function get data():Dictionary { return m_data; }
+	public final function get metadataKeyValuePairs():Dictionary { return m_metadataKeyValuePairs; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -64,12 +64,12 @@ public class MetadataInfo
 	
 	public final function getValue(key:String):String
 	{
-		return m_data[key];
+		return m_metadataKeyValuePairs[key];
 	}
 	
 	public function toString():String
 	{
-		return "[Metadata|" + m_name + "]";
+		return "[Metadata|" + m_metadataName + "]";
 	}
 	
 	//--------------------------------------

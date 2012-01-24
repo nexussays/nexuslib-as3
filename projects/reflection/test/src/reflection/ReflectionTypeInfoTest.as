@@ -139,10 +139,10 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		
 		assertNotNull(m_testTypeInfo.getMetadataByName("ClassMetadata"));
 		
-		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataByName("ClassMetadata").name);
+		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataByName("ClassMetadata").metadataName);
 		
 		assertEquals("value2",	m_testTypeInfo.getMetadataByName("ClassMetadata").getValue("param2"));
-		assertEquals("value",	m_testTypeInfo.getMetadataByName("ClassMetadata").data["param"]);
+		assertEquals("value",	m_testTypeInfo.getMetadataByName("ClassMetadata").metadataKeyValuePairs["param"]);
 		
 	}
 }
