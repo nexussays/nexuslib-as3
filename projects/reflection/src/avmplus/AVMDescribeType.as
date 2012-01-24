@@ -35,8 +35,7 @@ public final class AVMDescribeType
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	private static var describeJson : Function;
-	private static var describeXml : Function;
+	private static var s_isAvailable : Boolean = false;
 	
 	//--------------------------------------
 	//	STATIC INITIALIZER
@@ -45,13 +44,14 @@ public final class AVMDescribeType
 	{
 		try
 		{
-			describeJson = describeTypeJSON;
-			describeXml = describeType;
+			if(describeTypeJSON is Function && describeType is Function)
+			{
+				s_isAvailable = true;
+			}
 		}
 		catch(e:Error)
 		{
-			describeJson = null;
-			describeXml = null;
+			s_isAvailable = false;
 		}
 	}
 	
@@ -59,7 +59,7 @@ public final class AVMDescribeType
 	//	GETTERS/SETTERS
 	//--------------------------------------
 	
-	public static function isAvailable():Boolean { return describeJson != null; }
+	public static function get isAvailable():Boolean { return s_isAvailable; }
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
@@ -68,23 +68,23 @@ public final class AVMDescribeType
 	public static function getClassJson(object:Object):Object
 	{
 		//1404 represents the bitwise flags to display class-level information but no instance data, base classes, or constructor
-		return describeJson(object, 1404);
+		return describeTypeJSON(object, 1404);
 	}
 	
 	public static function getInstanceJson(object:Object):Object
 	{
 		//2046 represents the bitwise flags to display instance information
-		return describeJson(object, 2046);
+		return describeTypeJSON(object, 2046);
 	}
 	
 	public static function getClassXml(object:Object):XML
 	{
-		return describeXml(object, 1404);
+		return describeType(object, 1404);
 	}
 	
 	public static function getInstanceXml(object:Object):XML
 	{
-		return describeXml(object, 2046);
+		return describeType(object, 2046);
 	}
 }
 
