@@ -1,0 +1,255 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is PROJECT_NAME.
+ *
+ * The Initial Developer of the Original Code is
+ * Malachi Griffie <malachi@nexussays.com>.
+ * Portions created by the Initial Developer are Copyright (C) 2011
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * ***** END LICENSE BLOCK ***** */
+package nexus.utils.reflection
+{
+
+import avmplus.AVMDescribeType;
+import flash.system.*;
+import flash.utils.*;
+
+import nexus.errors.ClassNotFoundError;
+import nexus.nexuslib_internal;
+import nexus.utils.Parse;
+
+/**
+ * ...
+ * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * @since	1/24/2012 4:44 AM
+ */
+internal class TypeInfoCreatorJson
+{
+	//--------------------------------------
+	//	CLASS CONSTANTS
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	CLASS VARIABLES
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	PUBLIC STATIC METHODS
+	//--------------------------------------
+	
+	static public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	{
+		var json : Object = AVMDescribeType.getJson(type);
+		
+		var reflectedType:TypeInfo = new TypeInfo(json.name, applicationDomain, type,
+					json.methods.length + json.factory.methods.length,
+					json.accessors.length + json.factory.accessors.length,
+					json.variables.length + json.factory.variables.length);
+		addMetadata(reflectedType, json.factory.metadata);
+		
+		//add constructor
+		reflectedType.setConstructor(parseConstructorInfo(json.factory.constructor[0], reflectedType, applicationDomain, true, false));
+		
+		//add fields
+		//s = getTimer();
+		addMembers(parseFieldInfo, json.constant, reflectedType, applicationDomain, true, true);
+		addMembers(parseFieldInfo, json.variable, reflectedType, applicationDomain, true, false);
+		addMembers(parseFieldInfo, json.factory.constant, reflectedType, applicationDomain, false, true);
+		addMembers(parseFieldInfo, json.factory.variable, reflectedType, applicationDomain, false, false);
+		
+		//add methods
+		addMembers(parseMethodInfo, json.method, reflectedType, applicationDomain, true, false);
+		addMembers(parseMethodInfo, json.factory.method, reflectedType, applicationDomain, false, false);
+		
+		//add properties
+		addMembers(parsePropertyInfo, json.accessor, reflectedType, applicationDomain, true, false);
+		addMembers(parsePropertyInfo, json.factory.accessor, reflectedType, applicationDomain, false, false);
+		//trace(getTimer() - s);
+		
+		for each(var extendedClassXml:XML in json.factory.extendsClass)
+		{
+			reflectedType.extendedClasses.push(Reflection.getClassByName(extendedClassXml.type, applicationDomain));
+		}
+		//trace(reflectedType.extendedClasses);
+		
+		for each(var implementedInterfacesXml:XML in json.factory.implementsInterface)
+		{
+			reflectedType.implementedInterfaces.push(Reflection.getClassByName(implementedInterfacesXml.type, applicationDomain));
+		}
+		//trace(reflectedType.implementedInterfaces);
+		
+		//isDynamic info is incorrect if doing a describeType of a Class instead of an instance
+		if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
+		{
+			//try to instantiate so we can do a describe type of the instance
+			try
+			{
+				object = new type();
+			}
+			catch(e:Error)
+			{
+				
+			}
+		}
+		
+		//if the object provided was an instance or we were able to create one above
+		if(!(object is Class))
+		{
+			//get the json info for the instance
+			json = describeType(object);
+			reflectedType.setIsDynamic(Parse.boolean(json.isDynamic, false));
+			reflectedType.setIsFinal(Parse.boolean(json.isFinal, false));
+		}
+		
+		json = null;
+		
+		return reflectedType;
+	}
+	
+	//--------------------------------------
+	//	PRIVATE CLASS METHODS
+	//--------------------------------------
+	
+	private static function addMembers(method:Function, xmlList:XMLList, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):void
+	{
+		for each(var xmlItem:XML in xmlList)
+		{
+			var member:AbstractMemberInfo = method(xmlItem, typeInfo, appDomain, isStatic, isConstant);
+			if(member != null)
+			{
+				addMetadata(member, xmlItem);
+				
+				//add member to typeinfo
+				typeInfo.addMember(member);
+				
+				//trace(member);
+			}
+		}
+	}
+	
+	static private function addMetadata(member:AbstractMetadataRecipient, metadataArray:Array):void
+	{
+		/*
+		{
+		   "name": "MetadataName",
+		   "value": [
+			  {"key":"param","value":"value"},
+			  {"key":"param2","value":"value2"}
+		   ]
+		}
+		//*/
+		//add metadata
+		for each(var metadataObject:Object in metadataArray)
+		{
+			var metadataName : String = metadataObject.name;
+			//this is a default matadata tag added by the compiler in a debug build
+			if(metadataName == "__go_to_definition_help")
+			{
+				member.setPosition(parseInt(metadataObject.value[0].value));
+			}
+			else if(metadataName == "__go_to_ctor_definition_help")
+			{
+				//just drop this
+			}
+			else
+			{
+				var metadata:MetadataInfo = null;
+				var metadataDict : Dictionary = new Dictionary();
+				for each(var keyValuePair:Object in metadataObject.value)
+				{
+					metadataDict[keyValuePair["key"]] = keyValuePair["value"];
+				}
+				
+				//see if there is a registered strongly-typed class for this metadata
+				for(var qualifiedName:String in Reflection.REGISTERED_METADATA_CLASSES)
+				{
+					var unqualifiedName : String = Reflection.REGISTERED_METADATA_NAMES[qualifiedName];
+					//implementers of metadata should omit the "Metadata" suffix, it is added here
+					if(metadataName == unqualifiedName || metadataName + "Metadata" == unqualifiedName)
+					{
+						metadata = new Reflection.REGISTERED_METADATA_CLASSES[qualifiedName](metadataName, metadataDict);
+						break;
+					}
+				}
+				
+				//if no special metadatainfo exists, use the default class
+				if(metadata == null)
+				{
+					metadata = new MetadataInfo(metadataName, metadataDict);
+				}
+				
+				member.addMetadata(metadata);
+			}
+		}
+	}
+	
+	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):FieldInfo
+	{
+		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
+		return new FieldInfo(xmlItem.name, isStatic, isConstant, Reflection.getClassByName(xmlItem.type, appDomain), null, typeInfo);
+	}
+	
+	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo
+	{
+		var method:MethodInfo = new MethodInfo(xmlItem.name, isStatic, Reflection.getClassByName(xmlItem.returnType, appDomain), Reflection.getClassByName(xmlItem.declaredBy, appDomain), typeInfo, xmlItem.parameter.length());
+		for each(var paramXml:XML in xmlItem.parameter)
+		{
+			method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(paramXml.type, appDomain), Parse.integer(paramXml.index, 1) - 1, Parse.boolean(paramXml.optional, false)));
+		}
+		return method;
+	}
+	
+	static private function parseConstructorInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain):MethodInfo
+	{
+		var isStatic : Boolean = true;
+		var isConstant : Boolean = false;
+		var method:MethodInfo;
+		if(xmlItem != null)
+		{
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, xmlItem.parameter.length());
+			for each(var paramXml:XML in xmlItem.parameter)
+			{
+				method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(paramXml.type, appDomain), Parse.integer(paramXml.index, 1) - 1, Parse.boolean(paramXml.optional, false)));
+			}
+		}
+		else
+		{
+			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, 0);
+		}
+		return method;
+	}
+	
+	static private function parsePropertyInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):PropertyInfo
+	{
+		var property:PropertyInfo;
+		var name:String = xmlItem.name;
+		if(name != "prototype")
+		{
+			var access:String = String(xmlItem.access).toLowerCase();
+			property = new PropertyInfo(name, isStatic, Reflection.getClassByName(xmlItem.type, appDomain), Reflection.getClassByName(xmlItem.declaredBy, appDomain), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite");
+		}
+		else
+		{
+			typeInfo.properties.fixed = false;
+			typeInfo.properties.length--;
+			typeInfo.properties.fixed = true;
+		}
+		return property;
+	}
+}
+
+}

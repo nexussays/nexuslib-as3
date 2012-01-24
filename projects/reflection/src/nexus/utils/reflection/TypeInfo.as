@@ -70,9 +70,9 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function TypeInfo(name:String, appDomain:ApplicationDomain, type:Class, metadataCount:int, methodCount:int, propertyCount:int, fieldCount:int)
+	public function TypeInfo(name:String, appDomain:ApplicationDomain, type:Class, methodCount:int, propertyCount:int, fieldCount:int)
 	{
-		super(name, metadataCount);
+		super(name);
 		
 		m_type = type;
 		

@@ -29,7 +29,7 @@ package nexus.utils.reflection
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
-public class FieldInfo extends AbstractFieldInfo
+public final class FieldInfo extends AbstractFieldInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -43,9 +43,9 @@ public class FieldInfo extends AbstractFieldInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, metadatacount:int)
+	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, !isConstant, metadatacount);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, !isConstant);
 	}
 	
 	//--------------------------------------

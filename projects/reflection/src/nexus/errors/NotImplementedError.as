@@ -27,7 +27,6 @@ package nexus.errors
 import flash.errors.IllegalOperationError;
 import flash.utils.*;
 
-
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>

@@ -32,7 +32,7 @@ import flash.utils.*;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
-public class MethodInfo extends AbstractMemberInfo
+public final class MethodInfo extends AbstractMemberInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -55,9 +55,9 @@ public class MethodInfo extends AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function MethodInfo(name:String, isStatic:Boolean, returnType:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, paramCount:int, metadataCount:int)
+	public function MethodInfo(name:String, isStatic:Boolean, returnType:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, paramCount:int)
 	{
-		super(name, isStatic, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, isStatic, declaringType, reflectedTypeInfo);
 		
 		m_returnType = returnType;
 		m_parameters = new Vector.<MethodParameterInfo>(paramCount, true);

@@ -46,9 +46,9 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractMemberInfo(name:String, isStatic:Boolean, declaringType:Class, reflectedTypeInfo:TypeInfo, metadataCount:int)
+	public function AbstractMemberInfo(name:String, isStatic:Boolean, declaringType:Class, reflectedTypeInfo:TypeInfo)
 	{
-		super(name, metadataCount);
+		super(name);
 		
 		m_isStatic = isStatic;
 		

@@ -24,11 +24,11 @@
 package nexus.utils.reflection
 {
 
-import flash.system.ApplicationDomain;
-import flash.system.System;
+import avmplus.AVMDescribeType;
+import flash.system.*;
 import flash.utils.*;
-import nexus.errors.ClassNotFoundError;
 
+import nexus.errors.ClassNotFoundError;
 import nexus.nexuslib_internal;
 import nexus.utils.Parse;
 
@@ -37,7 +37,7 @@ import nexus.utils.Parse;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/23/2011 3:34 AM
  */
-public class Reflection
+public final class Reflection
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -60,14 +60,15 @@ public class Reflection
 	///class typed as __AS3__.vec::Vector.<*>
 	static private const UNTYPEDVECTOR_CLASS:Class = Class(Vector.<*>);
 	
-	///cache all TypeInfo information so parsing in the describeType() call only happens once
-	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
-	///store strongly-typed classes that represent metadata on members
-	static private const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
-	static private const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
-	
 	///used in applicationDomainsAreEqual to check for equality
 	static private const EQUALITYTEST_DOMAINMEMORY:ByteArray = new ByteArray();
+	
+	///cache all TypeInfo information so parsing in the describeType() call only happens once
+	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
+	
+	///store strongly-typed classes that represent metadata on members
+	static internal const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
+	static internal const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
 	
 	//--------------------------------------
 	//	CLASS INITIAlIZER
@@ -296,6 +297,11 @@ public class Reflection
 			return false;
 		}
 		
+		if(applicationDomainOne == applicationDomainTwo)
+		{
+			return true;
+		}
+		
 		var domainMemoryOne:ByteArray = applicationDomainOne.domainMemory;
 		
 		//assign a different ByteArray to domainMemory of the first app domain
@@ -327,10 +333,10 @@ public class Reflection
 			var appDomainExists : Boolean = false;
 			for(var appDomainKey : Object in CACHED_TYPEINFO)
 			{
-				var appDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
-				if(Reflection.applicationDomainsAreEqual(appDomain, applicationDomain))
+				var cachedAppDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
+				if(Reflection.applicationDomainsAreEqual(cachedAppDomain, applicationDomain))
 				{
-					applicationDomain = appDomain;
+					applicationDomain = cachedAppDomain;
 					appDomainExists = true;
 					break;
 				}
@@ -346,85 +352,15 @@ public class Reflection
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
-			var xml:XML = describeType(type);
-			
-			//trace(type, xml.toXMLString(), "\n\n");
-			
-			reflectedType = new TypeInfo(xml.@name, applicationDomain, type,
-				xml.factory.metadata.length(), xml.method.length() + xml.factory.method.length(),
-				xml.accessor.length() + xml.factory.accessor.length(),
-				xml.variable.length() + xml.constant.length() + xml.factory.variable.length() + xml.factory.constant.length());
-				
-			if(xml.factory[0] != null)
+			if(false && AVMDescribeType.isAvailable)
 			{
-				addMetadata(reflectedType, xml.factory[0]);
+				//reflectedType = TypeInfoCreatorJson.create(object, type, applicationDomain);
 			}
-			
-			//add constructor
-			reflectedType.setConstructor(parseConstructorInfo(xml.factory.constructor[0], reflectedType, applicationDomain, true, false));
-			
-			//add fields
-			//s = getTimer();
-			addMembers(parseFieldInfo, xml.constant, reflectedType, applicationDomain, true, true);
-			addMembers(parseFieldInfo, xml.variable, reflectedType, applicationDomain, true, false);
-			addMembers(parseFieldInfo, xml.factory.constant, reflectedType, applicationDomain, false, true);
-			addMembers(parseFieldInfo, xml.factory.variable, reflectedType, applicationDomain, false, false);
-			
-			//add methods
-			addMembers(parseMethodInfo, xml.method, reflectedType, applicationDomain, true, false);
-			addMembers(parseMethodInfo, xml.factory.method, reflectedType, applicationDomain, false, false);
-			
-			//add properties
-			addMembers(parsePropertyInfo, xml.accessor, reflectedType, applicationDomain, true, false);
-			addMembers(parsePropertyInfo, xml.factory.accessor, reflectedType, applicationDomain, false, false);
-			//trace(getTimer() - s);
-			
-			for each(var extendedClassXml:XML in xml.factory.extendsClass)
+			else
 			{
-				reflectedType.extendedClasses.push(getClassByName(extendedClassXml.@type, applicationDomain));
+				reflectedType = TypeInfoCreatorXml.create(object, type, applicationDomain);
 			}
-			//trace(reflectedType.extendedClasses);
-			
-			for each(var implementedInterfacesXml:XML in xml.factory.implementsInterface)
-			{
-				reflectedType.implementedInterfaces.push(getClassByName(implementedInterfacesXml.@type, applicationDomain));
-			}
-			//trace(reflectedType.implementedInterfaces);
-			
-			//isDynamic info is incorrect if doing a describeType of a Class
-			if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
-			{
-				//try to instantiate so we can do a describe type of the instance
-				try
-				{
-					object = new type();
-				}
-				catch(e:Error)
-				{
-					
-				}
-			}
-			
-			//if the object provided was an instance or we were able to create one above
-			if(!(object is Class))
-			{
-				if("disposeXML" in System)
-				{
-					System["disposeXML"](xml);
-				}
-				//get the xml info for the instance
-				xml = describeType(object);
-				reflectedType.setIsDynamic(Parse.boolean(xml.@isDynamic, false));
-				reflectedType.setIsFinal(Parse.boolean(xml.@isFinal, false));
-			}
-			
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
-			
-			if("disposeXML" in System)
-			{
-				System["disposeXML"](xml);
-			}
-			xml = null;
 		}
 		return reflectedType;
 	}
@@ -532,117 +468,5 @@ public class Reflection
 	//--------------------------------------
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
-	
-	private static function addMembers(method:Function, xmlList:XMLList, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):void
-	{
-		for each(var xmlItem:XML in xmlList)
-		{
-			var member:AbstractMemberInfo = method(xmlItem, typeInfo, appDomain, isStatic, isConstant);
-			if(member != null)
-			{
-				addMetadata(member, xmlItem);
-				
-				//add member to typeinfo
-				typeInfo.addMember(member);
-				
-				//trace(member);
-			}
-		}
-	}
-	
-	static private function addMetadata(member:AbstractMetadataRecipient, xmlItem:XML):void
-	{
-		//add metadata
-		for each(var metadataXml:XML in xmlItem.metadata)
-		{
-			//this is a default matadata tag added by the compiler in a debug build
-			if(metadataXml.@name == "__go_to_definition_help")
-			{
-				member.setPosition(parseInt(metadataXml.arg[0].@value));
-			}
-			else
-			{
-				var metadata:MetadataInfo = null;
-				var metadataName : String = metadataXml.@name;
-				var metadataDict : Dictionary = new Dictionary();
-				for each(var argXml:XML in metadataXml.arg)
-				{
-					metadataDict[String(argXml.@key)] = String(argXml.@value);
-				}
-				
-				//see if there is a registered strongly-typed class for this metadata
-				for(var qualifiedName:String in REGISTERED_METADATA_CLASSES)
-				{
-					var unqualifiedName : String = REGISTERED_METADATA_NAMES[qualifiedName];
-					//implementers of metadata should omit the "Metadata" suffix, it is added here
-					if(metadataName == unqualifiedName || metadataName + "Metadata" == unqualifiedName)
-					{
-						metadata = new REGISTERED_METADATA_CLASSES[qualifiedName](metadataName, metadataDict);
-						break;
-					}
-				}
-				
-				//if no special metadatainfo exists, use the default class
-				if(metadata == null)
-				{
-					metadata = new MetadataInfo(metadataName, metadataDict);
-				}
-				
-				member.addMetadata(metadata);
-			}
-		}
-	}
-	
-	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):FieldInfo
-	{
-		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
-		return new FieldInfo(xmlItem.@name, isStatic, isConstant, getClassByName(xmlItem.@type, appDomain), null, typeInfo, xmlItem.metadata.length());
-	}
-	
-	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo
-	{
-		var method:MethodInfo = new MethodInfo(xmlItem.@name, isStatic, getClassByName(xmlItem.@returnType, appDomain), getClassByName(xmlItem.@declaredBy, appDomain), typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
-		for each(var paramXml:XML in xmlItem.parameter)
-		{
-			method.addMethodParameter(new MethodParameterInfo(getClassByName(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
-		}
-		return method;
-	}
-	
-	static private function parseConstructorInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo
-	{
-		var method:MethodInfo;
-		if(xmlItem != null)
-		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, xmlItem.parameter.length(), xmlItem.metadata.length());
-			for each(var paramXml:XML in xmlItem.parameter)
-			{
-				method.addMethodParameter(new MethodParameterInfo(getClassByName(paramXml.@type, appDomain), Parse.integer(paramXml.@index, 1) - 1, Parse.boolean(paramXml.@optional, false)));
-			}
-		}
-		else
-		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, 0, 0);
-		}
-		return method;
-	}
-	
-	static private function parsePropertyInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):PropertyInfo
-	{
-		var property:PropertyInfo;
-		var name:String = xmlItem.@name;
-		if(name != "prototype")
-		{
-			var access:String = String(xmlItem.@access).toLowerCase();
-			property = new PropertyInfo(name, isStatic, getClassByName(xmlItem.@type, appDomain), getClassByName(xmlItem.@declaredBy, appDomain), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite", xmlItem.metadata.length());
-		}
-		else
-		{
-			typeInfo.properties.fixed = false;
-			typeInfo.properties.length--;
-			typeInfo.properties.fixed = true;
-		}
-		return property;
-	}
 }
 }

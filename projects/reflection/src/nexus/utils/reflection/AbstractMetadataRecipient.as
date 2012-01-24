@@ -41,7 +41,6 @@ public class AbstractMetadataRecipient
 	
 	protected var m_name:String;
 	
-	private var m_metadataIndex:int = 0;
 	protected var m_metadata:Vector.<MetadataInfo>;
 	
 	protected var m_metadataByName:Dictionary;
@@ -53,11 +52,11 @@ public class AbstractMetadataRecipient
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractMetadataRecipient(name:String, metadataCount:int)
+	public function AbstractMetadataRecipient(name:String)
 	{
 		m_name = name;
 		
-		m_metadata = new Vector.<MetadataInfo>(metadataCount, true);
+		m_metadata = new Vector.<MetadataInfo>();
 		m_metadataByName = new Dictionary();
 	}
 	
@@ -117,7 +116,7 @@ public class AbstractMetadataRecipient
 	{
 		use namespace nexuslib_internal;
 		
-		m_metadata[m_metadataIndex++] = meta;
+		m_metadata.push(meta);
 		m_metadataByName[meta.metadataName] = meta;
 		
 		//if the metadata class has been registered, index it by that type as well

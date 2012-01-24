@@ -52,9 +52,9 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
+	public function AbstractFieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean)
 	{
-		super(name, isStatic, declaringType, reflectedTypeInfo, metadataCount);
+		super(name, isStatic, declaringType, reflectedTypeInfo);
 		
 		m_type = type;
 		

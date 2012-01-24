@@ -31,7 +31,7 @@ import flash.utils.*;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	7/23/2011 3:34 AM
  */
-public class PropertyInfo extends AbstractFieldInfo
+public final class PropertyInfo extends AbstractFieldInfo
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -45,9 +45,9 @@ public class PropertyInfo extends AbstractFieldInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean, metadataCount:int)
+	public function PropertyInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, read:Boolean, write:Boolean)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, read, write, metadataCount);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, read, write);
 	}
 	
 	//--------------------------------------
