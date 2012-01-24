@@ -3,5 +3,3 @@ syntax: regexp
 obj
 bin/.+\.swf
 test/.+\.lxml
-syntax: glob
-*.lxml
