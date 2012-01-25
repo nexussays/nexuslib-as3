@@ -1,4 +1,4 @@
 package mock
 {
-	public namespace testing_namespace = "mock.testing_namespace";
+	public namespace testing_namespace = "http://mock.testing_namespace";
 }

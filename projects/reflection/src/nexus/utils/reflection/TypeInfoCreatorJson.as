@@ -57,8 +57,6 @@ internal class TypeInfoCreatorJson
 		var json : Object = AVMDescribeType.getJson(type);
 		var x : int;
 		
-		trace(JsonSerializer.serialize(json, "   ", 30, true));
-		
 		var reflectedType:TypeInfo = new TypeInfo(json.factory.name, applicationDomain, type,
 					json.methods.length + json.factory.methods.length,
 					json.accessors.length + json.factory.accessors.length,
@@ -111,6 +109,7 @@ internal class TypeInfoCreatorJson
 			if(memberInfo != null)
 			{
 				addMetadata(memberInfo, member);
+				memberInfo.assignNamespace(Reflection.getNamespace(member.uri));
 				typeInfo.addMember(memberInfo);
 			}
 		}

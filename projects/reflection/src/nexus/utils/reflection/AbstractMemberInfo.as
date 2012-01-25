@@ -42,6 +42,9 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	
 	protected var m_isStatic : Boolean;
 	
+	protected var m_namespace : Namespace;
+	protected var m_qname : QName;
+	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
@@ -72,14 +75,29 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	
 	public function get isStatic():Boolean { return m_isStatic; }
 	
+	/**
+	 * The namespace of this member, if one exists.
+	 */
+	public function get namespace():Namespace { return m_namespace; }
+	
+	/**
+	 * The QName of this member. Use this for access instead of name
+	 */
+	public function get qname():QName { return m_qname; }
+	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
 	//--------------------------------------
-	//	PROTECTED INSTANCE METHODS
+	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
 	
+	internal function assignNamespace(ns:Namespace):void
+	{
+		m_namespace = ns;
+		m_qname = new QName(m_namespace, m_name);
+	}
 }
 
 }

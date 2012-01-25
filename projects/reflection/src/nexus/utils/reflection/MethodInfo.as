@@ -120,11 +120,11 @@ public final class MethodInfo extends AbstractMemberInfo
 		
 		if(m_returnType != null)
 		{
-			return Function(scope[m_name]).apply(scope, params);
+			return scope[m_qname].apply(scope, params);
 		}
 		else
 		{
-			Function(scope[m_name]).apply(scope, params);
+			scope[m_qname].apply(scope, params);
 			return null;
 		}
 	}

@@ -68,9 +68,9 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	}
 	
 	[bazbazbaz(param="value", param2="value2")]
-	testing_namespace function namespacedMethod(test:String, foo:*):Object
+	testing_namespace function namespacedMethod(test:String, foo:*=null):Object
 	{
-		return null;
+		return m_privateVar + test + (foo != null ? foo : "");
 	}
 	
 	//--------------------------------------

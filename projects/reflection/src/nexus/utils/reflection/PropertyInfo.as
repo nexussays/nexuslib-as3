@@ -58,7 +58,7 @@ public final class PropertyInfo extends AbstractFieldInfo
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function toString():String
+	override public function toString():String
 	{
 		if(m_typeName == null)
 		{

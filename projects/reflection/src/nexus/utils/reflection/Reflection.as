@@ -72,6 +72,8 @@ public final class Reflection
 	
 	///cache all TypeInfo information so parsing in the describeType() call only happens once
 	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
+	///cache all namespaces by their URI
+	static private const CACHED_NAMESPACES:Dictionary = new Dictionary();
 	
 	///store strongly-typed classes that represent metadata on members
 	static internal const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
@@ -471,9 +473,28 @@ public final class Reflection
 	 * @param	instance
 	 * @return
 	 */
-	nexuslib_internal static function getMetadataClass(instance:MetadataInfo):Class
+	static internal function getMetadataClass(instance:MetadataInfo):Class
 	{
 		return REGISTERED_METADATA_CLASSES[Reflection.getQualifiedClassName(instance)];
+	}
+	
+	/**
+	 * Retrievs the caches Namespace for the given namespace URI
+	 * @param	namespaceUri
+	 */
+	static internal function getNamespace(namespaceUri:String):Namespace
+	{
+		var ns : Namespace;
+		if(namespaceUri != null)
+		{
+			ns = CACHED_NAMESPACES[namespaceUri];
+			if(ns == null)
+			{
+				ns = new Namespace(namespaceUri);
+				CACHED_NAMESPACES[namespaceUri] = ns;
+			}
+		}
+		return ns;
 	}
 	
 	//--------------------------------------

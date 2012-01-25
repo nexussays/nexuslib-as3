@@ -130,7 +130,26 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		assertEquals(-1, m_baseTypeInfo.implementedInterfaces.indexOf(IFoo));
 	}
 	
-	public function test_metadata():void
+	public function testNamespacing():void
+	{
+		m_test.publicProperty = 555;
+		
+		assertNotNull(m_testTypeInfo.getMethodByName("namespacedMethod"));
+		
+		var namespacedMethod : MethodInfo = m_testTypeInfo.getMethodByName("namespacedMethod");
+		
+		assertEquals("555append", namespacedMethod.invoke(m_test, "append"));
+		assertEquals("555appendfoo", namespacedMethod.invoke(m_test, "append", "foo"));
+		assertEquals("555", namespacedMethod.invoke(m_test, null));
+		assertEquals("555foo", namespacedMethod.invoke(m_test, null, "foo"));
+		
+		assertEquals("555append", m_test[namespacedMethod.qname]("append"));
+		assertEquals("555appendfoo", m_test[namespacedMethod.qname]("append", "foo"));
+		assertEquals("555", m_test[namespacedMethod.qname](null));
+		assertEquals("555foo", m_test[namespacedMethod.qname](null, "foo"));
+	}
+	
+	public function testMetadata():void
 	{
 		//
 		//[ClassMetadata(param="value", param2="value2")]
@@ -143,7 +162,6 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		
 		assertEquals("value2",	m_testTypeInfo.getMetadataByName("ClassMetadata").getValue("param2"));
 		assertEquals("value",	m_testTypeInfo.getMetadataByName("ClassMetadata").metadataKeyValuePairs["param"]);
-		
 	}
 }
 
