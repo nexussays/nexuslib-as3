@@ -27,13 +27,14 @@ package nexus.utils.reflection
 import avmplus.AVMDescribeType;
 import flash.system.*;
 import flash.utils.*;
+import nexus.utils.serialization.json.JsonSerializer;
 
 import nexus.errors.ClassNotFoundError;
 import nexus.nexuslib_internal;
 import nexus.utils.Parse;
 
 /**
- * ...
+ * Creates a TypeInfo object using avmplus.describeTypeJSON
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/24/2012 4:44 AM
  */
@@ -54,65 +55,43 @@ internal class TypeInfoCreatorJson
 	static public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
 	{
 		var json : Object = AVMDescribeType.getJson(type);
+		var x : int;
 		
-		var reflectedType:TypeInfo = new TypeInfo(json.name, applicationDomain, type,
+		trace(JsonSerializer.serialize(json, "   ", 30, true));
+		
+		var reflectedType:TypeInfo = new TypeInfo(json.factory.name, applicationDomain, type,
 					json.methods.length + json.factory.methods.length,
 					json.accessors.length + json.factory.accessors.length,
 					json.variables.length + json.factory.variables.length);
-		addMetadata(reflectedType, json.factory.metadata);
+		
+		reflectedType.setIsDynamic(json.factory.isDynamic);
+		reflectedType.setIsFinal(json.factory.isFinal);
+		
+		addMetadata(reflectedType, json.factory);
 		
 		//add constructor
-		reflectedType.setConstructor(parseConstructorInfo(json.factory.constructor[0], reflectedType, applicationDomain, true, false));
+		reflectedType.setConstructor(parseConstructorInfo(json.factory.constructor, reflectedType, applicationDomain));
 		
 		//add fields
-		//s = getTimer();
-		addMembers(parseFieldInfo, json.constant, reflectedType, applicationDomain, true, true);
-		addMembers(parseFieldInfo, json.variable, reflectedType, applicationDomain, true, false);
-		addMembers(parseFieldInfo, json.factory.constant, reflectedType, applicationDomain, false, true);
-		addMembers(parseFieldInfo, json.factory.variable, reflectedType, applicationDomain, false, false);
+		addMembers(parseFieldInfo, json.variables, reflectedType, applicationDomain, true);
+		addMembers(parseFieldInfo, json.factory.variables, reflectedType, applicationDomain, false);
 		
 		//add methods
-		addMembers(parseMethodInfo, json.method, reflectedType, applicationDomain, true, false);
-		addMembers(parseMethodInfo, json.factory.method, reflectedType, applicationDomain, false, false);
+		addMembers(parseMethodInfo, json.methods, reflectedType, applicationDomain, true);
+		addMembers(parseMethodInfo, json.factory.methods, reflectedType, applicationDomain, false);
 		
 		//add properties
-		addMembers(parsePropertyInfo, json.accessor, reflectedType, applicationDomain, true, false);
-		addMembers(parsePropertyInfo, json.factory.accessor, reflectedType, applicationDomain, false, false);
-		//trace(getTimer() - s);
+		addMembers(parsePropertyInfo, json.accessors, reflectedType, applicationDomain, true);
+		addMembers(parsePropertyInfo, json.factory.accessors, reflectedType, applicationDomain, false);
 		
-		for each(var extendedClassXml:XML in json.factory.extendsClass)
+		for(x = 0; x < json.factory.bases.length; ++x)
 		{
-			reflectedType.extendedClasses.push(Reflection.getClassByName(extendedClassXml.type, applicationDomain));
-		}
-		//trace(reflectedType.extendedClasses);
-		
-		for each(var implementedInterfacesXml:XML in json.factory.implementsInterface)
-		{
-			reflectedType.implementedInterfaces.push(Reflection.getClassByName(implementedInterfacesXml.type, applicationDomain));
-		}
-		//trace(reflectedType.implementedInterfaces);
-		
-		//isDynamic info is incorrect if doing a describeType of a Class instead of an instance
-		if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
-		{
-			//try to instantiate so we can do a describe type of the instance
-			try
-			{
-				object = new type();
-			}
-			catch(e:Error)
-			{
-				
-			}
+			reflectedType.extendedClasses.push(Reflection.getClassByName(json.factory.bases[x], applicationDomain));
 		}
 		
-		//if the object provided was an instance or we were able to create one above
-		if(!(object is Class))
+		for(x = 0; x < json.factory.interfaces.length; ++x)
 		{
-			//get the json info for the instance
-			json = describeType(object);
-			reflectedType.setIsDynamic(Parse.boolean(json.isDynamic, false));
-			reflectedType.setIsFinal(Parse.boolean(json.isFinal, false));
+			reflectedType.implementedInterfaces.push(Reflection.getClassByName(json.factory.interfaces[x], applicationDomain));
 		}
 		
 		json = null;
@@ -124,25 +103,71 @@ internal class TypeInfoCreatorJson
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	private static function addMembers(method:Function, xmlList:XMLList, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):void
+	private static function addMembers(method:Function, members:Array, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean):void
 	{
-		for each(var xmlItem:XML in xmlList)
+		for each(var member:Object in members)
 		{
-			var member:AbstractMemberInfo = method(xmlItem, typeInfo, appDomain, isStatic, isConstant);
-			if(member != null)
+			var memberInfo:AbstractMemberInfo = method(member, typeInfo, appDomain, isStatic);
+			if(memberInfo != null)
 			{
-				addMetadata(member, xmlItem);
-				
-				//add member to typeinfo
-				typeInfo.addMember(member);
-				
-				//trace(member);
+				addMetadata(memberInfo, member);
+				typeInfo.addMember(memberInfo);
 			}
 		}
 	}
 	
-	static private function addMetadata(member:AbstractMetadataRecipient, metadataArray:Array):void
+	static private function parsePropertyInfo(object:Object, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean):PropertyInfo
 	{
+		var property:PropertyInfo;
+		var name:String = object.name;
+		if(name == "prototype")
+		{
+			typeInfo.properties.fixed = false;
+			typeInfo.properties.length--;
+			typeInfo.properties.fixed = true;
+		}
+		else
+		{
+			var access:String = object.access;
+			var canRead : Boolean = access == "readonly" || access == "readwrite";
+			var canWrite : Boolean = access == "writeonly" || access == "readwrite";
+			property = new PropertyInfo(name, isStatic, Reflection.getClassByName(object.type, appDomain), Reflection.getClassByName(object.declaredBy, appDomain),
+				typeInfo, canRead, canWrite);
+		}
+		return property;
+	}
+	
+	static private function parseFieldInfo(object:Object, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean):FieldInfo
+	{
+		//TODO: support adding "declaredBy" field. It will require recursing through all superclass TypeInfos looking for the first appearance
+		return new FieldInfo(object.name, isStatic, Reflection.getClassByName(object.type, appDomain), null, typeInfo, object.access == "readwrite");
+	}
+	
+	static private function parseMethodInfo(object:Object, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean):MethodInfo
+	{
+		var method:MethodInfo = new MethodInfo(object.name, isStatic, Reflection.getClassByName(object.returnType, appDomain), Reflection.getClassByName(object.declaredBy, appDomain), typeInfo, object.parameters.length);
+		for(var x : int = 0; x < object.parameters.length; ++x)
+		{
+			var param:Object = object.parameters[x];
+			method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(param.type, appDomain), x, param.optional));
+		}
+		return method;
+	}
+	
+	static private function parseConstructorInfo(params:Array, typeInfo:TypeInfo, appDomain:ApplicationDomain):MethodInfo
+	{
+		var method:MethodInfo = new MethodInfo("_ctor", true, null, typeInfo.type, typeInfo, params.length);
+		for(var x : int = 0; x < params.length; ++x)
+		{
+			var param:Object = params[x];
+			method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(param.type, appDomain), x, param.optional));
+		}
+		return method;
+	}
+	
+	static private function addMetadata(member:AbstractMetadataRecipient, sourceObject:Object):void
+	{
+		var metadataArray:Array = sourceObject.metadata;
 		/*
 		{
 		   "name": "MetadataName",
@@ -195,60 +220,6 @@ internal class TypeInfoCreatorJson
 				member.addMetadata(metadata);
 			}
 		}
-	}
-	
-	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):FieldInfo
-	{
-		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
-		return new FieldInfo(xmlItem.name, isStatic, isConstant, Reflection.getClassByName(xmlItem.type, appDomain), null, typeInfo);
-	}
-	
-	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo
-	{
-		var method:MethodInfo = new MethodInfo(xmlItem.name, isStatic, Reflection.getClassByName(xmlItem.returnType, appDomain), Reflection.getClassByName(xmlItem.declaredBy, appDomain), typeInfo, xmlItem.parameter.length());
-		for each(var paramXml:XML in xmlItem.parameter)
-		{
-			method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(paramXml.type, appDomain), Parse.integer(paramXml.index, 1) - 1, Parse.boolean(paramXml.optional, false)));
-		}
-		return method;
-	}
-	
-	static private function parseConstructorInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain):MethodInfo
-	{
-		var isStatic : Boolean = true;
-		var isConstant : Boolean = false;
-		var method:MethodInfo;
-		if(xmlItem != null)
-		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, xmlItem.parameter.length());
-			for each(var paramXml:XML in xmlItem.parameter)
-			{
-				method.addMethodParameter(new MethodParameterInfo(Reflection.getClassByName(paramXml.type, appDomain), Parse.integer(paramXml.index, 1) - 1, Parse.boolean(paramXml.optional, false)));
-			}
-		}
-		else
-		{
-			method = new MethodInfo("_ctor", isStatic, null, typeInfo.type, typeInfo, 0);
-		}
-		return method;
-	}
-	
-	static private function parsePropertyInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):PropertyInfo
-	{
-		var property:PropertyInfo;
-		var name:String = xmlItem.name;
-		if(name != "prototype")
-		{
-			var access:String = String(xmlItem.access).toLowerCase();
-			property = new PropertyInfo(name, isStatic, Reflection.getClassByName(xmlItem.type, appDomain), Reflection.getClassByName(xmlItem.declaredBy, appDomain), typeInfo, access == "readonly" || access == "readwrite", access == "writeonly" || access == "readwrite");
-		}
-		else
-		{
-			typeInfo.properties.fixed = false;
-			typeInfo.properties.length--;
-			typeInfo.properties.fixed = true;
-		}
-		return property;
 	}
 }
 

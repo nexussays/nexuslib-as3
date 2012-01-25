@@ -32,7 +32,7 @@ import nexus.nexuslib_internal;
 import nexus.utils.Parse;
 
 /**
- * ...
+ * Creates a TypeInfo object using flash.utils.describeType
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/24/2012 4:44 AM
  */
@@ -200,7 +200,7 @@ internal class TypeInfoCreatorXml
 	static private function parseFieldInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):FieldInfo
 	{
 		//TODO: add declaring type info. it will require recursing through all superclass typeinfos
-		return new FieldInfo(xmlItem.@name, isStatic, isConstant, Reflection.getClassByName(xmlItem.@type, appDomain), null, typeInfo);
+		return new FieldInfo(xmlItem.@name, isStatic, Reflection.getClassByName(xmlItem.@type, appDomain), null, typeInfo, !isConstant);
 	}
 	
 	static private function parseMethodInfo(xmlItem:XML, typeInfo:TypeInfo, appDomain:ApplicationDomain, isStatic:Boolean, isConstant:Boolean):MethodInfo

@@ -8,8 +8,8 @@
     <movie fps="30" />
     <movie width="400" />
     <movie height="300" />
-    <movie version="10" />
-    <movie minorVersion="1" />
+    <movie version="11" />
+    <movie minorVersion="0" />
     <movie platform="Flash Player" />
     <movie background="#FF00FF" />
   </output>
@@ -52,7 +52,7 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <!-- example: <element path="..." /> -->
+    <element path="..\..\..\lib\blooddy_crypto_0.3.5\blooddy_crypto.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

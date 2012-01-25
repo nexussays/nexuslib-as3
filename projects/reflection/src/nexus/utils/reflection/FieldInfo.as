@@ -43,9 +43,9 @@ public final class FieldInfo extends AbstractFieldInfo
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function FieldInfo(name:String, isStatic:Boolean, isConstant:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo)
+	public function FieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, write:Boolean)
 	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, !isConstant);
+		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, write);
 	}
 	
 	//--------------------------------------

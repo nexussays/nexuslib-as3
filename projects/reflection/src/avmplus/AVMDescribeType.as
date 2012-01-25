@@ -98,9 +98,28 @@ public final class AVMDescribeType
 	
 	public static function getJson(object:Object):Object
 	{
-		//keep same general format as the xml
+		var factory : Object = describeTypeJSON(object, GET_INSTANCE);
+		factory.traits.isDynamic = factory.isDynamic;
+		factory.traits.isFinal = factory.isFinal;
+		factory.traits.isStatic = factory.isStatic;
+		factory.traits.name = factory.name;
+		factory = factory.traits;
+		factory.methods = factory.methods || [];
+		factory.accessors = factory.accessors || [];
+		factory.variables = factory.variables || [];
+		factory.constructor = factory.constructor || [];
+		
 		var obj : Object = describeTypeJSON(object, GET_CLASS);
-		obj["factory"] = describeTypeJSON(object, GET_INSTANCE);
+		obj = obj.traits;
+		obj.methods = obj.methods || [];
+		obj.accessors = obj.accessors || [];
+		obj.variables = obj.variables || [];
+		delete obj.bases;
+		delete obj.constructor;
+		delete obj.interfaces;
+		
+		obj.factory = factory;
+		
 		return obj;
 	}
 	

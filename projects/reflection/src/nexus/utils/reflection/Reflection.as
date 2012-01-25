@@ -25,6 +25,7 @@ package nexus.utils.reflection
 {
 
 import avmplus.AVMDescribeType;
+import flash.errors.IllegalOperationError;
 import flash.system.*;
 import flash.utils.*;
 
@@ -42,6 +43,12 @@ public final class Reflection
 	//--------------------------------------
 	//	CLASS CONSTANTS
 	//--------------------------------------
+	
+	/**
+	 * Determines if the Reflection library should throw an error if it doesn't have access to the avmplus describeTypeJson interface or
+	 * if it should use flash.utils.describeType in its place and accept any data errors that result.
+	 */
+	static nexuslib_internal var allowInferiorDescribeType : Boolean = false;
 	
 	//TODO: Probably need to do some checking here to make sure this is the domain we want
 	/**
@@ -352,13 +359,17 @@ public final class Reflection
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
-			if(false && AVMDescribeType.isAvailable)
+			if(AVMDescribeType.isAvailable)
 			{
-				//reflectedType = TypeInfoCreatorJson.create(object, type, applicationDomain);
+				reflectedType = TypeInfoCreatorJson.create(object, type, applicationDomain);
+			}
+			else if(nexuslib_internal::allowInferiorDescribeType)
+			{
+				reflectedType = TypeInfoCreatorXml.create(object, type, applicationDomain);
 			}
 			else
 			{
-				reflectedType = TypeInfoCreatorXml.create(object, type, applicationDomain);
+				throw new IllegalOperationError("Cannot get type information for object, describeTypeJSON() is not present and Reflection.allowInferiorDescribeType is false.");
 			}
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 		}
