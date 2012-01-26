@@ -131,7 +131,7 @@ public final class AVMDescribeType
 	 */
 	public static function getXml(object:Object):XML
 	{
-		return describeType(object, 1534);
+		return describeType(object, GET_CLASS);
 	}
 }
 

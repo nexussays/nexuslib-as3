@@ -24,8 +24,9 @@
 package
 {
 
-import asunit.textui.ResultPrinter;
-import asunit.textui.TestRunner;
+import asunit.core.TextCore;
+import flash.display.Sprite;
+import flash.system.Capabilities;
 import flash.text.TextFormat;
 
 /**
@@ -34,19 +35,28 @@ import flash.text.TextFormat;
  * @since	1/14/2012 11:38 PM
  */
 [SWF(width="800", height="600", backgroundColor="#333333", frameRate="30")]
-public class ReflectionTestRunner extends TestRunner
+public class ReflectionTestRunner extends Sprite
 {
+	private var core:TextCore;
+	
 	public function ReflectionTestRunner()
 	{
-		this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));
+		core = new TextCore();
+		core.textPrinter.fontFamily = "Consolas";
+		core.textPrinter.fontSize = 12;
+		core.textPrinter.header = "nexuslib.reflection\nFlash Player version: " + Capabilities.version;
+		core.textPrinter.hideLocalPaths = true;
+		core.start(ReflectionTests, null, this);
 		
-		// start(clazz:Class, methodName:String, showTrace:Boolean)
+		//this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));
+		
 		// NOTE: sending a particular class and method name will
 		// execute setUp(), the method and NOT tearDown.
 		// This allows you to get visual confirmation while developing
 		// visual entities
-		//start(AllTests, null, TestRunner.SHOW_TRACE);
-		start(ReflectionTests);
+		// start(AllTests, null, TestRunner.SHOW_TRACE);
+		
+		//start(ReflectionTests);
 	}
 }
 

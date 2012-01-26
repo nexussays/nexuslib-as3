@@ -24,8 +24,6 @@
 package
 {
 
-import asunit.framework.TestSuite;
-
 import reflection.*;
 
 /**
@@ -33,12 +31,16 @@ import reflection.*;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/14/2012 11:36 PM
  */
-public class ReflectionTests extends TestSuite
+[Suite]
+public class ReflectionTests// extends TestSuite
 {
+	public var test01 : ReflectionCoreTest;
+	public var test02 : ReflectionTypeInfoTest;
+	
 	public function ReflectionTests()
 	{
-		addTest(new ReflectionCoreTest());
-		addTest(new ReflectionTypeInfoTest());
+		//addTest(new ReflectionCoreTest());
+		//addTest(new ReflectionTypeInfoTest());
 	}
 }
 
