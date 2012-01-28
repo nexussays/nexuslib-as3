@@ -36,7 +36,7 @@ import nexus.utils.Parse;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/24/2012 4:44 AM
  */
-internal class TypeInfoCreatorXml
+internal class TypeInfoCreatorXml implements ITypeInfoCreator
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -50,7 +50,7 @@ internal class TypeInfoCreatorXml
 	//	PUBLIC STATIC METHODS
 	//--------------------------------------
 	
-	static public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
 	{
 		var xml:XML = describeType(type);
 		
@@ -145,7 +145,7 @@ internal class TypeInfoCreatorXml
 			if(member != null)
 			{
 				addMetadata(member, xmlItem);
-				
+				member.assignNamespace(Reflection.getNamespace(xmlItem.@uri));
 				//add member to typeinfo
 				typeInfo.addMember(member);
 				

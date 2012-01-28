@@ -38,7 +38,7 @@ import nexus.utils.Parse;
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since	1/24/2012 4:44 AM
  */
-internal class TypeInfoCreatorJson
+internal class TypeInfoCreatorJson implements ITypeInfoCreator
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -52,7 +52,7 @@ internal class TypeInfoCreatorJson
 	//	PUBLIC STATIC METHODS
 	//--------------------------------------
 	
-	static public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
 	{
 		var json : Object = AVMDescribeType.getJson(type);
 		var x : int;

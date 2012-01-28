@@ -48,8 +48,11 @@ public final class Reflection
 	 * Determines if the Reflection library should throw an error if it doesn't have access to the avmplus describeTypeJson interface or
 	 * if it should use flash.utils.describeType in its place and accept any data errors that result.
 	 */
-	static nexuslib_internal var allowInferiorDescribeType : Boolean = false;
+	static nexuslib_internal var allowedTypeInfoCreators : int = nexuslib_internal::TYPEINFOCREATOR_NEW;// | nexuslib_internal::TYPEINFOCREATOR_OLD;
+	static nexuslib_internal const TYPEINFOCREATOR_NEW : int = 1;
+	static nexuslib_internal const TYPEINFOCREATOR_OLD : int = 2;
 	
+	static private var s_typeInfoCreator : ITypeInfoCreator;
 	//TODO: Probably need to do some checking here to make sure this is the domain we want
 	/**
 	 * Reference this instead of <code>ApplicationDomain.currentDomain</code> as <code>ApplicationDomain.currentDomain</code> creates a new
@@ -62,8 +65,6 @@ public final class Reflection
 	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
 	///__AS3__.vec::Vector.<*>
 	static private const UNTYPEDVECTOR_CLASSNAME_QUALIFIED:String = flash.utils.getQualifiedClassName(Vector.<*>);
-	///Vector.<*>
-	static private const UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED:String = "Vector.<*>";
 	///class typed as __AS3__.vec::Vector.<*>
 	static private const UNTYPEDVECTOR_CLASS:Class = Class(Vector.<*>);
 	
@@ -122,7 +123,7 @@ public final class Reflection
 			return Object;
 		}
 		//looking up the class for an untyped vector currently does not work
-		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == UNTYPEDVECTOR_CLASSNAME_UNQUALIFIED)
+		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == "Vector.<*>")
 		{
 			return UNTYPEDVECTOR_CLASS;
 		}
@@ -332,6 +333,7 @@ public final class Reflection
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
+		//get proper application domain instance to lookup in the dictionary
 		if(applicationDomain == null)
 		{
 			applicationDomain = SYSTEM_DOMAIN;
@@ -357,22 +359,29 @@ public final class Reflection
 			}
 		}
 		
+		//get the typeinfo creator
+		if(s_typeInfoCreator == null)
+		{
+			use namespace nexuslib_internal;
+			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorJson();
+			}
+			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorXml();
+			}
+			else
+			{
+				throw new IllegalOperationError("Cannot get type information for object, describeTypeJSON() is not present and Reflection.allowedTypeInfoCreators is set to not permit the inferior describeType() method." + allowedTypeInfoCreators);
+			}
+		}
+		
 		var type:Class = getClass(object, applicationDomain);
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
-			if(AVMDescribeType.isAvailable)
-			{
-				reflectedType = TypeInfoCreatorJson.create(object, type, applicationDomain);
-			}
-			else if(nexuslib_internal::allowInferiorDescribeType)
-			{
-				reflectedType = TypeInfoCreatorXml.create(object, type, applicationDomain);
-			}
-			else
-			{
-				throw new IllegalOperationError("Cannot get type information for object, describeTypeJSON() is not present and Reflection.allowInferiorDescribeType is false.");
-			}
+			reflectedType = s_typeInfoCreator.create(object, type, applicationDomain);
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 		}
 		return reflectedType;
