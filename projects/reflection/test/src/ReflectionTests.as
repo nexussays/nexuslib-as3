@@ -36,6 +36,7 @@ public class ReflectionTests// extends TestSuite
 {
 	public var test01 : ReflectionCoreTest;
 	public var test02 : ReflectionTypeInfoTest;
+	public var test03 : ReflectionTypeInfoTest;
 	
 	public function ReflectionTests()
 	{

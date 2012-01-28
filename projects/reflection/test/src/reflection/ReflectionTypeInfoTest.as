@@ -135,33 +135,69 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		m_test.publicProperty = 555;
 		
 		assertNotNull(m_testTypeInfo.getMethodByName("namespacedMethod"));
+		testMethodCalls(m_testTypeInfo.getMethodByName("namespacedMethod"));
 		
-		var namespacedMethod : MethodInfo = m_testTypeInfo.getMethodByName("namespacedMethod");
+		assertNotNull(m_testTypeInfo.getMethodByName("baseMethod"));
+		testMethodCalls(m_testTypeInfo.getMethodByName("baseMethod"));
+	}
+	
+	private function testMethodCalls(methodInfo:MethodInfo):void
+	{
+		assertEquals("555append", methodInfo.invoke(m_test, "append"));
+		assertEquals("555appendfoo", methodInfo.invoke(m_test, "append", "foo"));
+		assertEquals("555", methodInfo.invoke(m_test, null));
+		assertEquals("555foo", methodInfo.invoke(m_test, null, "foo"));
 		
-		assertEquals("555append", namespacedMethod.invoke(m_test, "append"));
-		assertEquals("555appendfoo", namespacedMethod.invoke(m_test, "append", "foo"));
-		assertEquals("555", namespacedMethod.invoke(m_test, null));
-		assertEquals("555foo", namespacedMethod.invoke(m_test, null, "foo"));
-		
-		assertEquals("555append", m_test[namespacedMethod.qname]("append"));
-		assertEquals("555appendfoo", m_test[namespacedMethod.qname]("append", "foo"));
-		assertEquals("555", m_test[namespacedMethod.qname](null));
-		assertEquals("555foo", m_test[namespacedMethod.qname](null, "foo"));
+		assertEquals("555append", m_test[methodInfo.qname]("append"));
+		assertEquals("555appendfoo", m_test[methodInfo.qname]("append", "foo"));
+		assertEquals("555", m_test[methodInfo.qname](null));
+		assertEquals("555foo", m_test[methodInfo.qname](null, "foo"));
 	}
 	
 	public function testMetadata():void
 	{
+		var method : MethodInfo;
 		//
-		//[ClassMetadata(param="value", param2="value2")]
-		//public dynamic class TestClass extends BaseClass implements IFoo
+		//base class
 		//
+		assertNotNull(m_baseTypeInfo.getMetadataByName("ClassMetadata"));
 		
+		assertNotNull(m_baseTypeInfo.getMethodByName("baseMethod"));
+		method = m_baseTypeInfo.getMethodByName("baseMethod");
+		
+		assertNotNull(method.getMetadataByName("MethodMetadata"));
+		
+		assertEquals("BaseClass",	method.getMetadataByName("MethodMetadata").getValue("on"));
+		
+		//
+		//test class
+		//
 		assertNotNull(m_testTypeInfo.getMetadataByName("ClassMetadata"));
 		
 		assertEquals("ClassMetadata",	m_testTypeInfo.getMetadataByName("ClassMetadata").metadataName);
 		
-		assertEquals("value2",	m_testTypeInfo.getMetadataByName("ClassMetadata").getValue("param2"));
+		assertEquals("TestClass",	m_testTypeInfo.getMetadataByName("ClassMetadata").getValue("on"));
 		assertEquals("value",	m_testTypeInfo.getMetadataByName("ClassMetadata").metadataKeyValuePairs["param"]);
+		
+		assertNotNull(m_testTypeInfo.getMethodByName("baseMethod"));
+		method = m_testTypeInfo.getMethodByName("baseMethod");
+		
+		//TODO: I feel like there is some inconssitency here and that these should work
+		//assertNotNull(method.getMetadataByName("MethodMetadata"));
+		
+		//assertEquals("BaseClass",	method.getMetadataByName("MethodMetadata").getValue("on"));
+		
+		//
+		//final class
+		//
+		assertNull(m_finalTypeInfo.getMetadataByName("ClassMetadata"));
+		
+		assertNotNull(m_finalTypeInfo.getMethodByName("baseMethod"));
+		method = m_finalTypeInfo.getMethodByName("baseMethod");
+		
+		assertNotNull(method.getMetadataByName("MethodMetadata"));
+		
+		assertEquals("FinalClass",	method.getMetadataByName("MethodMetadata").getValue("on"));
 	}
 }
 

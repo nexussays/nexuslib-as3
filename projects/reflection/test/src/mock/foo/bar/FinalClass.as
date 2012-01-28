@@ -30,6 +30,12 @@ public final class FinalClass extends TestClass
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
+	[MethodMetadata(on="FinalClass")]
+	override public function baseMethod(arg1:String, arg2:String="", arg3:Array=null):Object
+	{
+		return super.baseMethod(arg1, arg2, arg3);
+	}
+	
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
