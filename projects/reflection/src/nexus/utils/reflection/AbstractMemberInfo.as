@@ -96,7 +96,7 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	internal function assignNamespace(ns:Namespace):void
 	{
 		m_namespace = ns;
-		m_qname = new QName(m_namespace, m_name);
+		m_qname = new QName(m_namespace == null ? "" : m_namespace, m_name);
 	}
 }
 
