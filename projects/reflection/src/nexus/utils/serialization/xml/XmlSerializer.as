@@ -78,9 +78,9 @@ public class XmlSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function serialize(sourceObject:Object):Object
+	public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object
 	{
-		return XmlSerializer.serialize(sourceObject, false);
+		return XmlSerializer.serialize(sourceObject, applicationDomain, false);
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class XmlSerializer implements ISerializer
 	 * @param	elementName		The name of the root element. If null, the name of the object's class is used.
 	 * @return
 	 */
-	public static function serialize(sourceObject:Object, serializeConstants:Boolean = false):XML
+	public static function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null, serializeConstants:Boolean = false):XML
 	{
 		s_serializeConstants = serializeConstants;
 		var typeInfo:TypeInfo = Reflection.getTypeInfo(sourceObject);

@@ -38,7 +38,7 @@ public interface ISerializer
 	 * @param	includeReadOnlyFields
 	 * @return
 	 */
-	function serialize(sourceObject:Object):Object;
+	function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object;
 	
 	/**
 	 * Deserializes the given serialized data into an object. If a type is not provided the object is a native Actionscript object.

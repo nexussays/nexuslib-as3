@@ -147,9 +147,9 @@ public class JsonSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function serialize(sourceObject:Object):Object
+	public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object
 	{
-		return JsonSerializer.serialize(sourceObject, m_indentationCharacters, m_maxLineLength, m_serializeConstants);
+		return JsonSerializer.serialize(sourceObject, applicationDomain, m_indentationCharacters, m_maxLineLength, m_serializeConstants);
 	}
 	
 	/**
@@ -157,15 +157,7 @@ public class JsonSerializer implements ISerializer
 	 */
 	public function deserialize(serializedData:Object, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
-		var object : Object = JsonSerializer.deserialize(serializedData as String);
-		if(type != null)
-		{
-			return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
-		}
-		else
-		{
-			return object;
-		}
+		return JsonSerializer.deserialize(serializedData as String, type, applicationDomain);
 	}
 	
 	//--------------------------------------
@@ -179,20 +171,28 @@ public class JsonSerializer implements ISerializer
 	 * @param	includeReadOnlyFields
 	 * @return
 	 */
-	static public function serialize(sourceObject:Object, indentationCharacters:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
+	static public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null, indentationCharacters:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
 	{
 		s_indentation = "";
 		s_indentationCharacters = indentationCharacters || "";
 		s_maxLineLength = maxLineLength;
 		s_serializeConstants = serializeConstants;
-		return serializeObject(sourceObject);
+		return serializeObject(sourceObject, applicationDomain);
 	}
 	
-	static public function deserialize(json:String):Object
+	static public function deserialize(json:String, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
 		try
 		{
-			return JsonParser.decode(json);
+			var object : Object = JsonParser.decode(json);
+			if(type != null)
+			{
+				return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
+			}
+			else
+			{
+				return object;
+			}
 		}
 		catch(e:SyntaxError)
 		{
@@ -205,7 +205,7 @@ public class JsonSerializer implements ISerializer
 	//	PRIVATE CLASS METHODS
 	//--------------------------------------
 	
-	static private function serializeObject(sourceObject:Object):String
+	static private function serializeObject(sourceObject:Object, applicationDomain:ApplicationDomain):String
 	{
 		var result:String;
 		var pretty : Boolean;
@@ -245,7 +245,7 @@ public class JsonSerializer implements ISerializer
 						result += pretty ? ",\n" : ",";
 					}
 					result += pretty ? s_indentation : "";
-					result += serializeObject(sourceObject[x]);
+					result += serializeObject(sourceObject[x], applicationDomain);
 				}
 				
 				if(pretty)
@@ -280,14 +280,14 @@ public class JsonSerializer implements ISerializer
 						for(x = 0; x < keys.length; ++x)
 						{
 							key = keys[x];
-							result += setupObjectString(result, key, sourceObject[key], pretty);
+							result += setupObjectString(result, key, sourceObject[key], pretty, applicationDomain);
 						}
 					}
 					else
 					{
 						for(key in sourceObject)
 						{
-							result += setupObjectString(result, key, sourceObject[key], pretty);
+							result += setupObjectString(result, key, sourceObject[key], pretty, applicationDomain);
 						}
 					}
 				}
@@ -295,7 +295,7 @@ public class JsonSerializer implements ISerializer
 				{
 					//Loop over all of the variables and accessors in the class and
 					//serialize them along with their values.
-					var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject);
+					var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject, applicationDomain);
 					var memberNames : Vector.<AbstractMemberInfo> = s_maxLineLength < int.MAX_VALUE ? typeInfo.allMembersSortedByName : typeInfo.allMembers;
 					for each(var field : AbstractMemberInfo in memberNames)
 					{
@@ -306,7 +306,7 @@ public class JsonSerializer implements ISerializer
 							&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
 							&& field.getMetadataByName("Transient") == null)
 						{
-							result += setupObjectString(result, field.name, sourceObject[field.name], pretty);
+							result += setupObjectString(result, field.name, sourceObject[field.name], pretty, applicationDomain);
 						}
 					}
 				}
@@ -326,7 +326,7 @@ public class JsonSerializer implements ISerializer
 		return result;
 	}
 	
-	static private function setupObjectString(current:String, key:String, value:Object, pretty:Boolean):String
+	static private function setupObjectString(current:String, key:String, value:Object, pretty:Boolean, applicationDomain:ApplicationDomain):String
 	{
 		var result : String = "";
 		if(!(value is Function))
@@ -338,7 +338,7 @@ public class JsonSerializer implements ISerializer
 			result += pretty ? s_indentation : "";
 			result += JsonParser.encode(key);
 			result += pretty ? ": " : ":";
-			result += serializeObject(value);
+			result += serializeObject(value, applicationDomain);
 		}
 		return result;
 	}

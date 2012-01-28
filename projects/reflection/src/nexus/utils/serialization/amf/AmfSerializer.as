@@ -79,7 +79,7 @@ public class AmfSerializer implements ISerializer
 	/**
 	 * @inheritDoc
 	 */
-	public function serialize(sourceObject:Object):Object
+	public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object
 	{
 		return AmfSerializer.serialize(sourceObject, m_isTypeSerialized);
 	}
