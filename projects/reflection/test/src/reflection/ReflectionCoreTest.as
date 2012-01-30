@@ -103,6 +103,13 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 		//baseTest_getSuperClass(new ApplicationDomain(ApplicationDomain.currentDomain));
 	}
 	
+	public function test_getApplicationDomain():void
+	{
+		assertSame(Reflection.SYSTEM_DOMAIN, Reflection.getApplicationDomain(m_test));
+		
+		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, Reflection.getApplicationDomain(m_test)));
+	}
+	
 	public function test_getVectorType():void
 	{
 		baseTest_getVectorType(null);

@@ -44,15 +44,6 @@ public final class Reflection
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	/**
-	 * Determines if the Reflection library should throw an error if it doesn't have access to the avmplus describeTypeJson interface or
-	 * if it should use flash.utils.describeType in its place and accept any data errors that result.
-	 */
-	static nexuslib_internal var allowedTypeInfoCreators : int = nexuslib_internal::TYPEINFOCREATOR_NEW;// | nexuslib_internal::TYPEINFOCREATOR_OLD;
-	static nexuslib_internal const TYPEINFOCREATOR_NEW : int = 1;
-	static nexuslib_internal const TYPEINFOCREATOR_OLD : int = 2;
-	
-	static private var s_typeInfoCreator : ITypeInfoCreator;
 	//TODO: Probably need to do some checking here to make sure this is the domain we want
 	/**
 	 * Reference this instead of <code>ApplicationDomain.currentDomain</code> as <code>ApplicationDomain.currentDomain</code> creates a new
@@ -76,9 +67,26 @@ public final class Reflection
 	///cache all namespaces by their URI
 	static private const CACHED_NAMESPACES:Dictionary = new Dictionary();
 	
+	///ApplicationDomains can be registered so they don't always have to be provided to Reflection methods
+	static private const REGISTERED_APPDOMAINS : Vector.<ApplicationDomain> = new Vector.<ApplicationDomain>();
+	
 	///store strongly-typed classes that represent metadata on members
 	static internal const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
 	static internal const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
+	
+	//--------------------------------------
+	//	CLASS VARIABLES
+	//--------------------------------------
+	
+	/**
+	 * Determines if the Reflection library should throw an error if it doesn't have access to the avmplus describeTypeJson interface or
+	 * if it should use flash.utils.describeType in its place and accept any data errors that result.
+	 */
+	static nexuslib_internal var allowedTypeInfoCreators : int = nexuslib_internal::TYPEINFOCREATOR_NEW;// | nexuslib_internal::TYPEINFOCREATOR_OLD;
+	static nexuslib_internal const TYPEINFOCREATOR_NEW : int = 1;
+	static nexuslib_internal const TYPEINFOCREATOR_OLD : int = 2;
+	
+	static private var s_typeInfoCreator : ITypeInfoCreator;
 	
 	//--------------------------------------
 	//	CLASS INITIAlIZER
@@ -128,15 +136,21 @@ public final class Reflection
 			return UNTYPEDVECTOR_CLASS;
 		}
 		
-		try
+		if(applicationDomain == null)
 		{
-			applicationDomain = applicationDomain || SYSTEM_DOMAIN;
+			applicationDomain = getApplicationDomainOfClassName(qualifiedName);
+		}
+		else
+		{
 			//walk up parent app domains while the class is still defined to get the top-most reference
 			while(applicationDomain.parentDomain != null && applicationDomain.parentDomain.hasDefinition(qualifiedName))
 			{
 				applicationDomain = applicationDomain.parentDomain;
 			}
-			
+		}
+		
+		try
+		{
 			var result : Class = applicationDomain.getDefinition(qualifiedName) as Class;
 			if(result == null)
 			{
@@ -172,6 +186,48 @@ public final class Reflection
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Finds the ApplicationDomain the given object blongs to. Any desired ApplicationDomains must be registered first with Reflection.registerApplicationDomain()
+	 * @param	object	The object instance or Class to lookup
+	 * @return	The ApplicationDomain of the provided Object
+	 * @throws	Error	If the object is present in several ApplicationDomains
+	 */
+	static public function getApplicationDomain(object:Object):ApplicationDomain
+	{
+		return getApplicationDomainOfClassName(flash.utils.getQualifiedClassName(object));
+	}
+	
+	/**
+	 * Finds the ApplicationDomain the given Class name blongs to. Any desired ApplicationDomains must be registered first with Reflection.registerApplicationDomain()
+	 * @param	qualifiedName	The class name to lookup
+	 * @return	The ApplicationDomain of the provided Object
+	 * @throws	Error	If the object is present in several ApplicationDomains
+	 */
+	static public function getApplicationDomainOfClassName(qualifiedName:String):ApplicationDomain
+	{
+		if(	qualifiedName == null || qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null"
+			|| qualifiedName == "*" || qualifiedName == "Object" || qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED
+			|| qualifiedName == "Vector.<*>")
+		{
+			return SYSTEM_DOMAIN;
+		}
+		
+		var applicationDomain : ApplicationDomain;
+		for each(var registeredAppDomain : ApplicationDomain in REGISTERED_APPDOMAINS)
+		{
+			if(registeredAppDomain.hasDefinition(qualifiedName))
+			{
+				//if an app domain with this definition was found, throw an error because we don't know which reference is desired
+				if(applicationDomain != null)
+				{
+					throw new Error("The desired class \"" + qualifiedName + "\" is found in two different registered ApplicationDomains, an explicit ApplicationDomain must be provided in order to obtain a Class.");
+				}
+				applicationDomain = registeredAppDomain;
+			}
+		}
+		return applicationDomain || SYSTEM_DOMAIN;
 	}
 	
 	/**
@@ -327,20 +383,57 @@ public final class Reflection
 	}
 	
 	/**
+	 * Registering an <code>ApplicationDomain</code> will result in it being checked for class references in any Reflection methods that take
+	 * an ApplicationDomain as a parameter.
+	 * @param	applicationDomain
+	 */
+	static public function registerApplicationDomain(applicationDomain:ApplicationDomain):void
+	{
+		if(applicationDomain != null)
+		{
+			for each(var appDomain : ApplicationDomain in REGISTERED_APPDOMAINS)
+			{
+				if(Reflection.applicationDomainsAreEqual(applicationDomain, appDomain))
+				{
+					return;
+				}
+			}
+			REGISTERED_APPDOMAINS.push(applicationDomain);
+		}
+	}
+	
+	/**
 	 * Reflects into the given object and returns a TypeInfo object
 	 * @param	obj	The object to reflect
 	 * @return	A TypeInfo that represents the given object's Class information
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
+		//get the typeinfo creator
+		if(s_typeInfoCreator == null)
+		{
+			use namespace nexuslib_internal;
+			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorJson();
+			}
+			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorXml();
+			}
+			else
+			{
+				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. If you believe this message is in error, please see the docs for Reflection.allowedTypeInfoCreators.");
+			}
+		}
+		
 		//get proper application domain instance to lookup in the dictionary
 		if(applicationDomain == null)
 		{
-			applicationDomain = SYSTEM_DOMAIN;
+			applicationDomain = getApplicationDomain(object);
 		}
 		else
 		{
-			//var s : int = getTimer();
 			var appDomainExists : Boolean = false;
 			for(var appDomainKey : Object in CACHED_TYPEINFO)
 			{
@@ -359,28 +452,11 @@ public final class Reflection
 			}
 		}
 		
-		//get the typeinfo creator
-		if(s_typeInfoCreator == null)
-		{
-			use namespace nexuslib_internal;
-			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorJson();
-			}
-			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorXml();
-			}
-			else
-			{
-				throw new IllegalOperationError("Cannot get type information for object, describeTypeJSON() is not present and Reflection.allowedTypeInfoCreators is set to not permit the inferior describeType() method." + allowedTypeInfoCreators);
-			}
-		}
-		
 		var type:Class = getClass(object, applicationDomain);
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
+			//create and cache TypeInfo for the provided object if it is not present in the cache
 			reflectedType = s_typeInfoCreator.create(object, type, applicationDomain);
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 		}

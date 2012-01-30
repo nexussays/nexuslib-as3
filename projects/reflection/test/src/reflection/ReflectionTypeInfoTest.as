@@ -182,7 +182,7 @@ public class ReflectionTypeInfoTest extends AbstractReflectionTest
 		assertNotNull(m_testTypeInfo.getMethodByName("baseMethod"));
 		method = m_testTypeInfo.getMethodByName("baseMethod");
 		
-		//TODO: I feel like there is some inconssitency here and that these should work
+		//TODO: I feel like there is some inconsistency here and that these should work
 		//assertNotNull(method.getMetadataByName("MethodMetadata"));
 		
 		//assertEquals("BaseClass",	method.getMetadataByName("MethodMetadata").getValue("on"));

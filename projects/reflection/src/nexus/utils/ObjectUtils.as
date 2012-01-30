@@ -25,6 +25,7 @@ package nexus.utils
 {
 
 import flash.system.ApplicationDomain;
+import flash.utils.Dictionary;
 import nexus.errors.NotImplementedError;
 import nexus.utils.reflection.*;
 
@@ -133,6 +134,11 @@ public class ObjectUtils
 		else
 		{
 			var typeInfo:TypeInfo = Reflection.getTypeInfo(instance, applicationDomain);
+			if(typeInfo.isDynamic)
+			{
+				var fieldsInDataFoundInClass : Dictionary = new Dictionary();
+			}
+			
 			for each(var member:AbstractMemberInfo in typeInfo.allMembers)
 			{
 				if(member is AbstractFieldInfo && !member.isStatic)
@@ -140,11 +146,16 @@ public class ObjectUtils
 					//only assign the field if it exists in the source data
 					if(source != null && source[member.name] !== undefined)
 					{
+						if(fieldsInDataFoundInClass != null)
+						{
+							fieldsInDataFoundInClass[member.name] = member.name;
+						}
+						
 						if(AbstractFieldInfo(member).canWrite)
 						{
 							try
 							{
-								instance[member.name] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
+								instance[member.qname] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
 							}
 							catch(e:Error)
 							{
@@ -153,8 +164,20 @@ public class ObjectUtils
 						}
 						else
 						{
-							assignTypedObjectFromNativeObject(instance[member.name], source[member.name], applicationDomain);
+							assignTypedObjectFromNativeObject(instance[member.qname], source[member.name], applicationDomain);
 						}
+					}
+				}
+			}
+			
+			if(typeInfo.isDynamic)
+			{
+				for(var dynamicKey:String in source)
+				{
+					if(!(dynamicKey in fieldsInDataFoundInClass))
+					{
+						//TODO: Does it even make any sense to get the class of the source?
+						instance[dynamicKey] = createTypedObjectFromNativeObject(Reflection.getClass(source[dynamicKey], applicationDomain), source[dynamicKey], applicationDomain);
 					}
 				}
 			}
