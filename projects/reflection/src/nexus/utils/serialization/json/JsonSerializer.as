@@ -296,6 +296,11 @@ public class JsonSerializer implements ISerializer
 					//Loop over all of the variables and accessors in the class and
 					//serialize them along with their values.
 					var typeInfo : TypeInfo = Reflection.getTypeInfo(sourceObject, applicationDomain);
+					if(typeInfo.isDynamic)
+					{
+						var fieldsInDataFoundInClass : Dictionary = new Dictionary();
+					}
+					
 					var memberNames : Vector.<AbstractMemberInfo> = s_maxLineLength < int.MAX_VALUE ? typeInfo.allMembersSortedByName : typeInfo.allMembers;
 					for each(var field : AbstractMemberInfo in memberNames)
 					{
@@ -307,6 +312,17 @@ public class JsonSerializer implements ISerializer
 							&& field.getMetadataByName("Transient") == null)
 						{
 							result += setupObjectString(result, field.name, sourceObject[field.name], pretty, applicationDomain);
+						}
+					}
+					
+					if(typeInfo.isDynamic)
+					{
+						for(var dynamicKey:String in sourceObject)
+						{
+							if(!(dynamicKey in fieldsInDataFoundInClass))
+							{
+								result += setupObjectString(result, dynamicKey, sourceObject[dynamicKey], pretty, applicationDomain);
+							}
 						}
 					}
 				}
