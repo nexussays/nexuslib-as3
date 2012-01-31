@@ -2,4 +2,4 @@ syntax: regexp
 \.svn
 obj
 bin/.+\.swf
-test/.+\.lxml
+\.lxml
