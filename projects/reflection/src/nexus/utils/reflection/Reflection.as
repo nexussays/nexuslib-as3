@@ -432,24 +432,23 @@ public final class Reflection
 		{
 			applicationDomain = getApplicationDomain(object);
 		}
-		else
+		
+		//ensure the application domain exists in the cache
+		var appDomainExists : Boolean = false;
+		for(var appDomainKey : Object in CACHED_TYPEINFO)
 		{
-			var appDomainExists : Boolean = false;
-			for(var appDomainKey : Object in CACHED_TYPEINFO)
+			var cachedAppDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
+			if(Reflection.applicationDomainsAreEqual(cachedAppDomain, applicationDomain))
 			{
-				var cachedAppDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
-				if(Reflection.applicationDomainsAreEqual(cachedAppDomain, applicationDomain))
-				{
-					applicationDomain = cachedAppDomain;
-					appDomainExists = true;
-					break;
-				}
+				applicationDomain = cachedAppDomain;
+				appDomainExists = true;
+				break;
 			}
-			
-			if(!appDomainExists)
-			{
-				CACHED_TYPEINFO[applicationDomain] = new Dictionary();
-			}
+		}
+		
+		if(!appDomainExists)
+		{
+			CACHED_TYPEINFO[applicationDomain] = new Dictionary();
 		}
 		
 		var type:Class = getClass(object, applicationDomain);
