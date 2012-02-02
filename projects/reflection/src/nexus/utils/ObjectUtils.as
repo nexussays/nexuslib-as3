@@ -144,7 +144,7 @@ public class ObjectUtils
 				if(member is AbstractFieldInfo && !member.isStatic)
 				{
 					//only assign the field if it exists in the source data
-					if(source != null && source[member.name] !== undefined)
+					if(source != null && (member.name in source))
 					{
 						if(fieldsInDataFoundInClass != null)
 						{
