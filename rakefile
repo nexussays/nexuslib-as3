@@ -1,0 +1,92 @@
+#
+# Build the reflection library swc
+#
+
+desc 'Default build task'
+task :default => [:build]
+task :build => ['reflection:build']
+
+namespace :reflection do
+
+	desc 'Compile the swc'
+	task :build do
+		#puts get_all_classes('src')
+
+		run "#{COMPC} -load-config+=compc_config.xml -output #{PROJECT[:output_swc_file]}"
+
+		puts "#build complete"
+	end
+
+	desc 'Run the unit tests against src'
+	task :test do
+		puts "#test complete"
+	end
+	
+end
+
+#
+# Utility methods
+#
+
+def get_all_classes(path)
+	Dir.chdir(path) do
+		FileList["**/*.as"].pathmap('%d/%n').map do |f|
+			f.gsub(/^\.\//, '').gsub('/', '.')
+		end
+	end
+end
+
+def run(command)
+	puts "\n> Running shell command"
+	
+	if is_windows?
+		sh command.gsub('/', '\\')
+	else
+		sh command
+	end
+
+	puts "<\n\n"
+end
+
+def is_mac?
+	RUBY_PLATFORM.downcase.include?("darwin")
+end
+
+def is_windows?
+	require 'rbconfig'
+	RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+end
+
+def is_linux?
+	RUBY_PLATFORM.downcase.include?("linux")
+end
+
+#
+# Configuration
+#
+
+sdk_locations = [
+	ENV['FLEX_HOME'],
+	'C:\develop\sdk\flex_sdk_4.6.0.23201',
+	'C:\develop\sdk\flex_sdk_4.5.1.21328'
+]
+
+# Find where the flex sdk is installed
+sdk_locations.each do |p|
+	if p != nil && File.exists?(p)
+		FLEX_HOME = p
+		MXMLC = File.join(FLEX_HOME, 'bin', 'mxmlc')
+		COMPC = File.join(FLEX_HOME, 'bin', 'compc')
+		ASDOC = File.join(FLEX_HOME, 'bin', 'asdoc')
+		break
+	end
+end
+
+if FLEX_HOME != nil
+	puts "Flex SDK found at #{FLEX_HOME}"
+else
+	puts "\nrake aborted!"
+	puts "Could not find Flex SDK at any of the following paths:"
+	puts sdk_locations
+	exit
+end

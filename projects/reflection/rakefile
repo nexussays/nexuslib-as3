@@ -1,0 +1,5 @@
+import '../../rakefile'
+
+PROJECT = {
+	:output_swc_file => File.join("bin", "nexuslib.reflection.swc")
+}
