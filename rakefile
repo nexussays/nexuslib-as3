@@ -1,10 +1,9 @@
-require 'zip/zip'
+require "zip/zip"
 
 #############################################
-# Configuration
+# Find Flex SDK
 #############################################
 
-#find flex sdk
 [
 	ENV['FLEX_HOME'],
 	'C:\develop\sdk\flex_sdk_4.6.0.23201',
