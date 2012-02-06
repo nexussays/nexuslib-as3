@@ -1,29 +1,55 @@
 require 'zip/zip'
 
-#
-# Build the library swc
-#
+#############################################
+# Configuration
+#############################################
 
-desc 'Default build task'
+#find flex sdk
+[
+	ENV['FLEX_HOME'],
+	'C:\develop\sdk\flex_sdk_4.6.0.23201',
+	'C:\develop\sdk\flex_sdk_4.5.1.21328'
+].each do |path|
+	if path != nil && File.exists?(path)
+		FLEX_HOME = path
+		MXMLC = File.join(FLEX_HOME, 'bin', 'mxmlc')
+		COMPC = File.join(FLEX_HOME, 'bin', 'compc')
+		ASDOC = File.join(FLEX_HOME, 'bin', 'asdoc')
+		break
+	end
+end
+
+if FLEX_HOME != nil
+	puts "Using Flex SDK at #{FLEX_HOME}"
+else
+	puts "\nrake aborted!"
+	puts "Could not find Flex SDK"
+	exit
+end
+
+#############################################
+# Build the project
+#############################################
+
 task :default => [:build]
 
 #namespace :library do
 
-	desc 'bin directory'
 	directory PROJECT[:output_dir]
 
 	desc 'Compile the swc'
 	task :build => [PROJECT[:output_dir]] do
-		puts "#build"
+		puts "\n:build"
 		#puts get_all_classes('src')
 
 		run "#{COMPC} -load-config+=compc_config.xml -output #{File.join(PROJECT[:output_dir], PROJECT[:output_file])}"
 
-		puts "#build complete\n"
+		puts ":build complete\n"
 	end
 
+	desc 'Package the project into a zip'
 	task :package => [:clean, :build] do
-		puts "#package"
+		puts "\n:package"
 		cp "../../LICENSE", "#{PROJECT[:output_dir]}/license.txt"
 
 		Zip::ZipFile.open(File.join(PROJECT[:output_dir], PROJECT[:package_file]), Zip::ZipFile::CREATE) do |z|
@@ -31,29 +57,32 @@ task :default => [:build]
 			z.add(PROJECT[:output_file], File.join(PROJECT[:output_dir], PROJECT[:output_file]))
 		end
 
-		puts "#package complete\n"
+		puts ":package complete\n"
 	end
 
-	desc 'clean the build files'
+	desc 'Remove the results of a build/package'
 	task :clean do
-		puts "#clean"
+		puts "\n:clean"
 
 		rm_r PROJECT[:output_dir] rescue nil
 
-		puts "#clean complete\n"
+		puts ":clean complete\n"
 	end
 
 	desc 'Run the unit tests against src'
 	task :test do
-		puts "#test"
-		puts "#test complete\n"
+		puts "\n:test"
+
+		puts "NOT YET IMPLEMENTED"
+
+		puts ":test complete\n"
 	end
 	
 #end
 
-#
+#############################################
 # Utility methods
-#
+#############################################
 
 def get_all_classes(path)
 	Dir.chdir(path) do
@@ -75,42 +104,7 @@ def run(command)
 	puts "<\n\n"
 end
 
-def is_mac?
-	RUBY_PLATFORM.downcase.include?("darwin")
-end
-
 def is_windows?
 	require 'rbconfig'
 	RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
-end
-
-def is_linux?
-	RUBY_PLATFORM.downcase.include?("linux")
-end
-
-#
-# Configuration
-#
-
-#find flex sdk
-[
-	ENV['FLEX_HOME'],
-	'C:\develop\sdk\flex_sdk_4.6.0.23201',
-	'C:\develop\sdk\flex_sdk_4.5.1.21328'
-].each do |path|
-	if path != nil && File.exists?(path)
-		FLEX_HOME = path
-		MXMLC = File.join(FLEX_HOME, 'bin', 'mxmlc')
-		COMPC = File.join(FLEX_HOME, 'bin', 'compc')
-		ASDOC = File.join(FLEX_HOME, 'bin', 'asdoc')
-		break
-	end
-end
-
-if FLEX_HOME != nil
-	puts "Flex SDK found at #{FLEX_HOME}"
-else
-	puts "\nrake aborted!"
-	puts "Could not find Flex SDK"
-	exit
 end
