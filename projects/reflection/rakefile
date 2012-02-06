@@ -1,5 +1,7 @@
 import '../../rakefile'
 
 PROJECT = {
-	:output_swc_file => File.join("bin", "nexuslib.reflection.swc")
+	:output_dir => "bin",
+	:output_file => "nexuslib.reflection.swc",
+	:package_file => "nexuslib.reflection.zip"
 }

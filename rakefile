@@ -1,28 +1,55 @@
+require 'zip/zip'
+
 #
-# Build the reflection library swc
+# Build the library swc
 #
 
 desc 'Default build task'
 task :default => [:build]
-task :build => ['reflection:build']
 
-namespace :reflection do
+#namespace :library do
+
+	desc 'bin directory'
+	directory PROJECT[:output_dir]
 
 	desc 'Compile the swc'
-	task :build do
+	task :build => [PROJECT[:output_dir]] do
+		puts "#build"
 		#puts get_all_classes('src')
 
-		run "#{COMPC} -load-config+=compc_config.xml -output #{PROJECT[:output_swc_file]}"
+		run "#{COMPC} -load-config+=compc_config.xml -output #{File.join(PROJECT[:output_dir], PROJECT[:output_file])}"
 
-		puts "#build complete"
+		puts "#build complete\n"
+	end
+
+	task :package => [:clean, :build] do
+		puts "#package"
+		cp "../../LICENSE", "#{PROJECT[:output_dir]}/license.txt"
+
+		Zip::ZipFile.open(File.join(PROJECT[:output_dir], PROJECT[:package_file]), Zip::ZipFile::CREATE) do |z|
+			z.add("license.txt", "#{PROJECT[:output_dir]}/license.txt")
+			z.add(PROJECT[:output_file], File.join(PROJECT[:output_dir], PROJECT[:output_file]))
+		end
+
+		puts "#package complete\n"
+	end
+
+	desc 'clean the build files'
+	task :clean do
+		puts "#clean"
+
+		rm_r PROJECT[:output_dir] rescue nil
+
+		puts "#clean complete\n"
 	end
 
 	desc 'Run the unit tests against src'
 	task :test do
-		puts "#test complete"
+		puts "#test"
+		puts "#test complete\n"
 	end
 	
-end
+#end
 
 #
 # Utility methods
@@ -65,16 +92,14 @@ end
 # Configuration
 #
 
-sdk_locations = [
+#find flex sdk
+[
 	ENV['FLEX_HOME'],
 	'C:\develop\sdk\flex_sdk_4.6.0.23201',
 	'C:\develop\sdk\flex_sdk_4.5.1.21328'
-]
-
-# Find where the flex sdk is installed
-sdk_locations.each do |p|
-	if p != nil && File.exists?(p)
-		FLEX_HOME = p
+].each do |path|
+	if path != nil && File.exists?(path)
+		FLEX_HOME = path
 		MXMLC = File.join(FLEX_HOME, 'bin', 'mxmlc')
 		COMPC = File.join(FLEX_HOME, 'bin', 'compc')
 		ASDOC = File.join(FLEX_HOME, 'bin', 'asdoc')
@@ -86,7 +111,6 @@ if FLEX_HOME != nil
 	puts "Flex SDK found at #{FLEX_HOME}"
 else
 	puts "\nrake aborted!"
-	puts "Could not find Flex SDK at any of the following paths:"
-	puts sdk_locations
+	puts "Could not find Flex SDK"
 	exit
 end
