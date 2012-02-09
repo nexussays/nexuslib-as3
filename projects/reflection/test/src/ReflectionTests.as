@@ -24,6 +24,7 @@
 package
 {
 
+import test.nexus.utils.ObjectUtilsTest;
 import test.nexus.utils.reflection.*;
 
 /**
@@ -37,6 +38,7 @@ public class ReflectionTests// extends TestSuite
 	public var test01 : ReflectionCoreTest;
 	public var test02 : ReflectionTypeInfoTest;
 	public var test03 : ReflectionTypeInfoTest;
+	public var test04 : ObjectUtilsTest;
 	
 	public function ReflectionTests()
 	{

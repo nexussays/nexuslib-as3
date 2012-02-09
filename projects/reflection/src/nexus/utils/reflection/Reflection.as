@@ -409,6 +409,11 @@ public final class Reflection
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
+		if(object == null)
+		{
+			return null;
+		}
+		
 		//get the typeinfo creator
 		if(s_typeInfoCreator == null)
 		{

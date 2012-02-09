@@ -27,7 +27,15 @@ package nexus.utils.reflection
 import flash.utils.*;
 
 /**
- * Represents a metadata tag applied to an element
+ * Represents a metadata tag applied to an element.
+ *
+ * Notes on metadata:
+ * <ul>
+ * <li>A metadata tag on the class level is never inherited by subclasses.</li>
+ * <li>A metadata tag on a property or method that is not overridden in a subclass is always available when reflecting on the subclass.</li>
+ * <li>A metadata tag on an overridden property getter/setter or method is only inherited if the overriding method or property does not have any metadata itself.</li>
+ * </ul>
+
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  * @since 7/23/2011 3:34 AM
  */

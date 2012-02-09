@@ -58,9 +58,12 @@ public class ObjectUtils
 		{
 			result = null;
 		}
-		else if(Reflection.isScalar(type) || (type == null && Reflection.isScalar(source)))
+		else if(Reflection.isScalar(type) || type == null)
 		{
-			result = source;
+			if(Reflection.isScalar(source))
+			{
+				result = source;
+			}
 		}
 		else if(type == Date)
 		{
@@ -101,7 +104,7 @@ public class ObjectUtils
 	static public function assignTypedObjectFromNativeObject(instance:Object, source:Object, applicationDomain:ApplicationDomain=null):void
 	{
 		//assigning primitives is pointless without pass by ref
-		if(source == null || Reflection.isScalar(instance) || instance == Date)
+		if(source == null || instance == null || Reflection.isScalar(instance) || instance is Date)
 		{
 			return;
 		}
