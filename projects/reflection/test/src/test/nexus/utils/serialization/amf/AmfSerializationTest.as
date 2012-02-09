@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is nexuslib.
+ * The Original Code is PROJECT_NAME.
  *
  * The Initial Developer of the Original Code is
  * Malachi Griffie <malachi@nexussays.com>.
@@ -21,28 +21,42 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package
+package test.nexus.utils.serialization.amf
 {
 
-import test.nexus.utils.reflection.*;
+import asunit.framework.TestCase;
 
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 11:36 PM
+ * @since	1/29/2012 11:41 PM
  */
-[Suite]
-public class ReflectionTests// extends TestSuite
+public class AmfSerializationTest extends TestCase
 {
-	public var test01 : ReflectionCoreTest;
-	public var test02 : ReflectionTypeInfoTest;
-	public var test03 : ReflectionTypeInfoTest;
+	//--------------------------------------
+	//	CLASS CONSTANTS
+	//--------------------------------------
 	
-	public function ReflectionTests()
+	//--------------------------------------
+	//	INSTANCE VARIABLES
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	CONSTRUCTOR
+	//--------------------------------------
+	
+	public function AmfSerializationTest(testMethod:String = null)
 	{
-		//addTest(new ReflectionCoreTest());
-		//addTest(new ReflectionTypeInfoTest());
+		super(testMethod);
 	}
+	
+	//--------------------------------------
+	//	SETUP & TEARDOWN
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	TESTS
+	//--------------------------------------
 }
 
 }

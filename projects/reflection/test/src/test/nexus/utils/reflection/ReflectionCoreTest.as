@@ -21,7 +21,7 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package reflection
+package test.nexus.utils.reflection
 {
 
 import asunit.framework.*;

@@ -21,27 +21,54 @@
  * Contributor(s):
  *
  * ***** END LICENSE BLOCK ***** */
-package
+package test.nexus.utils
 {
-
-import test.nexus.utils.reflection.*;
 
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 11:36 PM
+ * @since	1/17/2012 3:37 AM
  */
-[Suite]
-public class ReflectionTests// extends TestSuite
+public class ObjectUtilsTest extends TestCase
 {
-	public var test01 : ReflectionCoreTest;
-	public var test02 : ReflectionTypeInfoTest;
-	public var test03 : ReflectionTypeInfoTest;
+	//--------------------------------------
+	//	CLASS CONSTANTS
+	//--------------------------------------
 	
-	public function ReflectionTests()
+	//--------------------------------------
+	//	INSTANCE VARIABLES
+	//--------------------------------------
+	
+	//--------------------------------------
+	//	CONSTRUCTOR
+	//--------------------------------------
+	
+	public function ObjectUtilsTest(testMethod:String = null)
 	{
-		//addTest(new ReflectionCoreTest());
-		//addTest(new ReflectionTypeInfoTest());
+		super(testMethod);
+	}
+	
+	//--------------------------------------
+	//	SETUP & TEARDOWN
+	//--------------------------------------
+	
+	override protected function setUp():void
+	{
+		
+	}
+	
+	override protected function tearDown():void
+	{
+		
+	}
+	
+	//--------------------------------------
+	//	TESTS
+	//--------------------------------------
+	
+	public function test_():void
+	{
+		ObjectUtils.
 	}
 }
 

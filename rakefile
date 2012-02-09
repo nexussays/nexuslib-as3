@@ -1,4 +1,6 @@
-require "zip/zip"
+require 'yaml'
+require 'zip/zip'
+require 'rake/version_task'
 
 #############################################
 # Find Flex SDK
@@ -37,8 +39,9 @@ task :default => [:build]
 	directory PROJECT[:output_dir]
 
 	desc 'Compile the swc'
-	task :build => [PROJECT[:output_dir]] do
+	task :build => [PROJECT[:output_dir], 'version:bump:revision'] do
 		puts "\n:build"
+
 		#puts get_all_classes('src')
 
 		run "#{COMPC} -load-config+=compc_config.xml -output #{File.join(PROJECT[:output_dir], PROJECT[:output_file])}"
@@ -66,6 +69,11 @@ task :default => [:build]
 		rm_r PROJECT[:output_dir] rescue nil
 
 		puts ":clean complete\n"
+	end
+
+	Rake::VersionTask.new do |task|
+		task.with_git = false
+		#task.with_hg = false
 	end
 
 	desc 'Run the unit tests against src'
