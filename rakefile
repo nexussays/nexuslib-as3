@@ -1,6 +1,40 @@
 require 'yaml'
 require 'zip/zip'
 require 'rake/version_task'
+require 'version'
+
+#############################################
+# Utility methods
+#############################################
+
+def get_all_classes(path)
+	Dir.chdir(path) do
+		FileList["**/*.as"].pathmap('%d/%n').map do |f|
+			f.gsub(/^\.\//, '').gsub('/', '.')
+		end
+	end
+end
+
+def run(command)
+	#puts "> Running shell command"
+	
+	if is_windows?
+		sh command.gsub('/', '\\')
+	else
+		sh command
+	end
+
+	#puts "<\n"
+end
+
+def get_version
+	Version.current(File.join(Rake.original_dir, CONFIG[:version_file]))
+end
+
+def is_windows?
+	require 'rbconfig'
+	RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+end
 
 #############################################
 # Find Flex SDK
@@ -29,89 +63,85 @@ else
 end
 
 #############################################
-# Build the project
+# Config
 #############################################
 
-task :default => [:build]
+CONFIG = {
+	:license_src => "../../LICENSE",
+	:license_dest => "license.txt",
+	:version_file => ".version"
+}
 
-#namespace :library do
-
-	directory PROJECT[:output_dir]
-
-	desc 'Compile the swc'
-	task :build => [PROJECT[:output_dir], 'version:bump:revision'] do
-		puts "\n:build"
-
-		#puts get_all_classes('src')
-
-		run "#{COMPC} -load-config+=compc_config.xml -output #{File.join(PROJECT[:output_dir], PROJECT[:output_file])}"
-
-		puts ":build complete\n"
-	end
-
-	desc 'Package the project into a zip'
-	task :package => [:clean, :build] do
-		puts "\n:package"
-		cp "../../LICENSE", "#{PROJECT[:output_dir]}/license.txt"
-
-		Zip::ZipFile.open(File.join(PROJECT[:output_dir], PROJECT[:package_file]), Zip::ZipFile::CREATE) do |z|
-			z.add("license.txt", "#{PROJECT[:output_dir]}/license.txt")
-			z.add(PROJECT[:output_file], File.join(PROJECT[:output_dir], PROJECT[:output_file]))
-		end
-
-		puts ":package complete\n"
-	end
-
-	desc 'Remove the results of a build/package'
-	task :clean do
-		puts "\n:clean"
-
-		rm_r PROJECT[:output_dir] rescue nil
-
-		puts ":clean complete\n"
-	end
-
-	Rake::VersionTask.new do |task|
-		task.with_git = false
-		#task.with_hg = false
-	end
-
-	desc 'Run the unit tests against src'
-	task :test do
-		puts "\n:test"
-
-		puts "NOT YET IMPLEMENTED"
-
-		puts ":test complete\n"
-	end
-	
-#end
+BIN = PROJECT[:bin_dir]
+SRC = PROJECT[:src_dir]
+SWC = File.join(BIN, "#{PROJECT[:name]}.swc")
+SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{get_version}.swc")
+ZIP = File.join(BIN, "#{PROJECT[:name]}-#{get_version}.zip")
 
 #############################################
-# Utility methods
+# Rules
 #############################################
 
-def get_all_classes(path)
-	Dir.chdir(path) do
-		FileList["**/*.as"].pathmap('%d/%n').map do |f|
-			f.gsub(/^\.\//, '').gsub('/', '.')
-		end
-	end
+#rule '.as'
+
+#############################################
+# Tasks
+#############################################
+
+desc "Compile the swc if it is out of date"
+task :default => SWC
+
+directory BIN
+
+file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
+	Rake::Task["build"].execute
 end
 
-def run(command)
-	puts "\n> Running shell command"
-	
-	if is_windows?
-		sh command.gsub('/', '\\')
-	else
-		sh command
-	end
-
-	puts "<\n\n"
+file SWC_VERSIONED => [BIN, SWC, CONFIG[:version_file]] do
+	cp SWC, SWC_VERSIONED
 end
 
-def is_windows?
-	require 'rbconfig'
-	RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+file ZIP => FileList[BIN, SWC, SWC_VERSIONED] do
+	rm ZIP rescue nil
+
+	filename = "#{PROJECT[:name]}-#{get_version}.swc"
+
+	Zip::ZipFile.open(ZIP, Zip::ZipFile::CREATE) do |zip|
+		zip.add(CONFIG[:license_dest], CONFIG[:license_src])
+		zip.add(filename, SWC_VERSIONED)
+	end
+
+	puts "zip #{ZIP}"
+end
+
+desc "Compile the swc"
+task :build => BIN do
+	run "#{COMPC} -load-config+=compc_config.xml -output #{SWC}"
+end
+
+desc "Package the project into a zip if it is out of date"
+task :package => ZIP
+
+desc "Remove the results of package"
+task :clean do
+	rm FileList[File.join(BIN, "*.swc")].exclude(SWC) rescue nil
+	rm FileList[File.join(BIN, "*.zip")] rescue nil
+end
+
+desc "Remove the results of build & package"
+task :clobber => [:clean] do
+	rm SWC rescue nil
+end
+
+Rake::VersionTask.new do |task|
+	task.with_git = false
+	#task.with_hg = false
+	task.filename = CONFIG[:version_file]
+end
+
+desc 'Run the unit tests against src'
+task :test do
+
+	puts "NOT YET IMPLEMENTED"
+
 end
