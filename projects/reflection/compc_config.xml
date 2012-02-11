@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
-	<output>bin/nexuslib.reflection.swc</output>
 	<use-network>true</use-network>
 	<target-player>11.0</target-player>
 	<warnings>true</warnings>

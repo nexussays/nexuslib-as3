@@ -6,5 +6,6 @@
 			<name>FieldMetadata</name>
 			<name>CtorMetadata</name>
 		</keep-as3-metadata>
+		<verbose-stacktraces>true</verbose-stacktraces>
 	</compiler>
 </flex-config>

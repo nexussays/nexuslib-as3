@@ -1,39 +1,114 @@
-require 'yaml'
 require 'zip/zip'
 require 'rake/version_task'
+require 'rake/clean'
 require 'version'
 
 #############################################
 # Utility methods
 #############################################
 
-def get_all_classes(path)
+def get_classes(path)
 	Dir.chdir(path) do
-		FileList["**/*.as"].pathmap('%d/%n').map do |f|
-			f.gsub(/^\.\//, '').gsub('/', '.')
+		FileList["**/*.as"].pathmap("%X").map do |f|
+			f.gsub(/^\.\//, '').gsub(/[\/\\]/, '.')
 		end
 	end
 end
 
 def run(command)
-	#puts "> Running shell command"
-	
 	if is_windows?
 		sh command.gsub('/', '\\')
 	else
 		sh command
 	end
-
-	#puts "<\n"
 end
 
-def get_version
+def current_version
 	Version.current(File.join(Rake.original_dir, CONFIG[:version_file]))
 end
 
 def is_windows?
 	require 'rbconfig'
 	RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+end
+
+#############################################
+# Config
+#############################################
+
+CONFIG = {
+	:license_src => "../../LICENSE",
+	:license_dest => "license.txt",
+	:version_file => ".version"
+}
+
+#create constants so it's quicker to get project settings
+BIN = PROJECT[:bin_dir]
+SRC = PROJECT[:src_dir]
+SWC = File.join(BIN, "#{PROJECT[:name]}.swc")
+SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.swc")
+ZIP = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.zip")
+
+#############################################
+# Tasks
+#############################################
+
+task :default => :build
+
+directory BIN
+
+file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
+	run "#{COMPC} -load-config+=compc_config.xml -output #{SWC}"
+end
+
+file CONFIG[:version_file] do
+	File.open(CONFIG[:version_file], 'w') do |f|
+		f.puts "0.0.0"
+	end
+	SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.swc")
+	ZIP = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.zip")
+end
+
+file SWC_VERSIONED => [BIN, SWC, CONFIG[:version_file]] do
+	cp SWC, SWC_VERSIONED
+end
+
+file ZIP => [BIN, SWC, CONFIG[:version_file], SWC_VERSIONED] do
+	rm ZIP rescue nil
+
+	filename = "#{PROJECT[:name]}-#{current_version}.swc"
+
+	Zip::ZipFile.open(ZIP, Zip::ZipFile::CREATE) do |zip|
+		zip.add(CONFIG[:license_dest], CONFIG[:license_src])
+		zip.add(filename, SWC_VERSIONED)
+	end
+
+	puts "zip #{ZIP}"
+end
+
+desc "Compile the swc"
+task :build => SWC
+
+desc "Package the project into a zip"
+task :package => ZIP
+
+CLEAN.include(File.join(BIN, "*.swc"));
+CLEAN.include(File.join(BIN, "*.zip"));
+CLEAN.exclude(SWC)
+
+CLOBBER.include(SWC)
+
+Rake::VersionTask.new do |task|
+	task.with_git = false
+	#task.with_hg = false
+	task.filename = CONFIG[:version_file]
+end
+
+desc 'Run the unit tests against src'
+task :test do
+
+	puts "TEST NOT YET IMPLEMENTED"
+
 end
 
 #############################################
@@ -60,88 +135,4 @@ else
 	puts "\nrake aborted!"
 	puts "Could not find Flex SDK"
 	exit
-end
-
-#############################################
-# Config
-#############################################
-
-CONFIG = {
-	:license_src => "../../LICENSE",
-	:license_dest => "license.txt",
-	:version_file => ".version"
-}
-
-BIN = PROJECT[:bin_dir]
-SRC = PROJECT[:src_dir]
-SWC = File.join(BIN, "#{PROJECT[:name]}.swc")
-SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{get_version}.swc")
-ZIP = File.join(BIN, "#{PROJECT[:name]}-#{get_version}.zip")
-
-#############################################
-# Rules
-#############################################
-
-#rule '.as'
-
-#############################################
-# Tasks
-#############################################
-
-desc "Compile the swc if it is out of date"
-task :default => SWC
-
-directory BIN
-
-file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
-	Rake::Task["build"].execute
-end
-
-file SWC_VERSIONED => [BIN, SWC, CONFIG[:version_file]] do
-	cp SWC, SWC_VERSIONED
-end
-
-file ZIP => FileList[BIN, SWC, SWC_VERSIONED] do
-	rm ZIP rescue nil
-
-	filename = "#{PROJECT[:name]}-#{get_version}.swc"
-
-	Zip::ZipFile.open(ZIP, Zip::ZipFile::CREATE) do |zip|
-		zip.add(CONFIG[:license_dest], CONFIG[:license_src])
-		zip.add(filename, SWC_VERSIONED)
-	end
-
-	puts "zip #{ZIP}"
-end
-
-desc "Compile the swc"
-task :build => BIN do
-	run "#{COMPC} -load-config+=compc_config.xml -output #{SWC}"
-end
-
-desc "Package the project into a zip if it is out of date"
-task :package => ZIP
-
-desc "Remove the results of package"
-task :clean do
-	rm FileList[File.join(BIN, "*.swc")].exclude(SWC) rescue nil
-	rm FileList[File.join(BIN, "*.zip")] rescue nil
-end
-
-desc "Remove the results of build & package"
-task :clobber => [:clean] do
-	rm SWC rescue nil
-end
-
-Rake::VersionTask.new do |task|
-	task.with_git = false
-	#task.with_hg = false
-	task.filename = CONFIG[:version_file]
-end
-
-desc 'Run the unit tests against src'
-task :test do
-
-	puts "NOT YET IMPLEMENTED"
-
 end
