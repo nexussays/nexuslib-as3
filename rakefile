@@ -1,6 +1,7 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'zip/zip'
-require 'rake/version_task'
-require 'rake/clean'
+require 'version/version_task'
 require 'version'
 
 #############################################
@@ -15,16 +16,35 @@ def get_classes(path)
 	end
 end
 
-def run(command)
-	if is_windows?
-		sh command.gsub('/', '\\')
-	else
-		sh command
+def run(command, abort_on_failure = true)
+	command = command.gsub('/', '\\') if is_windows?
+	output = ""
+
+	#sh command
+	puts "> #{command}"
+	IO.popen("#{command} 2>&1") do |proc|
+		while !proc.closed? && (line = proc.gets)
+			puts ">    #{line}"
+			output << line
+			yield line if block_given?
+		end
 	end
+
+	if $?.exitstatus != 0
+		msg = "Operation exited with status #{$?.exitstatus}"
+		if abort_on_failure
+			abort msg
+		else
+			puts msg
+		end	
+	end
+	#log $?.exitstatus
+
+	return output
 end
 
 def current_version
-	Version.current(File.join(Rake.original_dir, CONFIG[:version_file]))
+	Version.current(File.join(Rake.original_dir, CONFIG[:version_file])) || "0.0.0"
 end
 
 def is_windows?
@@ -55,6 +75,12 @@ ZIP = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.zip")
 
 task :default => :build
 
+desc "Compile the swc"
+task :build => SWC
+
+desc "Package the project into a zip"
+task :package => ZIP
+
 directory BIN
 
 file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
@@ -62,11 +88,8 @@ file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
 end
 
 file CONFIG[:version_file] do
-	File.open(CONFIG[:version_file], 'w') do |f|
-		f.puts "0.0.0"
-	end
-	SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.swc")
-	ZIP = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.zip")
+	Rake::Task["version:create"].execute
+	#abort "rake aborted!\nVersion file missing and had to be created"
 end
 
 file SWC_VERSIONED => [BIN, SWC, CONFIG[:version_file]] do
@@ -86,25 +109,29 @@ file ZIP => [BIN, SWC, CONFIG[:version_file], SWC_VERSIONED] do
 	puts "zip #{ZIP}"
 end
 
-desc "Compile the swc"
-task :build => SWC
+desc "Remove package results & temporary build artifacts"
+task :clean do
+	list = FileList.new
+	list.include(File.join(BIN, "*.swc"));
+	list.include(File.join(BIN, "*.zip"));
+	list.exclude(SWC)
+	list.each { |fn| rm_r fn rescue nil }
+end
 
-desc "Package the project into a zip"
-task :package => ZIP
-
-CLEAN.include(File.join(BIN, "*.swc"));
-CLEAN.include(File.join(BIN, "*.zip"));
-CLEAN.exclude(SWC)
-
-CLOBBER.include(SWC)
+desc "Remove all build & package results"
+task :clobber => [:clean] do
+	list = FileList.new
+	list.include(SWC)
+	list.each { |fn| rm_r fn rescue nil }
+end
 
 Rake::VersionTask.new do |task|
 	task.with_git = false
-	#task.with_hg = false
+	task.with_hg = false
 	task.filename = CONFIG[:version_file]
 end
 
-desc 'Run the unit tests against src'
+#desc 'Run the unit tests against src'
 task :test do
 
 	puts "TEST NOT YET IMPLEMENTED"
