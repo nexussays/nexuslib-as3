@@ -144,31 +144,28 @@ public class ObjectUtils
 			
 			for each(var member:AbstractMemberInfo in typeInfo.allMembers)
 			{
-				if(member is AbstractFieldInfo && !member.isStatic)
+				//only assign the field if it exists in the source data
+				if(member is AbstractFieldInfo && !member.isStatic && member.name in source)
 				{
-					//only assign the field if it exists in the source data
-					if(source != null && (member.name in source))
+					if(fieldsInDataFoundInClass != null)
 					{
-						if(fieldsInDataFoundInClass != null)
+						fieldsInDataFoundInClass[member.name] = member.name;
+					}
+					
+					if(AbstractFieldInfo(member).canWrite)
+					{
+						try
 						{
-							fieldsInDataFoundInClass[member.name] = member.name;
+							instance[member.qname] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
 						}
-						
-						if(AbstractFieldInfo(member).canWrite)
+						catch(e:Error)
 						{
-							try
-							{
-								instance[member.qname] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
-							}
-							catch(e:Error)
-							{
-								//TODO: is a catch-all here ok?
-							}
+							//TODO: is a catch-all here ok?
 						}
-						else
-						{
-							assignTypedObjectFromNativeObject(instance[member.qname], source[member.name], applicationDomain);
-						}
+					}
+					else
+					{
+						assignTypedObjectFromNativeObject(instance[member.qname], source[member.name], applicationDomain);
 					}
 				}
 			}
