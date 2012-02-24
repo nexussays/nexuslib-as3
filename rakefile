@@ -8,6 +8,12 @@ require 'version'
 # Utility methods
 #############################################
 
+class String
+	def /(join)
+		File.join(self, join)
+	end
+end
+
 def get_classes(path)
 	Dir.chdir(path) do
 		FileList["**/*.as"].pathmap("%X").map do |f|
@@ -44,7 +50,7 @@ def run(command, abort_on_failure = true)
 end
 
 def current_version
-	Version.current(File.join(Rake.original_dir, CONFIG[:version_file])) || "0.0.0"
+	Version.current(Rake.original_dir/CONFIG[:version_file]) || "0.0.0"
 end
 
 def is_windows?
@@ -57,7 +63,7 @@ end
 #############################################
 
 CONFIG = {
-	:license_src => "../../LICENSE",
+	:license_src => ".."/".."/"LICENSE",
 	:license_dest => "license.txt",
 	:version_file => ".version"
 }
@@ -65,9 +71,9 @@ CONFIG = {
 #create constants so it's quicker to get project settings
 BIN = PROJECT[:bin_dir]
 SRC = PROJECT[:src_dir]
-SWC = File.join(BIN, "#{PROJECT[:name]}.swc")
-SWC_VERSIONED = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.swc")
-ZIP = File.join(BIN, "#{PROJECT[:name]}-#{current_version}.zip")
+SWC = BIN/"#{PROJECT[:name]}.swc"
+SWC_VERSIONED = BIN/"#{PROJECT[:name]}-#{current_version}.swc"
+ZIP = BIN/"#{PROJECT[:name]}-#{current_version}.zip"
 
 #############################################
 # Tasks
@@ -83,7 +89,7 @@ task :package => ZIP
 
 directory BIN
 
-file SWC => FileList[BIN, File.join(SRC,"**","*.as")] do
+file SWC => FileList[BIN, SRC/"**"/"*.as"] do
 	run "#{COMPC} -load-config+=compc_config.xml -output #{SWC}"
 end
 
@@ -112,8 +118,8 @@ end
 desc "Remove package results & temporary build artifacts"
 task :clean do
 	list = FileList.new
-	list.include(File.join(BIN, "*.swc"));
-	list.include(File.join(BIN, "*.zip"));
+	list.include(BIN/"*.swc");
+	list.include(BIN/"*.zip");
 	list.exclude(SWC)
 	list.each { |fn| rm_r fn rescue nil }
 end
@@ -149,17 +155,15 @@ end
 ].each do |path|
 	if path != nil && File.exists?(path)
 		FLEX_HOME = path
-		MXMLC = File.join(FLEX_HOME, 'bin', 'mxmlc')
-		COMPC = File.join(FLEX_HOME, 'bin', 'compc')
-		ASDOC = File.join(FLEX_HOME, 'bin', 'asdoc')
+		MXMLC = FLEX_HOME/'bin'/'mxmlc'
+		COMPC = FLEX_HOME/'bin'/'compc'
+		ASDOC = FLEX_HOME/'bin'/'asdoc'
 		break
 	end
 end
 
-if FLEX_HOME != nil
+if defined? FLEX_HOME
 	puts "Using Flex SDK at #{FLEX_HOME}"
 else
-	puts "\nrake aborted!"
-	puts "Could not find Flex SDK"
-	exit
+	abort "\nrake aborted!\nCould not find Flex SDK"
 end
