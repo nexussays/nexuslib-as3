@@ -26,11 +26,10 @@ def run(command, abort_on_failure = true)
 	command = command.gsub('/', '\\') if is_windows?
 	output = ""
 
-	#sh command
-	puts "> #{command}"
+	puts "#{command}"
 	IO.popen("#{command} 2>&1") do |proc|
 		while !proc.closed? && (line = proc.gets)
-			puts ">    #{line}"
+			puts "> #{line}"
 			output << line
 			yield line if block_given?
 		end
@@ -50,7 +49,7 @@ def run(command, abort_on_failure = true)
 end
 
 def current_version
-	Version.current(Rake.original_dir/CONFIG[:version_file]) || "0.0.0"
+	Version.current(Rake.original_dir/PROJECT[:version_file]) || "0.0.0"
 end
 
 def is_windows?
@@ -65,12 +64,13 @@ end
 CONFIG = {
 	:license_src => ".."/".."/"LICENSE",
 	:license_dest => "license.txt",
-	:version_file => ".version"
 }
 
+PROJECT[:version_file] 	= ".version" 	if PROJECT[:version_file].nil?
+PROJECT[:src_dir] 		= "src" 		if PROJECT[:src_dir].nil?
+
 #create constants so it's quicker to get project settings
-BIN = PROJECT[:bin_dir]
-SRC = PROJECT[:src_dir]
+BIN = PROJECT[:bin_dir] || "bin"
 SWC = BIN/"#{PROJECT[:name]}.swc"
 SWC_VERSIONED = BIN/"#{PROJECT[:name]}-#{current_version}.swc"
 ZIP = BIN/"#{PROJECT[:name]}-#{current_version}.zip"
@@ -89,37 +89,38 @@ task :package => ZIP
 
 directory BIN
 
-file SWC => FileList[BIN, SRC/"**"/"*.as"] do
+file SWC => FileList[BIN, PROJECT[:src_dir]/"**"/"*.as"] do
 	run "#{COMPC} -load-config+=compc_config.xml -output #{SWC}"
 end
 
-file CONFIG[:version_file] do
+file PROJECT[:version_file] do
 	Rake::Task["version:create"].execute
 	#abort "rake aborted!\nVersion file missing and had to be created"
 end
 
-file SWC_VERSIONED => [BIN, SWC, CONFIG[:version_file]] do
+file SWC_VERSIONED => [SWC, PROJECT[:version_file]] do
 	cp SWC, SWC_VERSIONED
 end
 
-file ZIP => [BIN, SWC, CONFIG[:version_file], SWC_VERSIONED] do
-	rm ZIP rescue nil
-
-	filename = "#{PROJECT[:name]}-#{current_version}.swc"
+file ZIP => SWC_VERSIONED do
+	rm_q ZIP rescue nil
 
 	Zip::ZipFile.open(ZIP, Zip::ZipFile::CREATE) do |zip|
 		zip.add(CONFIG[:license_dest], CONFIG[:license_src])
-		zip.add(filename, SWC_VERSIONED)
+		zip.add("#{PROJECT[:name]}-#{current_version}.swc", SWC_VERSIONED)
 	end
 
 	puts "zip #{ZIP}"
 end
 
+Rake::VersionTask.new do |task|
+	task.filename = PROJECT[:version_file]
+end
+
 desc "Remove package results & temporary build artifacts"
 task :clean do
 	list = FileList.new
-	list.include(BIN/"*.swc");
-	list.include(BIN/"*.zip");
+	list.include(BIN/"*");
 	list.exclude(SWC)
 	list.each { |fn| rm_r fn rescue nil }
 end
@@ -129,19 +130,6 @@ task :clobber => [:clean] do
 	list = FileList.new
 	list.include(SWC)
 	list.each { |fn| rm_r fn rescue nil }
-end
-
-Rake::VersionTask.new do |task|
-	task.with_git = false
-	task.with_hg = false
-	task.filename = CONFIG[:version_file]
-end
-
-#desc 'Run the unit tests against src'
-task :test do
-
-	puts "TEST NOT YET IMPLEMENTED"
-
 end
 
 #############################################
@@ -155,9 +143,13 @@ end
 ].each do |path|
 	if path != nil && File.exists?(path)
 		FLEX_HOME = path
-		MXMLC = FLEX_HOME/'bin'/'mxmlc'
-		COMPC = FLEX_HOME/'bin'/'compc'
-		ASDOC = FLEX_HOME/'bin'/'asdoc'
+		MXMLC 	= FLEX_HOME/'bin'/'mxmlc'
+		COMPC 	= FLEX_HOME/'bin'/'compc'
+		AMXMLC 	= FLEX_HOME/'bin'/'amxmlc'
+		ACOMPC 	= FLEX_HOME/'bin'/'acompc'
+		ADT 	= FLEX_HOME/'bin'/'adt'
+		ADL 	= FLEX_HOME/'bin'/'adl'
+		ASDOC 	= FLEX_HOME/'bin'/'asdoc'
 		break
 	end
 end
