@@ -32,6 +32,7 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	
 	private var m_privateVar:int;
 	protected var m_protectedVar: int;
+	testing_namespace var m_namespacedVar : int;
 	
 	[Embed(source="test.xml", mimeType="application/octet-stream")]
 	public const instanceEmbed:Class;

@@ -107,7 +107,7 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	{
 		assertSame(Reflection.SYSTEM_DOMAIN, Reflection.getApplicationDomain(m_test));
 		
-		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, Reflection.getApplicationDomain(m_test)));
+		assertTrue(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, Reflection.getApplicationDomain(m_test)));
 	}
 	
 	public function test_getVectorType():void
@@ -183,17 +183,17 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	{
 		var childDomain : ApplicationDomain = new ApplicationDomain(ApplicationDomain.currentDomain);
 		
-		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, ApplicationDomain.currentDomain));
+		assertTrue(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, ApplicationDomain.currentDomain));
 		
-		assertTrue(Reflection.applicationDomainsAreEqual(Reflection.SYSTEM_DOMAIN, ApplicationDomain.currentDomain));
-		assertTrue(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, Reflection.SYSTEM_DOMAIN));
+		assertTrue(Reflection.areApplicationDomainsEqual(Reflection.SYSTEM_DOMAIN, ApplicationDomain.currentDomain));
+		assertTrue(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, Reflection.SYSTEM_DOMAIN));
 		
-		assertTrue(Reflection.applicationDomainsAreEqual(childDomain.parentDomain, Reflection.SYSTEM_DOMAIN));
-		assertTrue(Reflection.applicationDomainsAreEqual(childDomain.parentDomain, ApplicationDomain.currentDomain));
+		assertTrue(Reflection.areApplicationDomainsEqual(childDomain.parentDomain, Reflection.SYSTEM_DOMAIN));
+		assertTrue(Reflection.areApplicationDomainsEqual(childDomain.parentDomain, ApplicationDomain.currentDomain));
 		
-		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, childDomain));
-		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, new ApplicationDomain(Reflection.SYSTEM_DOMAIN)));
-		assertFalse(Reflection.applicationDomainsAreEqual(ApplicationDomain.currentDomain, new ApplicationDomain(null)));
+		assertFalse(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, childDomain));
+		assertFalse(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, new ApplicationDomain(Reflection.SYSTEM_DOMAIN)));
+		assertFalse(Reflection.areApplicationDomainsEqual(ApplicationDomain.currentDomain, new ApplicationDomain(null)));
 	}
 	
 	public function test_isScalar():void

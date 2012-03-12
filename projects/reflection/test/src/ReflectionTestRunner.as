@@ -46,6 +46,7 @@ public class ReflectionTestRunner extends Sprite
 		core.textPrinter.fontSize = 12;
 		core.textPrinter.header = "nexuslib.reflection\nFlash Player version: " + Capabilities.version;
 		core.textPrinter.hideLocalPaths = true;
+		core.textPrinter.traceOnComplete = false;
 		core.start(ReflectionTests, null, this);
 		
 		//this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));

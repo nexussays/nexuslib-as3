@@ -32,9 +32,7 @@ import nexus.utils.reflection.*;
 import nexus.utils.serialization.ISerializer;
 
 /**
- * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	9/29/2011 2:13 AM
+ * An object serializer for JSON.
  */
 public class JsonSerializer implements ISerializer
 {
@@ -69,15 +67,7 @@ public class JsonSerializer implements ISerializer
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	//--------------------------------------
-	//	CLASS VARIABLES
-	//--------------------------------------
-	
-	static private var s_indentationCharacters : String;
-	static private var s_maxLineLength : int;
-	static private var s_serializeConstants : Boolean;
-	///the current indentation characters, defined as s_indentationCharacters * indentationLevel
-	static private var s_indentation:String;
+	static private const s_staticSerializer : JsonSerializer = new JsonSerializer();
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -85,17 +75,34 @@ public class JsonSerializer implements ISerializer
 	
 	private var m_indentationCharacters:String;
 	private var m_maxLineLength:int;
-	private var m_serializeConstants:Boolean;
+	private var m_isSerializingConstantScalars:Boolean;
+	private var m_isOutputAlphabetized : Boolean;
+	private var m_includedNamespaces : Dictionary;
+	
+	///the current indentation characters used in this serialization pass
+	private var m_indentation:String;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function JsonSerializer(indentationCharacters:String = "", lineLength:int = int.MAX_VALUE)
+	/**
+	 * Creates a new JsonSerializer which provides more customization than that static serialize/deserialize methods.
+	 * @param	indentationCharacters			The character(s) to use for indentation in the output JSON
+	 * @param	lineLength						Pretty-print JSON by defining a maximum character length of a single line. By default the output JSON will not have any newlines.
+	 * @param	isSerializingConstantScalars	By default, scalar values that are constant or are provided only through a get function (with no corresponding set function) are not serialized.
+	 * @param	isOutputAlphabetized			Should the resulting JSON alphabetize objects by key, default is true.
+	 */
+	public function JsonSerializer(indentationCharacters:String = "", lineLength:int = int.MAX_VALUE,
+		isSerializingConstantScalars:Boolean = false, isOutputAlphabetized:Boolean = true)
 	{
-		m_indentationCharacters = indentationCharacters;
-		m_maxLineLength = lineLength;
-		m_serializeConstants = false;
+		this.indentationCharacters = indentationCharacters;
+		this.maxLineLength = lineLength;
+		this.isSerializingConstantScalars = isSerializingConstantScalars;
+		this.isOutputAlphabetized = isOutputAlphabetized;
+		
+		m_includedNamespaces = new Dictionary();
+		m_includedNamespaces[new Namespace()] = true;
 	}
 	
 	//--------------------------------------
@@ -110,7 +117,11 @@ public class JsonSerializer implements ISerializer
 	public function get indentationCharacters():String { return m_indentationCharacters; }
 	public function set indentationCharacters(value:String):void
 	{
-		if(m_indentationCharacters != value)
+		if(value == null)
+		{
+			m_indentationCharacters = "";
+		}
+		else if(m_indentationCharacters != value)
 		{
 			m_indentationCharacters = value || "";
 			if(m_indentationCharacters.length > 10)
@@ -121,13 +132,23 @@ public class JsonSerializer implements ISerializer
 	}
 	
 	/**
+	 * If true, objects in the resulting JSON will be alphabetized by key
+	 * @default	true
+	 */
+	public function get isOutputAlphabetized():Boolean { return m_isOutputAlphabetized; }
+	public function set isOutputAlphabetized(value:Boolean):void
+	{
+		m_isOutputAlphabetized = value;
+	}
+	
+	/**
 	 * If true, constants are serialized in the JSON output along with variables and getter properties.
 	 * @default	false
 	 */
-	public function get serializeConstants():Boolean { return m_serializeConstants; }
-	public function set serializeConstants(value:Boolean):void
+	public function get isSerializingConstantScalars():Boolean { return m_isSerializingConstantScalars; }
+	public function set isSerializingConstantScalars(value:Boolean):void
 	{
-		m_serializeConstants = value;
+		m_isSerializingConstantScalars = value;
 	}
 	
 	/**
@@ -145,11 +166,22 @@ public class JsonSerializer implements ISerializer
 	//--------------------------------------
 	
 	/**
+	 * Includes the provided namespace in serialization.
+	 * @param	ns		The namespace to include
+	 * @param	prefix	The prefix to use on the key of serialized objects, defaults to the URI
+	 */
+	public function includeNamespaceInSerialization(ns:Namespace, prefix:String=null):void
+	{
+		m_includedNamespaces[ns] = true;
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object
 	{
-		return JsonSerializer.serialize(sourceObject, applicationDomain, m_indentationCharacters, m_maxLineLength, m_serializeConstants);
+		m_indentation = "";
+		return serializeObject(sourceObject, applicationDomain);
 	}
 	
 	/**
@@ -157,58 +189,50 @@ public class JsonSerializer implements ISerializer
 	 */
 	public function deserialize(serializedData:Object, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
-		return JsonSerializer.deserialize(serializedData as String, type, applicationDomain);
+		var json : String = serializedData as String;
+		var result : Object;
+		
+		try
+		{
+			result = JsonParser.decode(json);
+		}
+		catch(e:SyntaxError)
+		{
+			throw new SyntaxError("Error deserializing object, invalid JSON input.");
+		}
+		
+		if(type != null)
+		{
+			return ObjectUtils.createTypedObjectFromNativeObject(type, result, applicationDomain);
+		}
+		
+		return result;
 	}
 	
 	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	/**
-	 * Serializes the given object into a JSON string
-	 * @param	sourceObject
-	 * @param	space
-	 * @param	includeReadOnlyFields
-	 * @return
-	 */
-	static public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null, indentationCharacters:String = "", maxLineLength:int = int.MAX_VALUE, serializeConstants:Boolean = false):String
+	static public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null, indentationCharacters:String = "", maxLineLength:int = int.MAX_VALUE):Object
 	{
-		s_indentation = "";
-		s_indentationCharacters = indentationCharacters || "";
-		s_maxLineLength = maxLineLength;
-		s_serializeConstants = serializeConstants;
-		return serializeObject(sourceObject, applicationDomain);
+		s_staticSerializer.indentationCharacters = indentationCharacters;
+		s_staticSerializer.maxLineLength = maxLineLength;
+		return s_staticSerializer.serialize(sourceObject, applicationDomain);
 	}
 	
 	static public function deserialize(json:String, type:Class = null, applicationDomain:ApplicationDomain = null):Object
 	{
-		try
-		{
-			var object : Object = JsonParser.decode(json);
-			if(type != null)
-			{
-				return ObjectUtils.createTypedObjectFromNativeObject(type, object, applicationDomain);
-			}
-			else
-			{
-				return object;
-			}
-		}
-		catch(e:SyntaxError)
-		{
-			throw new SyntaxError("Error parsing object, invalid JSON input.");
-		}
-		return null;
+		return s_staticSerializer.deserialize(json, type, applicationDomain);
 	}
 	
 	//--------------------------------------
-	//	PRIVATE CLASS METHODS
+	//	PRIVATE METHODS
 	//--------------------------------------
 	
-	static private function serializeObject(sourceObject:Object, applicationDomain:ApplicationDomain):String
+	private function serializeObject(sourceObject:Object, applicationDomain:ApplicationDomain):String
 	{
 		var result:String;
-		var pretty : Boolean;
+		var lineWrap : Boolean;
 		var x : int;
 		
 		if(sourceObject == null)
@@ -229,11 +253,11 @@ public class JsonSerializer implements ISerializer
 			//if a max line length has been set, use the native encoder to very quickly roughly determine the string length
 			//of the current object and then use that to determine if we need to run the pretty formatter or not
 			//TODO: find a faster way to determine this
-			pretty = (s_maxLineLength == 0 || (s_maxLineLength < int.MAX_VALUE && JsonParser.encode(sourceObject).length > s_maxLineLength));
+			lineWrap = (m_maxLineLength == 0 || (m_maxLineLength < int.MAX_VALUE && JsonParser.encode(sourceObject).length > m_maxLineLength));
 			
-			if(pretty)
+			if(lineWrap)
 			{
-				s_indentation += s_indentationCharacters;
+				m_indentation += m_indentationCharacters;
 			}
 			
 			if(Reflection.isArrayType(sourceObject))
@@ -242,17 +266,17 @@ public class JsonSerializer implements ISerializer
 				{
 					if(result.length > 0)
 					{
-						result += pretty ? ",\n" : ",";
+						result += lineWrap ? ",\n" : ",";
 					}
-					result += pretty ? s_indentation : "";
+					result += lineWrap ? m_indentation : "";
 					result += serializeObject(sourceObject[x], applicationDomain);
 				}
 				
-				if(pretty)
+				if(lineWrap)
 				{
 					//unindent
-					s_indentation = s_indentation.substring(0, s_indentation.length - s_indentationCharacters.length);
-					result = "[" + "\n" + result + "\n" + s_indentation + "]";
+					m_indentation = m_indentation.substring(0, m_indentation.length - m_indentationCharacters.length);
+					result = "[" + "\n" + result + "\n" + m_indentation + "]";
 				}
 				else
 				{
@@ -265,10 +289,7 @@ public class JsonSerializer implements ISerializer
 				if(Reflection.isAssociativeArray(sourceObject))
 				{
 					var key : String;
-					//alphabetize output
-					//don't check if(pretty) here because we want to sort on case if the entire serialize call is pretty printed
-					//even if this specific object we are recursing over is not
-					if(s_maxLineLength < int.MAX_VALUE)
+					if(m_isOutputAlphabetized)
 					{
 						var keys : Array = [];
 						for(key in sourceObject)
@@ -280,14 +301,14 @@ public class JsonSerializer implements ISerializer
 						for(x = 0; x < keys.length; ++x)
 						{
 							key = keys[x];
-							result += setupObjectString(result, key, sourceObject[key], pretty, applicationDomain);
+							result += setupObjectString(result, key, sourceObject[key], lineWrap, applicationDomain);
 						}
 					}
 					else
 					{
 						for(key in sourceObject)
 						{
-							result += setupObjectString(result, key, sourceObject[key], pretty, applicationDomain);
+							result += setupObjectString(result, key, sourceObject[key], lineWrap, applicationDomain);
 						}
 					}
 				}
@@ -301,17 +322,18 @@ public class JsonSerializer implements ISerializer
 						var fieldsInDataFoundInClass : Dictionary = new Dictionary();
 					}
 					
-					var memberNames : Vector.<AbstractMemberInfo> = s_maxLineLength < int.MAX_VALUE ? typeInfo.allMembersSortedByName : typeInfo.allMembers;
-					for each(var field : AbstractMemberInfo in memberNames)
+					var memberNames : Vector.<AbstractMemberInfo> = m_isOutputAlphabetized ? typeInfo.allMembersSortedByName : typeInfo.allMembers;
+					for each(var member : AbstractMemberInfo in memberNames)
 					{
-						if(	field is AbstractFieldInfo
-							&& !AbstractFieldInfo(field).isStatic
-							&& AbstractFieldInfo(field).canRead
-							//don't serialize constant fields if told not to, but always serialize read-only properties
-							&& (s_serializeConstants || AbstractFieldInfo(field).canWrite || field is PropertyInfo)
-							&& field.getMetadataByName("Transient") == null)
+						var field : AbstractFieldInfo = member as AbstractFieldInfo;
+						if(	field != null
+							&& field.canRead
+							&& !field.isStatic
+							&& (m_isSerializingConstantScalars || field.canWrite || !Reflection.isScalar(field.type))
+							&& field.getMetadataByName("Transient") == null
+							&& (field.namespace == null || field.namespace in m_includedNamespaces) )
 						{
-							result += setupObjectString(result, field.name, sourceObject[field.name], pretty, applicationDomain);
+							result += setupObjectString(result, field.qname.toString(), sourceObject[field.qname], lineWrap, applicationDomain);
 						}
 					}
 					
@@ -321,17 +343,17 @@ public class JsonSerializer implements ISerializer
 						{
 							if(!(dynamicKey in fieldsInDataFoundInClass))
 							{
-								result += setupObjectString(result, dynamicKey, sourceObject[dynamicKey], pretty, applicationDomain);
+								result += setupObjectString(result, dynamicKey, sourceObject[dynamicKey], lineWrap, applicationDomain);
 							}
 						}
 					}
 				}
 				
-				if(pretty)
+				if(lineWrap)
 				{
 					//unindent
-					s_indentation = s_indentation.substring(0, s_indentation.length - s_indentationCharacters.length);
-					result = "{" + "\n" + result + "\n" + s_indentation + "}";
+					m_indentation = m_indentation.substring(0, m_indentation.length - m_indentationCharacters.length);
+					result = "{" + "\n" + result + "\n" + m_indentation + "}";
 				}
 				else
 				{
@@ -342,18 +364,18 @@ public class JsonSerializer implements ISerializer
 		return result;
 	}
 	
-	static private function setupObjectString(current:String, key:String, value:Object, pretty:Boolean, applicationDomain:ApplicationDomain):String
+	private function setupObjectString(current:String, key:String, value:Object, lineWrap:Boolean, applicationDomain:ApplicationDomain):String
 	{
 		var result : String = "";
 		if(!(value is Function))
 		{
 			if(current.length > 0)
 			{
-				result += pretty ? ",\n" : ",";
+				result += lineWrap ? ",\n" : ",";
 			}
-			result += pretty ? s_indentation : "";
+			result += lineWrap ? m_indentation : "";
 			result += JsonParser.encode(key);
-			result += pretty ? ": " : ":";
+			result += lineWrap ? ": " : ":";
 			result += serializeObject(value, applicationDomain);
 		}
 		return result;

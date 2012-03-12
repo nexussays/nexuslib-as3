@@ -356,7 +356,7 @@ public final class Reflection
 	 * @param	applicationDomainTwo	One of the <code>ApplicationDomain</code>s to check for equality
 	 * @return	True if the two provided application domains point to the same reference
 	 */
-	public static function applicationDomainsAreEqual(applicationDomainOne:ApplicationDomain, applicationDomainTwo:ApplicationDomain):Boolean
+	public static function areApplicationDomainsEqual(applicationDomainOne:ApplicationDomain, applicationDomainTwo:ApplicationDomain):Boolean
 	{
 		if(applicationDomainOne == null || applicationDomainTwo == null)
 		{
@@ -393,7 +393,7 @@ public final class Reflection
 		{
 			for each(var appDomain : ApplicationDomain in REGISTERED_APPDOMAINS)
 			{
-				if(Reflection.applicationDomainsAreEqual(applicationDomain, appDomain))
+				if(Reflection.areApplicationDomainsEqual(applicationDomain, appDomain))
 				{
 					return;
 				}
@@ -443,7 +443,7 @@ public final class Reflection
 		for(var appDomainKey : Object in CACHED_TYPEINFO)
 		{
 			var cachedAppDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
-			if(Reflection.applicationDomainsAreEqual(cachedAppDomain, applicationDomain))
+			if(Reflection.areApplicationDomainsEqual(cachedAppDomain, applicationDomain))
 			{
 				applicationDomain = cachedAppDomain;
 				appDomainExists = true;
@@ -568,7 +568,7 @@ public final class Reflection
 	}
 	
 	/**
-	 * Retrievs the caches Namespace for the given namespace URI
+	 * Retrieves the cached Namespace for the given namespace URI
 	 * @param	namespaceUri
 	 */
 	static internal function getNamespace(namespaceUri:String):Namespace

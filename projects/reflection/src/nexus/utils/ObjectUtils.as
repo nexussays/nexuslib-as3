@@ -139,24 +139,26 @@ public class ObjectUtils
 			var typeInfo:TypeInfo = Reflection.getTypeInfo(instance, applicationDomain);
 			if(typeInfo.isDynamic)
 			{
-				var fieldsInDataFoundInClass : Dictionary = new Dictionary();
+				var fieldsInDataFoundInClass : Object = { };
 			}
 			
 			for each(var member:AbstractMemberInfo in typeInfo.allMembers)
 			{
+				var field : AbstractFieldInfo = member as AbstractFieldInfo;
 				//only assign the field if it exists in the source data
-				if(member is AbstractFieldInfo && !member.isStatic && member.name in source)
+				if(field != null && !field.isStatic && field.qname.toString() in source)
 				{
+					var qname : QName = field.qname;
 					if(fieldsInDataFoundInClass != null)
 					{
-						fieldsInDataFoundInClass[member.name] = member.name;
+						fieldsInDataFoundInClass[qname.toString()] = true;
 					}
 					
-					if(AbstractFieldInfo(member).canWrite)
+					if(field.canWrite)
 					{
 						try
 						{
-							instance[member.qname] = createTypedObjectFromNativeObject(AbstractFieldInfo(member).type, source[member.name], applicationDomain);
+							instance[qname] = createTypedObjectFromNativeObject(field.type, source[qname], applicationDomain);
 						}
 						catch(e:Error)
 						{
@@ -165,7 +167,7 @@ public class ObjectUtils
 					}
 					else
 					{
-						assignTypedObjectFromNativeObject(instance[member.qname], source[member.name], applicationDomain);
+						assignTypedObjectFromNativeObject(instance[qname], source[qname], applicationDomain);
 					}
 				}
 			}
@@ -180,6 +182,7 @@ public class ObjectUtils
 						instance[dynamicKey] = createTypedObjectFromNativeObject(Reflection.getClass(source[dynamicKey], applicationDomain), source[dynamicKey], applicationDomain);
 					}
 				}
+				fieldsInDataFoundInClass = null;
 			}
 		}
 	}

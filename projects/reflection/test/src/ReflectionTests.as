@@ -26,6 +26,7 @@ package
 
 import test.nexus.utils.ObjectUtilsTest;
 import test.nexus.utils.reflection.*;
+import test.nexus.utils.serialization.json.JsonSerializerTest;
 
 /**
  * ...
@@ -39,6 +40,7 @@ public class ReflectionTests// extends TestSuite
 	public var test02 : ReflectionTypeInfoTest;
 	public var test03 : ReflectionTypeInfoTest;
 	public var test04 : ObjectUtilsTest;
+	public var test05 : JsonSerializerTest;
 	
 	public function ReflectionTests()
 	{
