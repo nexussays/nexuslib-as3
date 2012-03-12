@@ -146,28 +146,32 @@ public class ObjectUtils
 			{
 				var field : AbstractFieldInfo = member as AbstractFieldInfo;
 				//only assign the field if it exists in the source data
-				if(field != null && !field.isStatic && field.qname.toString() in source)
+				if(field != null && !field.isStatic)
 				{
 					var qname : QName = field.qname;
-					if(fieldsInDataFoundInClass != null)
+					var qnameString : String = qname.toString();
+					if(qnameString in source)
 					{
-						fieldsInDataFoundInClass[qname.toString()] = true;
-					}
-					
-					if(field.canWrite)
-					{
-						try
+						if(fieldsInDataFoundInClass != null)
 						{
-							instance[qname] = createTypedObjectFromNativeObject(field.type, source[qname], applicationDomain);
+							fieldsInDataFoundInClass[qnameString] = true;
 						}
-						catch(e:Error)
+						
+						if(field.canWrite)
 						{
-							//TODO: is a catch-all here ok?
+							try
+							{
+								instance[qname] = createTypedObjectFromNativeObject(field.type, source[qnameString], applicationDomain);
+							}
+							catch(e:Error)
+							{
+								//TODO: is a catch-all here ok?
+							}
 						}
-					}
-					else
-					{
-						assignTypedObjectFromNativeObject(instance[qname], source[qname], applicationDomain);
+						else
+						{
+							assignTypedObjectFromNativeObject(instance[qname], source[qnameString], applicationDomain);
+						}
 					}
 				}
 			}

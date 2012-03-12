@@ -26,6 +26,7 @@ package test.nexus.utils.serialization.json
 
 import asunit.framework.TestCase;
 import mock.testing_namespace;
+import nexus.utils.ObjectUtils;
 
 import flash.utils.*;
 
@@ -46,8 +47,8 @@ public class JsonSerializerTest extends TestCase
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_base1 : DynamicBaseClass;
-	private var m_base2 : DynamicBaseClass;
+	private var m_base1 : BaseClass;
+	private var m_base2 : BaseClass;
 	
 	private var m_serializer1 : JsonSerializer;
 	private var m_serializer2 : JsonSerializer;
@@ -70,9 +71,10 @@ public class JsonSerializerTest extends TestCase
 	
 	override protected function setUp():void
 	{
-		m_base1 = new DynamicBaseClass();
-		m_base2 = new DynamicBaseClass();
+		m_base1 = new BaseClass();
+		m_base2 = new BaseClass();
 		m_base1.baseVar = m_base2.baseVar = 100;
+		m_base1.testing_namespace::baseVar = "test_serialization3";
 		
 		m_serializer1 = new JsonSerializer();
 		m_serializer2 = new JsonSerializer();
@@ -150,7 +152,7 @@ public class JsonSerializerTest extends TestCase
 		m_json2 = m_serializer1.serialize(deserialized);
 		assertEquals(m_json1, m_json2);
 		
-		m_base1 = m_serializer1.deserialize(m_json1, DynamicBaseClass) as DynamicBaseClass;
+		m_base1 = m_serializer1.deserialize(m_json1, BaseClass) as BaseClass;
 		m_json2 = m_serializer1.serialize(m_base1);
 		assertEquals(m_json1, m_json2);
 	}
@@ -160,9 +162,6 @@ public class JsonSerializerTest extends TestCase
 		var deserialized : Object;
 		
 		m_serializer1.includeNamespaceInSerialization(testing_namespace);
-		//m_base1.testing_namespace::baseVar = "test_serialization3";
-		m_base1["dynamic.var::foo"] = "dynamic";
-		m_base1["http://mock.testing_namespace::dynamictoo"] = "dynamic";
 		
 		m_json1 = m_serializer1.serialize(m_base1);
 		deserialized = m_serializer1.deserialize(m_json1);
@@ -170,9 +169,35 @@ public class JsonSerializerTest extends TestCase
 		deserialized = m_serializer1.deserialize(m_json2);
 		m_json1 = m_serializer1.serialize(deserialized);
 		assertEquals(m_json1, m_json2);
+	}
+	
+	/**
+	 * serialize a typed object with a namespaced field and then deserialize into a typed object
+	 */
+	public function test_serialization4():void
+	{
+		m_serializer1.includeNamespaceInSerialization(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
-		m_base2 = m_serializer1.deserialize(m_json1, DynamicBaseClass) as DynamicBaseClass;
+		m_base2 = m_serializer1.deserialize(m_json1, BaseClass) as BaseClass;
+		m_json2 = m_serializer1.serialize(m_base2);
+		assertEquals(m_json1, m_json2);
+	}
+	
+	/**
+	 * Add a bunch of extra values to the deserialized object and create an instance of it
+	 */
+	public function test_serialization5():void
+	{
+		var deserialized : Object;
+		
+		m_serializer1.includeNamespaceInSerialization(testing_namespace);
+		
+		m_json1 = m_serializer1.serialize(m_base1);
+		deserialized = m_serializer1.deserialize(m_json1);
+		deserialized["extra.foo::field"] = "blah blah";
+		deserialized["http://mock.testing_namespace::var"] = "foo";
+		m_base2 = ObjectUtils.createTypedObjectFromNativeObject(BaseClass, deserialized) as BaseClass;
 		m_json2 = m_serializer1.serialize(m_base2);
 		assertEquals(m_json1, m_json2);
 	}
