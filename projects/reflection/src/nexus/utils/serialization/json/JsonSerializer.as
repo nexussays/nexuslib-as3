@@ -80,7 +80,7 @@ public class JsonSerializer implements ISerializer
 	private var m_includedNamespaces : Dictionary;
 	
 	///the current indentation characters used in this serialization pass
-	private var m_indentation:String;
+	private var m_currentIndentation:String;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -110,9 +110,8 @@ public class JsonSerializer implements ISerializer
 	//--------------------------------------
 	
 	/**
-	 * Entries in generated JSON objects and JSON arrays are separated by a gap derived from the space value.
-	 * This gap is always 0 to 10 characters wide. If the provided string value is longer than 10 characters,
-	 * only the first 10 characters of the string value are used.
+	 * If the serializer has a maximum line length set, then the indentation character(s) provided here are used after each newline
+	 * If the provided string value is longer than 10 characters, only the first 10 characters of the string value are used.
 	 */
 	public function get indentationCharacters():String { return m_indentationCharacters; }
 	public function set indentationCharacters(value:String):void
@@ -180,7 +179,7 @@ public class JsonSerializer implements ISerializer
 	 */
 	public function serialize(sourceObject:Object, applicationDomain:ApplicationDomain = null):Object
 	{
-		m_indentation = "";
+		m_currentIndentation = "";
 		return serializeObject(sourceObject, applicationDomain);
 	}
 	
@@ -235,14 +234,22 @@ public class JsonSerializer implements ISerializer
 		var lineWrap : Boolean;
 		var x : int;
 		
+		//see if this object has a toJSON method
+		if(	sourceObject != null
+			&&	(
+				sourceObject is IJsonSerializable
+				|| (!(sourceObject is Dictionary) && "toJSON" in sourceObject && sourceObject["toJSON"] is Function)
+				)
+			)
+		{
+			sourceObject = sourceObject.toJSON(null);
+		}
+		
 		if(sourceObject == null)
 		{
 			result = "null";
 		}
-		else if(Reflection.isScalar(sourceObject)
-			|| sourceObject is Date
-			|| sourceObject is IJsonSerializable
-			|| ("toJSON" in sourceObject && !sourceObject is Dictionary))
+		else if(Reflection.isScalar(sourceObject) || sourceObject is Date)
 		{
 			result = JsonParser.encode(sourceObject);
 		}
@@ -257,7 +264,7 @@ public class JsonSerializer implements ISerializer
 			
 			if(lineWrap)
 			{
-				m_indentation += m_indentationCharacters;
+				m_currentIndentation += m_indentationCharacters;
 			}
 			
 			if(Reflection.isArrayType(sourceObject))
@@ -268,15 +275,15 @@ public class JsonSerializer implements ISerializer
 					{
 						result += lineWrap ? ",\n" : ",";
 					}
-					result += lineWrap ? m_indentation : "";
+					result += lineWrap ? m_currentIndentation : "";
 					result += serializeObject(sourceObject[x], applicationDomain);
 				}
 				
 				if(lineWrap)
 				{
 					//unindent
-					m_indentation = m_indentation.substring(0, m_indentation.length - m_indentationCharacters.length);
-					result = "[" + "\n" + result + "\n" + m_indentation + "]";
+					m_currentIndentation = m_currentIndentation.substring(0, m_currentIndentation.length - m_indentationCharacters.length);
+					result = "[" + "\n" + result + "\n" + m_currentIndentation + "]";
 				}
 				else
 				{
@@ -352,8 +359,8 @@ public class JsonSerializer implements ISerializer
 				if(lineWrap)
 				{
 					//unindent
-					m_indentation = m_indentation.substring(0, m_indentation.length - m_indentationCharacters.length);
-					result = "{" + "\n" + result + "\n" + m_indentation + "}";
+					m_currentIndentation = m_currentIndentation.substring(0, m_currentIndentation.length - m_indentationCharacters.length);
+					result = "{" + "\n" + result + "\n" + m_currentIndentation + "}";
 				}
 				else
 				{
@@ -373,7 +380,7 @@ public class JsonSerializer implements ISerializer
 			{
 				result += lineWrap ? ",\n" : ",";
 			}
-			result += lineWrap ? m_indentation : "";
+			result += lineWrap ? m_currentIndentation : "";
 			result += JsonParser.encode(key);
 			result += lineWrap ? ": " : ":";
 			result += serializeObject(value, applicationDomain);

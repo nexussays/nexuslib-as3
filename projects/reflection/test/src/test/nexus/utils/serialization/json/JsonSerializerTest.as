@@ -201,6 +201,18 @@ public class JsonSerializerTest extends TestCase
 		m_json2 = m_serializer1.serialize(m_base2);
 		assertEquals(m_json1, m_json2);
 	}
+	
+	public function test_toJSON():void
+	{
+		var custom : CustomSerializationClass = new CustomSerializationClass();
+		var id : int = CustomSerializationClass.id;
+		
+		m_json1 = m_serializer1.serialize(custom);
+		assertEquals("\"CustomSerializationClass" + id + "\"", m_json1);
+		
+		custom = m_serializer1.deserialize(m_json1, CustomSerializationClass) as CustomSerializationClass;
+		assertEquals("CustomSerializationClass" + id, custom.baseString);
+	}
 }
 
 }
