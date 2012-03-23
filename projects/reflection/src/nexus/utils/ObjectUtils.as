@@ -54,24 +54,24 @@ public class ObjectUtils
 		var result:Object;
 		
 		//TODO: consider adding error checking if the data and desired type do not match
+		
+		//doesn't matter what the desired type is if the source data is null
 		if(source == null)
 		{
 			result = null;
-		}
-		else if(Reflection.isScalar(type) || type == null)
-		{
-			if(Reflection.isScalar(source))
-			{
-				result = source;
-			}
 		}
 		else if(type == Date)
 		{
 			result = new Date(source);
 		}
+		else if(Reflection.isScalar(type) || type == null)
+		{
+			//if the object we are trying to create is a scalar but the source is not, try to cast the source to the desired type
+			result = Reflection.isScalar(source) ? source : source as type;
+		}
 		else if(Reflection.isArrayType(type) || Reflection.isAssociativeArray(type))
 		{
-			//assume native types won't need application domain support
+			//assume we can just instantiate native types directly without going through an app domain
 			result = new type();
 			assignTypedObjectFromNativeObject(result, source, applicationDomain);
 		}
@@ -84,7 +84,7 @@ public class ObjectUtils
 			}
 			catch(e:Error)
 			{
-				//probably because ctor requires arguments
+				//probably because ctor requires arguments, if we add support for that then this can catch more interesting errors
 			}
 			
 			if(result != null)

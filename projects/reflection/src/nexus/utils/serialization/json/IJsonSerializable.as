@@ -29,7 +29,6 @@ package nexus.utils.serialization.json
  * serialize to JSON, and in fact most objects will not need to implement this at all as the native serialization provided by JsonSerializer
  * will be adequate.
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	9/29/2011 2:12 AM
  */
 public interface IJsonSerializable
 {

@@ -96,7 +96,10 @@ public class JsonSerializerTest extends TestCase
 	//	TESTS
 	//--------------------------------------
 	
-	public function test_serialization1():void
+	/**
+	 * Ensure that all calls to a serializer with identical data produce identical results
+	 */
+	public function test_determinism():void
 	{
 		//first instance
 		
@@ -145,37 +148,40 @@ public class JsonSerializerTest extends TestCase
 		assertEquals(m_json1, m_json2);
 	}
 	
-	public function test_serialization2():void
+	/**
+	 * Repeatedly serialize and deserialize the same data to insure integrity
+	 */
+	public function test_integrity():void
 	{
-		m_json1 = m_serializer1.serialize(m_base1);
-		var deserialized : Object = m_serializer1.deserialize(m_json1);
-		m_json2 = m_serializer1.serialize(deserialized);
-		assertEquals(m_json1, m_json2);
-		
-		m_base1 = m_serializer1.deserialize(m_json1, BaseClass) as BaseClass;
-		m_json2 = m_serializer1.serialize(m_base1);
-		assertEquals(m_json1, m_json2);
+		internal_testIntegrity(false);
 	}
 	
-	public function test_serialization3():void
+	/**
+	 * Ensure serializing with a namespace is different than without (where m_base1 has namespaced fields)
+	 */
+	public function test_namespace1():void
 	{
-		var deserialized : Object;
-		
 		m_serializer1.includeNamespaceInSerialization(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
-		deserialized = m_serializer1.deserialize(m_json1);
-		m_json2 = m_serializer1.serialize(deserialized);
-		deserialized = m_serializer1.deserialize(m_json2);
-		m_json1 = m_serializer1.serialize(deserialized);
-		assertEquals(m_json1, m_json2);
+		m_json2 = m_serializer2.serialize(m_base1);
+		assertTrue(m_json1 != m_json2);
+	}
+	
+	/**
+	 * Repeatedly serialize and deserialize the same data, including a namespace, to insure integrity
+	 */
+	public function test_namespaceIntegrity():void
+	{
+		internal_testIntegrity(true);
 	}
 	
 	/**
 	 * serialize a typed object with a namespaced field and then deserialize into a typed object
 	 */
-	public function test_serialization4():void
+	public function test_namespace3():void
 	{
+		//TODO: This is really a test of ObjectUtils
 		m_serializer1.includeNamespaceInSerialization(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
@@ -187,7 +193,7 @@ public class JsonSerializerTest extends TestCase
 	/**
 	 * Add a bunch of extra values to the deserialized object and create an instance of it
 	 */
-	public function test_serialization5():void
+	public function test_dynamic():void
 	{
 		var deserialized : Object;
 		
@@ -202,7 +208,7 @@ public class JsonSerializerTest extends TestCase
 		assertEquals(m_json1, m_json2);
 	}
 	
-	public function test_toJSON():void
+	public function test_IJsonSerializable():void
 	{
 		var custom : CustomSerializationClass = new CustomSerializationClass();
 		var id : int = CustomSerializationClass.id;
@@ -212,6 +218,33 @@ public class JsonSerializerTest extends TestCase
 		
 		custom = m_serializer1.deserialize(m_json1, CustomSerializationClass) as CustomSerializationClass;
 		assertEquals("CustomSerializationClass" + id, custom.baseString);
+	}
+	
+	//--------------------------------------
+	//	PRIVATE INSTANCE METHODS
+	//--------------------------------------
+	
+	private function internal_testIntegrity(boolean:Boolean):void
+	{
+		var deserialized : Object;
+		
+		if(boolean)
+		{
+			m_serializer1.includeNamespaceInSerialization(testing_namespace);
+		}
+		
+		m_json1 = m_serializer1.serialize(m_base1);
+		deserialized = m_serializer1.deserialize(m_json1);
+		m_json2 = m_serializer1.serialize(deserialized);
+		assertEquals(m_json1, m_json2);
+		
+		deserialized = m_serializer2.deserialize(m_json2);
+		m_json1 = m_serializer2.serialize(deserialized);
+		assertEquals(m_json1, m_json2);
+		
+		deserialized = m_serializer1.deserialize(m_json1);
+		m_json2 = m_serializer1.serialize(deserialized);
+		assertEquals(m_json1, m_json2);
 	}
 }
 
