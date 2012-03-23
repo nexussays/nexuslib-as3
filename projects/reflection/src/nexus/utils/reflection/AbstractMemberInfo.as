@@ -29,7 +29,6 @@ import flash.utils.*;
 /**
  * Base class for reflected member info for a class
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since 7/23/2011 3:34 AM
  */
 public class AbstractMemberInfo extends AbstractMetadataRecipient
 {

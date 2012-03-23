@@ -32,7 +32,6 @@ import nexus.utils.reflection.Reflection;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/17/2012 3:37 AM
  */
 public class ObjectUtilsTest extends TestCase
 {

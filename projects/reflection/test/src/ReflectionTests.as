@@ -31,7 +31,6 @@ import test.nexus.utils.serialization.json.JsonSerializerTest;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 11:36 PM
  */
 [Suite]
 public class ReflectionTests// extends TestSuite

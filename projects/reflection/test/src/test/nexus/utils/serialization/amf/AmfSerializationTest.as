@@ -29,7 +29,6 @@ import asunit.framework.TestCase;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/29/2012 11:41 PM
  */
 public class AmfSerializationTest extends TestCase
 {

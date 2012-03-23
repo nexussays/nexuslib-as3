@@ -32,7 +32,6 @@ import flash.text.TextFormat;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 11:38 PM
  */
 [SWF(width="800", height="600", backgroundColor="#333333", frameRate="30")]
 public class ReflectionTestRunner extends Sprite

@@ -30,7 +30,6 @@ import by.blooddy.crypto.serialization.JSON;
  * Wraps the by.blooddy.crypto.serialization.JSON encode and decode methods since there is a name conflict with
  * the native JSON if this package is imported directly in nexus.utils.serialization.json.JsonParser
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	11/29/2011 4:12 AM
  */
 internal class JsonParserBlooddy
 {

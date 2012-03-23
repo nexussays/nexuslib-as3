@@ -28,7 +28,6 @@ package nexus.utils.serialization.json
  * Provides an API to access the native JSON parser or fallback to the blooddy-crypto library JSON parser
  * if running on a version of flash without native JSON.
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	11/29/2011 3:55 AM
  */
 internal class JsonParser
 {

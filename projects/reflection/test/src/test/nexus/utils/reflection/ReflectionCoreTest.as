@@ -38,7 +38,6 @@ import nexus.utils.reflection.*;
 /**
  * Test the utility methods in Reflection, aside from getTypeInfo()
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 11:47 PM
  */
 public class ReflectionCoreTest extends AbstractReflectionTest
 {

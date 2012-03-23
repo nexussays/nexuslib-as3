@@ -36,7 +36,6 @@ import nexus.utils.Parse;
 /**
  * Creates a TypeInfo object using avmplus.describeTypeJSON
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/24/2012 4:44 AM
  */
 internal class TypeInfoCreatorJson implements ITypeInfoCreator
 {

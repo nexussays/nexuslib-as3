@@ -36,7 +36,6 @@ import nexus.utils.serialization.ISerializer;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/14/2012 2:13 AM
  */
 public class AmfSerializer implements ISerializer
 {

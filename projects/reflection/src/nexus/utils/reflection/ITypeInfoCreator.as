@@ -29,7 +29,6 @@ import flash.system.ApplicationDomain;
 /**
  * An internal interface used for XML and JSON TypeInfo creators
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/28/2012 4:03 AM
  */
 public interface ITypeInfoCreator
 {

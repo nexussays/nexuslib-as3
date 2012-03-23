@@ -32,7 +32,6 @@ import nexus.utils.reflection.*;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	10/25/2011 3:26 AM
  */
 public class ObjectUtils
 {

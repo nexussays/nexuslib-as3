@@ -29,7 +29,6 @@ import flash.utils.*;
 /**
  * Thrown by various methods in the Reflection framework when a class object cannot be found in a particular context.
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/23/2012 3:09 AM
  */
 public class ClassNotFoundError extends Error
 {

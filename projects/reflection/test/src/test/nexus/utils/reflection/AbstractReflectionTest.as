@@ -34,7 +34,6 @@ import mock.foo.IFoo;
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
- * @since	1/22/2012 3:18 AM
  */
 public class AbstractReflectionTest extends TestCase
 {
