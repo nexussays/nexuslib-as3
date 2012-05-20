@@ -1,5 +1,0 @@
-syntax: regexp
-\.svn
-obj
-bin/.+\.swf
-\.lxml
