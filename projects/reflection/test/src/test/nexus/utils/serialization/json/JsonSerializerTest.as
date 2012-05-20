@@ -161,7 +161,7 @@ public class JsonSerializerTest extends TestCase
 	 */
 	public function test_namespace1():void
 	{
-		m_serializer1.includeNamespaceInSerialization(testing_namespace);
+		m_serializer1.includeNamespace(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
 		m_json2 = m_serializer2.serialize(m_base1);
@@ -182,7 +182,7 @@ public class JsonSerializerTest extends TestCase
 	public function test_namespace3():void
 	{
 		//TODO: This is really a test of ObjectUtils
-		m_serializer1.includeNamespaceInSerialization(testing_namespace);
+		m_serializer1.includeNamespace(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
 		m_base2 = m_serializer1.deserialize(m_json1, BaseClass) as BaseClass;
@@ -197,7 +197,7 @@ public class JsonSerializerTest extends TestCase
 	{
 		var deserialized : Object;
 		
-		m_serializer1.includeNamespaceInSerialization(testing_namespace);
+		m_serializer1.includeNamespace(testing_namespace);
 		
 		m_json1 = m_serializer1.serialize(m_base1);
 		deserialized = m_serializer1.deserialize(m_json1);
@@ -230,7 +230,7 @@ public class JsonSerializerTest extends TestCase
 		
 		if(boolean)
 		{
-			m_serializer1.includeNamespaceInSerialization(testing_namespace);
+			m_serializer1.includeNamespace(testing_namespace);
 		}
 		
 		m_json1 = m_serializer1.serialize(m_base1);

@@ -167,9 +167,9 @@ public class JsonSerializer implements ISerializer
 	/**
 	 * Includes the provided namespace in serialization.
 	 * @param	ns		The namespace to include
-	 * @param	prefix	The prefix to use on the key of serialized objects, defaults to the URI
+	 * @param	prefix	The prefix to use on the key of serialized objects, defaults to the URI of the namespace
 	 */
-	public function includeNamespaceInSerialization(ns:Namespace, prefix:String=null):void
+	public function includeNamespace(ns:Namespace, prefix:String=null):void
 	{
 		m_includedNamespaces[ns] = true;
 	}
