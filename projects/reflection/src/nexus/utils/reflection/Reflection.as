@@ -367,6 +367,17 @@ public final class Reflection
 			return true;
 		}
 		
+		//Testing ApplicationDomains for equality is difficult since all methods that return ApplicationDomains return new instances
+		//for more information, see: http://hg.mozilla.org/tamarin-redux/file/tip/shell/DomainClass.cpp
+		
+		//The approach in use here to assign a ByteArray to the domainMemory of both application domains and then compare the getters
+		//to one another. We can't just compare the domainMemory getters to one another directly, because the by default, each application
+		//domain has an instance to the same memory.
+		
+		//This will cause issues in Flash 11.2 after August 2012 due to new licensing restrictions Adobe is putting in place
+		//see the announcement: http://blogs.adobe.com/flashplayer/2011/09/updates-from-the-lab.html
+		//see license information: http://www.adobe.com/devnet/flashplayer/articles/premium-features.html
+		
 		var domainMemoryOne:ByteArray = applicationDomainOne.domainMemory;
 		
 		//assign a different ByteArray to domainMemory of the first app domain
