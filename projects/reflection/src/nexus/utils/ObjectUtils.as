@@ -76,14 +76,27 @@ public class ObjectUtils
 		}
 		else
 		{
-			try
+			//see if there is a fromNative(object):Object method on this class, and call it if so
+			var typeInfo : TypeInfo = Reflection.getTypeInfo(type, applicationDomain);
+			var methodInfo : MethodInfo = typeInfo.getMethodByName("fromNative");
+			if(	methodInfo != null && methodInfo.isStatic
+				&& methodInfo.returnType != null
+				&& methodInfo.parameters.length == 1
+				&& methodInfo.parameters[0].type == Object)
 			{
-				//TODO: Handle constuctors with arguments?
-				result = new (Reflection.getClass(type, applicationDomain))();
+				result = methodInfo.invoke(type, source);
 			}
-			catch(e:Error)
+			else
 			{
-				//probably because ctor requires arguments, if we add support for that then this can catch more interesting errors
+				try
+				{
+					//TODO: Handle constuctors with arguments?
+					result = new (Reflection.getClass(type, applicationDomain))();
+				}
+				catch(e:Error)
+				{
+					//probably because ctor requires arguments, if we add support for that then this can catch more interesting errors
+				}
 			}
 			
 			if(result != null)
