@@ -25,21 +25,36 @@ package
 {
 
 import asunit.core.TextCore;
+import asunit.framework.Command;
+import by.blooddy.crypto.SHA1;
 import flash.display.Sprite;
+import flash.display.Stage3D;
+import flash.events.Event;
+import flash.system.ApplicationDomain;
 import flash.system.Capabilities;
 import flash.text.TextFormat;
+import nexus.utils.reflection.Reflection;
 
 /**
  * ...
  * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
-[SWF(width="800", height="600", backgroundColor="#333333", frameRate="30")]
+[SWF(width="800",height="600",backgroundColor="#333333",frameRate="30")]
 public class ReflectionTestRunner extends Sprite
 {
 	private var core:TextCore;
 	
 	public function ReflectionTestRunner()
 	{
+		//*
+		var stage3D:Stage3D = stage.stage3Ds[0];
+		stage.stage3Ds[0].addEventListener(Event.CONTEXT3D_CREATE, function(e:Event):void
+			{
+				trace(stage.stage3Ds[0].context3D);
+			});
+		stage.stage3Ds[0].requestContext3D();
+		//*/
+		
 		core = new TextCore();
 		core.textPrinter.fontFamily = "Consolas";
 		core.textPrinter.fontSize = 12;
@@ -49,13 +64,12 @@ public class ReflectionTestRunner extends Sprite
 		core.start(ReflectionTests, null, this);
 		
 		//this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));
-		
 		// NOTE: sending a particular class and method name will
 		// execute setUp(), the method and NOT tearDown.
 		// This allows you to get visual confirmation while developing
 		// visual entities
 		// start(AllTests, null, TestRunner.SHOW_TRACE);
-		
+	
 		//start(ReflectionTests);
 	}
 }

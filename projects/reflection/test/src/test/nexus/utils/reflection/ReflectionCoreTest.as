@@ -297,6 +297,10 @@ public class ReflectionCoreTest extends AbstractReflectionTest
 	//	PRIVATE INSTANCE METHODS
 	//--------------------------------------
 	
+	/**
+	 * Test Reflection.getClass with the provided ApplicationDomain
+	 * @param	appDomain
+	 */
 	private function baseTest_getClass(appDomain:ApplicationDomain):void
 	{
 		assertSame(int,			Reflection.getClass(0, appDomain));

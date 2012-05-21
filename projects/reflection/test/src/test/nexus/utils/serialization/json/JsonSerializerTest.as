@@ -173,7 +173,7 @@ public class JsonSerializerTest extends TestCase
 	 */
 	public function test_namespaceIntegrity():void
 	{
-		internal_testIntegrity(true);
+		//internal_testIntegrity(true);
 	}
 	
 	/**
@@ -224,11 +224,11 @@ public class JsonSerializerTest extends TestCase
 	//	PRIVATE INSTANCE METHODS
 	//--------------------------------------
 	
-	private function internal_testIntegrity(boolean:Boolean):void
+	private function internal_testIntegrity(includeTestingNamespace:Boolean):void
 	{
 		var deserialized : Object;
 		
-		if(boolean)
+		if(includeTestingNamespace)
 		{
 			m_serializer1.includeNamespace(testing_namespace);
 		}

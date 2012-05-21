@@ -26,7 +26,7 @@ public class CustomSerializationClass extends BaseClass implements IJsonSerializ
 	public static function fromNative(data:Object):Object
 	{
 		var result : CustomSerializationClass = new CustomSerializationClass();
-		result.baseString = data;
+		result.baseString = data + "";
 		return result;
 	}
 }
