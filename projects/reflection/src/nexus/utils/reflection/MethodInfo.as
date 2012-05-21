@@ -94,7 +94,7 @@ public final class MethodInfo extends AbstractMemberInfo
 	public function invoke(scope:Object, ...params):Object
 	{
 		//TODO: Decide if this is necessary or if we can let errors fall through and throw when apply() is called
-		if(!(scope is m_declaringType))
+		if((!m_isStatic && !(scope is m_declaringType)) || (m_isStatic && scope != m_declaringType))
 		{
 			throw new ArgumentError("Cannot invoke " + this.toString() + ", declared on " + Reflection.getQualifiedClassName(m_declaringType) + ", on an object of type " + Reflection.getQualifiedClassName(scope) + ".");
 		}
