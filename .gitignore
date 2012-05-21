@@ -1,3 +1,4 @@
 obj/
 bin/
-.lxml
+*.lxml
+Thumbs.db

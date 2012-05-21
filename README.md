@@ -8,7 +8,7 @@ None.
 
 # Getting Started
 
-Download one of the [compiled swcs](https://github.com/nexussays/nexuslib/downloads) if you don't want to build from source.
+Download one of the [compiled swcs](https://github.com/nexussays/nexuslib/downloads), or clone the repo and reference in your project.
 
 ## `nexuslib.reflection`
 
