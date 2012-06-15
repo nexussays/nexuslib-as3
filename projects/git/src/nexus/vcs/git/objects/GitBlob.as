@@ -44,16 +44,17 @@ public class GitBlob extends AbstractGitObject
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function GitBlob(hash:String, repo:GitManager, size:int=-1)
+	public function GitBlob(hash:String, repo:GitRepository)
 	{
-		super(hash, repo, size);
+		super(hash, repo);
+		m_bytes = new ByteArray();
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return "blob"; }
+	override public function get type():String { return GitObjectTypes.BLOB; }
 	
 	public function get content():IDataInput { return m_bytes; }
 	
@@ -70,9 +71,10 @@ public class GitBlob extends AbstractGitObject
 		return result;
 	}
 	
-	override public function populateContent(content:IDataInput, size:int=-1):void
+	override public function populateContent(content:IDataInput, size:int):void
 	{
 		super.populateContent(content, size);
+		m_bytes.clear();
 		content.readBytes(m_bytes, 0, 0);
 	}
 	

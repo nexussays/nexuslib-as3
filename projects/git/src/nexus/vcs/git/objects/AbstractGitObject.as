@@ -26,7 +26,7 @@ package nexus.vcs.git.objects
 
 import flash.errors.IllegalOperationError;
 import flash.utils.*;
-import nexus.vcs.git.GitManager;
+import nexus.vcs.git.GitRepository;
 
 /**
  * Abstract class to represent the data held in a git object.
@@ -44,17 +44,16 @@ public class AbstractGitObject
 	
 	protected var m_hash : String;
 	protected var m_size : int;
-	protected var m_repo : GitManager;
+	protected var m_repo : GitRepository;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractGitObject(hash:String, repo:GitManager, size:int=-1)
+	public function AbstractGitObject(hash:String, repo:GitRepository)
 	{
 		m_hash = hash;
 		m_repo = repo;
-		m_size = size;
 	}
 	
 	//--------------------------------------
@@ -79,23 +78,13 @@ public class AbstractGitObject
 		throw new IllegalOperationError("This method must be implemented by a subclass");
 	}
 	
-	public function populateContent(content:IDataInput, size:int=-1):void
+	public function populateContent(content:IDataInput, size:int):void
 	{
-		if(size == -1)
+		if(size <= 0)
 		{
-			if(m_size == -1)
-			{
-				throw new Error("Size never set on object " + m_hash);
-			}
+			throw new ArgumentError("Invalid size " + size + " provided set on object " + m_hash);
 		}
-		else
-		{
-			if(m_size != -1 && m_size != size)
-			{
-				throw new Error("Different sizes provided for object " + m_hash);
-			}
-			m_size = size;
-		}
+		m_size = size;
 	}
 	
 	public function toString(verbose:Boolean = false):String

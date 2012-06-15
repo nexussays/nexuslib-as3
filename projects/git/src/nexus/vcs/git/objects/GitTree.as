@@ -47,16 +47,16 @@ public class GitTree extends AbstractGitObject
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function GitTree(hash:String, repo:GitManager, size:int=-1)
+	public function GitTree(hash:String, repo:GitRepository)
 	{
-		super(hash, repo, size);
+		super(hash, repo);
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return "tree"; }
+	override public function get type():String { return GitObjectTypes.TREE; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -67,8 +67,10 @@ public class GitTree extends AbstractGitObject
 		return super.generateBytes();
 	}
 	
-	override public function populateContent(content:IDataInput, size:int=-1):void
+	override public function populateContent(content:IDataInput, size:int):void
 	{
+		super.populateContent(content, size);
+		
 		m_entries = new Vector.<TreeEntry>();
 		//<ascii unix access code> + <space> + <ascii? filename> + <byte\0> + <20-byte hash>
 		var buffer : ByteArray = new ByteArray();

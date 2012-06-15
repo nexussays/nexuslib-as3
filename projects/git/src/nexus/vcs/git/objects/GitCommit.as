@@ -56,9 +56,9 @@ public class GitCommit extends AbstractGitObject
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function GitCommit(hash:String, repo:GitManager, size:int=-1)
+	public function GitCommit(hash:String, repo:GitRepository)
 	{
-		super(hash, repo, size);
+		super(hash, repo);
 		
 		m_parents = new Vector.<GitCommit>();
 	}
@@ -67,7 +67,7 @@ public class GitCommit extends AbstractGitObject
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return "commit"; }
+	override public function get type():String { return GitObjectTypes.COMMIT; }
 	
 	/**
 	 * The tree object this commit points to.
@@ -116,7 +116,7 @@ public class GitCommit extends AbstractGitObject
 		return super.generateBytes();
 	}
 	
-	override public function populateContent(content:IDataInput, size:int=-1):void
+	override public function populateContent(content:IDataInput, size:int):void
 	{
 		super.populateContent(content, size);
 		

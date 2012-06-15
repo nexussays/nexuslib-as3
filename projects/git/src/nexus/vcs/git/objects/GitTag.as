@@ -25,7 +25,8 @@ package nexus.vcs.git.objects
 {
 
 import flash.utils.ByteArray;
-import nexus.vcs.git.GitManager;
+
+import nexus.vcs.git.*;
 
 public class GitTag extends AbstractGitObject
 {
@@ -41,14 +42,16 @@ public class GitTag extends AbstractGitObject
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function GitTag(hash:String, repo:GitManager, size:int=-1)
+	public function GitTag(hash:String, repo:GitRepository)
 	{
-		super(hash, repo, size);
+		super(hash, repo);
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
+	
+	override public function get type():String { return GitObjectTypes.TAG; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
