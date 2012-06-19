@@ -1,11 +1,10 @@
 require 'rubygems'
 require 'bundler/setup'
-require 'zip/zip'
 require 'version/version_task'
 require 'version'
 
-$: << './build/lib'
-require 'asrake'
+require './build/lib/asrake'
+#require 'C:\Users\nexus\Development\Projects\Personal\ASRake\lib\asrake.rb'
 
 FlexSDK::SDK_PATHS << 'C:\develop\sdk\flex_sdk_4.6.0.23201'
 
@@ -32,9 +31,9 @@ namespace :reflection do
 	root = "projects/reflection"
 	proj = "nexuslib.reflection"
 	version_file = "#{root}/VERSION"
+	version = "#{Version.current(version_file) || '0.0.0'}"
 	bin = "#{root}/bin"
 	swc = "#{bin}/#{proj}.swc"
-	zip = "#{bin}/#{proj}-#{Version.current(version_file) || '0.0.0'}.zip"
 
 	desc "Build nexuslib.reflection"
 	build_task = ASRake::SWC.new :build do |build|
@@ -42,24 +41,20 @@ namespace :reflection do
 		build.source_path << "#{root}/src"
 		build.output = swc
 		build.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
+		#build.dump_config = "#{root}/src/compc_config.xml"
 	end
 
 	desc "Package the project into a zip"
-	task :package => zip
-
-	file version_file do
-		Rake::Task["version:create"].execute
+	ASRake::Package.new :package => :build do |package|
+		package.output = "#{bin}/#{proj}-#{version}.zip"
+		package.files = {
+			"license.txt" => "LICENSE",
+			"#{proj}-#{version}.swc" => swc
+		}
 	end
 
-	file zip => :build do
-		rm_r zip rescue nil
-
-		Zip::ZipFile.open(zip, Zip::ZipFile::CREATE) do |file|
-			file.add("license.txt", "LICENSE")
-			file.add(build_task.output_file, swc)
-		end
-
-		puts "zip #{zip}"
+	file version_file do
+		Rake::Task["version:create"].invoke()
 	end
 
 	Rake::VersionTask.new do |task|
@@ -68,15 +63,12 @@ namespace :reflection do
 
 	desc "Remove package results & temporary build artifacts"
 	task :clean do
-		list = FileList.new(File.join(build_task.output_dir, "*"))
-		list.exclude(swc)
-		list.each { |f| rm_r f rescue nil }
+		FileList.new(build_task.output_dir/"*").exclude(swc).each { |f| rm_r f rescue nil }
 	end
 
 	desc "Remove all build & package results"
 	task :clobber => [:clean] do
-		list = FileList.new(swc)
-		list.each { |fn| rm_r fn rescue nil }
+		FileList.new(swc).each { |f| rm_r f rescue nil }
 	end
 
 end
