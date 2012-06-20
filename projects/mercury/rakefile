@@ -1,7 +1,0 @@
-import '../../rakefile'
-
-PROJECT = {
-	:bin_dir => "bin",
-	:src_dir => "src",
-	:name => "nexuslib.mercury"
-}
