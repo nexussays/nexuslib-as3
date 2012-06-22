@@ -14,6 +14,10 @@ Download one of the [compiled swcs](https://github.com/nexussays/nexuslib/downlo
 
 Reflection & serialization library. Full support for Application Domains, namespaces, and deserializing directly to typed AS objects. See the [nexuslib.reflection wiki page](https://github.com/nexussays/nexuslib/wiki/nexuslib.reflection) for more information and examples.
 
+## `nexuslib.git`
+
+In development.
+
 ## `nexuslib.mercury`
 
 In development.
