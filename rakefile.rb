@@ -33,39 +33,30 @@ task :clobber
 		proj = "nexuslib.#{project}"
 		version_file = "#{root}/VERSION"
 		version = "#{Version.current(version_file) || '0.0.0'}"
-		bin = "#{root}/bin"
-		swc = "#{bin}/#{proj}.swc"
 
+		compc = ASRake::Compc.new
+		compc.target_player = 11.0
+		compc.output = "#{root}/bin/#{proj}.swc"
+		#compc.debug = true
+		compc.source_path << "#{root}/src"
+		compc.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
+		#compc.dump_config = "#{root}/src/compc_config.xml"
+		
 		desc "Build nexuslib.#{project}"
-		ASRake::SWCTask.new :build do |build|
-			build.target_player = 11.0
-			build.output = swc
-			build.debug = true
-			build.source_path << "#{root}/src"
-			build.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
-			#build.dump_config = "#{root}/src/compc_config.xml"
-		end
+		ASRake::SWCTask.new :build, compc
 
 		desc "Package the project into a zip"
 		ASRake::PackageTask.new :package => :build do |package|
-			package.output = "#{bin}/#{proj}-#{version}.zip"
+			package.output = "#{compc.output_dir}/#{proj}-#{version}.zip"
 			package.files = {
 				"license.txt" => "LICENSE",
-				"#{proj}-#{version}.swc" => swc
+				"#{proj}-#{version}.swc" => compc.output
 			}
 		end
 
 		ASRake::VersionTask.new :version, version_file
 
-		desc "Remove package results & temporary build artifacts"
-		task :clean do
-			FileList.new(File.join(bin, "*")).exclude(swc).each { |f| rm_r f rescue nil }
-		end
-
-		desc "Remove all build & package results"
-		task :clobber => [:clean] do
-			FileList.new(swc).each { |f| rm_r f rescue nil }
-		end
+		ASRake::CleanTask.new compc
 
 	end
 
