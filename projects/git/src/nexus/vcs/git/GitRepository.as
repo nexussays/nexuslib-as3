@@ -75,15 +75,15 @@ public class GitRepository
 	{
 		var result:AbstractGitObject;
 		
+		//resolve references if one was provided
+		hash = lookupReference(hash);
+		
 		if(hash == null)
 		{
 			throw new ArgumentError("Cannot read object. Provided SHA-1 is null.");
 		}
 		
-		//resolve references if one was provided
-		hash = lookupReference(hash);
-		//ensure hash is valid
-		//assuming the length property is a quick lookup, if it fails it should do so a bit quicker than doing the regex test
+		//assuming here that the length property is a fast lookup, so if it fails it should do so a bit quicker by skipping the regex test
 		if(hash.length != 40 || !/^[a-f0-9]{40}$/.test(hash))
 		{
 			throw new ArgumentError("Cannot read object. Invalid SHA-1 \"" + hash + "\". Provided SHA-1 must match /^[a-f0-9]{40}$/");
@@ -124,7 +124,7 @@ public class GitRepository
 			rawBytes.position = 0;
 			
 			var type:String;
-			var size:int;
+			var size:int = -1;
 			var contentBytes:ByteArray = new ByteArray();
 			
 			//read object data
@@ -133,29 +133,33 @@ public class GitRepository
 			while(rawBytes.bytesAvailable > 0)
 			{
 				var byte:int = rawBytes.readUnsignedByte();
+				//if we hit a space and don't have the type yet, then we just finished reading the type
 				if(byte == 32 && type == null)
 				{
 					buffer.position = 0;
 					type = buffer.readUTFBytes(buffer.length);
 					buffer.clear();
-					
+					//we don't need to do anything with the space we read in, continue to next byte
 					continue;
 				}
-				else if(byte == 0 && size == 0)
+				//if we hit a null-byte and the size hasn't been set, then we just finished reading the size
+				else if(byte == 0 && size == -1)
 				{
 					buffer.position = 0;
 					size = parseInt(buffer.readUTFBytes(buffer.length));
-					buffer.clear();
-					buffer = null;
 					
-					//put remaining content into contentBytes
+					//put remaining content into contentBytes and break
 					rawBytes.readBytes(contentBytes, 0, rawBytes.bytesAvailable);
-					rawBytes.clear();
-					
-					continue;
+					break;
 				}
+				//didn't hit a delimiting character, write to the buffer and continue on
 				buffer.writeByte(byte);
 			}
+			
+			//don't forget to clean up
+			buffer.clear();
+			buffer = null;
+			rawBytes.clear();
 			rawBytes = null;
 			
 			result = GitUtil.createObjectByType(type, hash, contentBytes, size, this);
