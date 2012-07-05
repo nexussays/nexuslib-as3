@@ -34,13 +34,17 @@ public class GitPack
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function GitPack(name:String, index:ByteArray, repo:GitRepository)
+	public function GitPack(name:String, repo:GitRepository)
 	{
 		m_name = name;
 		m_repo = repo;
 		
+		//read index immediately
+		var indexBytes : ByteArray = m_repo.readBytesAtPath("objects/pack/" + m_name + ".idx");
 		m_index = new GitPackIndex(name);
-		m_index.initialize(index);
+		m_index.initialize(indexBytes);
+		indexBytes.clear();
+		indexBytes = null;
 	}
 	
 	//--------------------------------------
@@ -78,7 +82,7 @@ public class GitPack
 			//read bytes from header to find size, the first byte without the msb set signifies the last byte of the header
 			while((byte & 128) != 0)
 			{
-				byte = m_packBytes.readByte();
+				byte = m_packBytes.readUnsignedByte();
 				//mask all but msb and shift over depending on # of iterations (plus the 4 bits from the start)
 				size += ((byte & 0x7f) << ((i * 7) + 4));
 				++i;
@@ -93,15 +97,15 @@ public class GitPack
 			}
 			
 			//find the next sequential offset so we know how much data to read for this object
-			var index:int = m_index.offsetsSorted.indexOf(offset);
-			//if this is the last object in the pack, then we'll read up to the SHA-1 at the end of the pack, otherwise we'll read up to the next offset
-			var bytesToRead:int = index == m_index.offsetsSorted.length - 1 ? (m_packBytes.length - 20) : m_index.offsetsSorted[index + 1];
-			bytesToRead -= m_packBytes.position;
+			var nextOffset:int = m_index.getNextOffset(offset);
+			//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
+			nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
 			
 			//read in the content from the packfile
 			var contentBytes:ByteArray = new ByteArray();
-			//m_packBytes.position is at the start of the data after we finished reading the header above
-			m_packBytes.readBytes(contentBytes, 0, bytesToRead);
+			//read the number of bytes from our current position to the next offset
+			//m_packBytes.position is at the start of the data after we finished reading the header above, so
+			m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
 			contentBytes.uncompress();
 			contentBytes.position = 0;
 			if(contentBytes.length != size)
@@ -139,7 +143,7 @@ public class GitPack
 	{
 		if(m_packBytes == null)
 		{
-			m_packBytes = m_repo.readBytesAtPath("objects/pack/" + name + ".pack");
+			m_packBytes = m_repo.readBytesAtPath("objects/pack/" + m_name + ".pack");
 			m_packBytes.position = 0;
 			
 			//4-byte signature: The signature is: {'P', 'A', 'C', 'K'}
@@ -159,7 +163,15 @@ public class GitPack
 			var objectCount:int = m_packBytes.readInt();
 			if(objectCount != m_index.objectCount)
 			{
-				throw new Error("Pack and index report different object counts (" + objectCount + ", " + m_index.objectCount + ") for " + m_name);
+				throw new Error("Pack and index report different object counts (" + objectCount + " vs " + m_index.objectCount + ") for " + m_name);
+			}
+			
+			//verify SHA-1 checksum with index
+			m_packBytes.position = m_packBytes.length - 20;
+			var hash : String = GitUtil.readSHA1FromStream(m_packBytes);
+			if(hash != m_index.packfileHash)
+			{
+				throw new Error("Pack and index report different checksums (" + hash + " vs " + m_index.packfileHash + ") for " + m_name);
 			}
 		}
 	}

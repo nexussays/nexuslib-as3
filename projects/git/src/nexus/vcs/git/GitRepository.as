@@ -156,13 +156,15 @@ public class GitRepository
 				buffer.writeByte(byte);
 			}
 			
+			result = GitUtil.createObjectByType(type, size, hash, contentBytes, this);
+			
 			//don't forget to clean up
 			buffer.clear();
 			buffer = null;
 			rawBytes.clear();
 			rawBytes = null;
-			
-			result = GitUtil.createObjectByType(type, size, hash, contentBytes, this);
+			contentBytes.clear();
+			contentBytes = null;
 		}
 		
 		if(result == null)
@@ -280,7 +282,7 @@ public class GitRepository
 		{
 			if(packfile.extension == "idx")
 			{
-				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), readBytesAtPath(m_gitDir.getRelativePath(packfile)), this));
+				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), this));
 			}
 		}
 		
