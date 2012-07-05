@@ -36,7 +36,7 @@ public class GitBlob extends AbstractGitObject
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return GitObjectTypes.BLOB; }
+	override public function get type():String { return ObjectType.BLOB; }
 	
 	public function get content():IDataInput { return m_bytes; }
 	

@@ -116,7 +116,7 @@ public class GitPack
 			
 			//TODO: support pack deltas
 			//trace("offset", offset, "dataOffset", m_packBytes.position, "dataSize", size, "typeCode", type);
-			if(type == GitObjectTypes.PACK_DELTA_OFFSET || type == GitObjectTypes.PACK_DELTA_REFERENCE)
+			if(type == ObjectType.PACK_DELTA_OFFSET || type == ObjectType.PACK_DELTA_REFERENCE)
 			{
 				//trace("delta", type);
 				return null;

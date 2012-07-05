@@ -66,20 +66,20 @@ public class GitUtil
 		var result:AbstractGitObject;
 		switch(type)
 		{
-			case GitObjectTypes.COMMIT:
-			case GitObjectTypes.PACK_COMMIT:
+			case ObjectType.COMMIT:
+			case ObjectType.PACK_COMMIT:
 				result = new GitCommit(hash, repo);
 				break;
-			case GitObjectTypes.TREE:
-			case GitObjectTypes.PACK_TREE:
+			case ObjectType.TREE:
+			case ObjectType.PACK_TREE:
 				result = new GitTree(hash, repo);
 				break;
-			case GitObjectTypes.BLOB:
-			case GitObjectTypes.PACK_BLOB:
+			case ObjectType.BLOB:
+			case ObjectType.PACK_BLOB:
 				result = new GitBlob(hash, repo);
 				break;
-			case GitObjectTypes.TAG:
-			case GitObjectTypes.PACK_TAG:
+			case ObjectType.TAG:
+			case ObjectType.PACK_TAG:
 				result = new GitTag(hash, repo);
 				break;
 			default:

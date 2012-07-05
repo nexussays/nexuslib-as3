@@ -38,7 +38,7 @@ public class GitTree extends AbstractGitObject
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return GitObjectTypes.TREE; }
+	override public function get type():String { return ObjectType.TREE; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS

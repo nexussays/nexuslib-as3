@@ -6,7 +6,7 @@
 package nexus.vcs.git
 {
 
-public class GitObjectTypes
+public class ObjectType
 {
 	public static const COMMIT:String = "commit";
 	public static const TREE:String = "tree";

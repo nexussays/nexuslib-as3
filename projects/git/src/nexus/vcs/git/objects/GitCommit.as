@@ -49,7 +49,7 @@ public class GitCommit extends AbstractGitObject
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return GitObjectTypes.COMMIT; }
+	override public function get type():String { return ObjectType.COMMIT; }
 	
 	/**
 	 * The tree object this commit points to.

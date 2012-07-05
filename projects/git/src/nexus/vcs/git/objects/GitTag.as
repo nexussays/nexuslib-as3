@@ -33,7 +33,7 @@ public class GitTag extends AbstractGitObject
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	override public function get type():String { return GitObjectTypes.TAG; }
+	override public function get type():String { return ObjectType.TAG; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS

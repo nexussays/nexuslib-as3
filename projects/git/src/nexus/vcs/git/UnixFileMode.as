@@ -6,7 +6,7 @@
 package nexus.vcs.git
 {
 
-public class GitObjectModes
+public class UnixFileMode
 {
 	/**
 	 * 0100000000000000 (040000): Directory
