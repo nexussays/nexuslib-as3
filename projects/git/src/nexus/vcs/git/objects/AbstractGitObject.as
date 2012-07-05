@@ -1,5 +1,5 @@
 // Copyright (C) 2011-2012 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -64,7 +64,7 @@ public class AbstractGitObject
 	{
 		if(size <= 0)
 		{
-			throw new ArgumentError("Invalid size " + size + " provided set on object " + m_hash);
+			throw new ArgumentError("Invalid size " + size + " provided for object " + m_hash);
 		}
 		m_size = size;
 	}

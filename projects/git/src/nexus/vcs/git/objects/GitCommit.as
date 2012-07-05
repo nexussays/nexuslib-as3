@@ -1,5 +1,5 @@
 // Copyright (C) 2011-2012 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -28,10 +28,6 @@ public class GitCommit extends AbstractGitObject
 	private var m_parents:Vector.<GitCommit>;
 	private var m_author:String;
 	private var m_committer:String;
-	
-	/**
-	 * a comment describing this commit.
-	 */
 	private var m_comment:String;
 	
 	//--------------------------------------

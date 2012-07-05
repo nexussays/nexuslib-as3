@@ -1,5 +1,5 @@
 // Copyright (C) 2011-2012 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -40,28 +40,7 @@ public class GitUtil
 		return sha1;
 	}
 	
-	static public function getHexString(bytes:IDataInput):String
-	{
-		var debug : String = "";
-		if(bytes is ByteArray)
-		{
-			ByteArray(bytes).position = 0;
-		}
-		var count : int = 1;
-		while(bytes.bytesAvailable)
-		{
-			var byte : int = bytes.readUnsignedByte();
-			debug += (byte < 16 ? "0" : "") + byte.toString(16);
-			if(count % 2 == 0)
-			{
-				debug += " ";
-			}
-			++count;
-		}
-		return debug;
-	}
-	
-	static public function createObjectByType(type:Object, hash:String, contentBytes:ByteArray, size:int, repo:GitRepository):AbstractGitObject
+	static public function createObjectByType(type:Object, size:int, hash:String, contentBytes:ByteArray, repo:GitRepository):AbstractGitObject
 	{
 		var result:AbstractGitObject;
 		switch(type)
@@ -83,10 +62,36 @@ public class GitUtil
 				result = new GitTag(hash, repo);
 				break;
 			default:
+				//TODO: Throw a mor specific error type
 				throw new Error("Unknown or unsupported git object type \"" + type + "\"");
 		}
 		result.populateContent(contentBytes, size);
 		return result;
+	}
+	
+	/**
+	 * Returns the contents of the provided byte stream as a hex-formatted string, with spacing after each group of 2 bytes.
+	 * @param	bytes	The byte stream to read from
+	 */
+	static public function hexDump(bytes:IDataInput):String
+	{
+		var debug : String = "";
+		if(bytes is ByteArray)
+		{
+			ByteArray(bytes).position = 0;
+		}
+		var count : int = 1;
+		while(bytes.bytesAvailable > 0)
+		{
+			var byte : int = bytes.readUnsignedByte();
+			debug += (byte < 16 ? "0" : "") + byte.toString(16);
+			if(count % 2 == 0)
+			{
+				debug += " ";
+			}
+			++count;
+		}
+		return debug;
 	}
 	
 	//--------------------------------------

@@ -24,7 +24,7 @@ public class GitRepository
 	//--------------------------------------
 	
 	///Directory of the repositoy clone on the file system
-	private var m_dir:File;
+	private var m_gitDir:File;
 	private var m_packfiles:Vector.<GitPack>;
 	private var m_refs:Dictionary;
 	
@@ -44,7 +44,7 @@ public class GitRepository
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get directory():File { return m_dir; }
+	public function get directory():File { return m_gitDir; }
 	
 	/**
 	 * Return the SHA-1 pointed to by HEAD
@@ -162,7 +162,7 @@ public class GitRepository
 			rawBytes.clear();
 			rawBytes = null;
 			
-			result = GitUtil.createObjectByType(type, hash, contentBytes, size, this);
+			result = GitUtil.createObjectByType(type, size, hash, contentBytes, this);
 		}
 		
 		if(result == null)
@@ -188,7 +188,7 @@ public class GitRepository
 	public function readBytesAtPath(path:String):ByteArray
 	{
 		var bytes:ByteArray;
-		var file:File = m_dir.resolvePath(path);
+		var file:File = m_gitDir.resolvePath(path);
 		if(file.exists)
 		{
 			bytes = new ByteArray();
@@ -203,31 +203,31 @@ public class GitRepository
 	public function changeRepository(path:String):void
 	{
 		//restore the current repo on error
-		var oldRepo:File = m_dir;
-		m_dir = null;
+		var oldRepo:File = m_gitDir;
+		m_gitDir = null;
 		
 		if(path != null && path != "")
 		{
 			try
 			{
-				m_dir = new File(path);
-				m_dir = m_dir.resolvePath(".git");
+				m_gitDir = new File(path);
+				m_gitDir = m_gitDir.resolvePath(".git");
 			}
 			catch(e:Error)
 			{
-				m_dir = null;
+				m_gitDir = null;
 			}
 		}
 		
-		if(m_dir == null || !m_dir.exists)
+		if(m_gitDir == null || !m_gitDir.exists)
 		{
-			m_dir = oldRepo;
+			m_gitDir = oldRepo;
 			throw new ArgumentError("Invalid directory or not a git repository: " + path);
 		}
 		
 		init();
 		
-		trace("Updated repo path to: " + m_dir.nativePath);
+		trace("Updated repo path to: " + m_gitDir.nativePath);
 	}
 	
 	/**
@@ -275,12 +275,12 @@ public class GitRepository
 		m_packfiles = new Vector.<GitPack>();
 		
 		//parse packfile indexes
-		var packFiles:Array = m_dir.resolvePath("objects/pack").getDirectoryListing();
+		var packFiles:Array = m_gitDir.resolvePath("objects/pack").getDirectoryListing();
 		for each(var packfile:File in packFiles)
 		{
 			if(packfile.extension == "idx")
 			{
-				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), readBytesAtPath(m_dir.getRelativePath(packfile)), this));
+				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), readBytesAtPath(m_gitDir.getRelativePath(packfile)), this));
 			}
 		}
 		
@@ -302,7 +302,7 @@ public class GitRepository
 		}
 		
 		//iterate over refs in directory
-		var refDirs:Array = m_dir.resolvePath("refs").getDirectoryListing();
+		var refDirs:Array = m_gitDir.resolvePath("refs").getDirectoryListing();
 		while(refDirs.length > 0)
 		{
 			var file:File = refDirs.pop();
@@ -313,7 +313,7 @@ public class GitRepository
 			}
 			else
 			{
-				var relativePath:String = m_dir.getRelativePath(file);
+				var relativePath:String = m_gitDir.getRelativePath(file);
 				m_refs[relativePath] = readBytesAtPath(relativePath).toString().replace(/^\s*|\s*$/g, "");
 			}
 		}
@@ -393,7 +393,7 @@ public class GitRepository
 	
 	public function debug_readFile(path:String, followRefs:Boolean=true):Object
 	{
-		path = m_dir.resolvePath(path).url.replace(m_dir.url + "/", "");
+		path = m_gitDir.resolvePath(path).url.replace(m_gitDir.url + "/", "");
 		if(/^objects\/[a-f0-9]{2}\/[a-f0-9]{38}$/.test(path))
 		{
 			return getObject(path.replace(/objects|\//g, ""));
