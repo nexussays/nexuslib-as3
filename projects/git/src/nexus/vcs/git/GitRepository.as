@@ -95,7 +95,7 @@ public class GitRepository
 			//get the object from a pack
 			for each(var pack:GitPack in m_packfiles)
 			{
-				if(pack.hashExists(hash))
+				if(pack.containsObject(hash))
 				{
 					result = pack.getObject(hash);
 					break;
@@ -177,7 +177,7 @@ public class GitRepository
 	{
 		for each(var pack:GitPack in m_packfiles)
 		{
-			if(pack.hashExists(hash))
+			if(pack.containsObject(hash))
 			{
 				return pack;
 			}
