@@ -23,7 +23,8 @@ public class GitRepository
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_repo:File;
+	///Directory of the repositoy clone on the file system
+	private var m_dir:File;
 	private var m_packfiles:Vector.<GitPack>;
 	private var m_refs:Dictionary;
 	
@@ -43,14 +44,14 @@ public class GitRepository
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get repositoryDir():File { return m_repo; }
+	public function get directory():File { return m_dir; }
 	
 	/**
 	 * Return the SHA-1 pointed to by HEAD
 	 */
 	public function get head():String
 	{
-		return followRef(readBytesAtPath("HEAD").toString());
+		return lookupReference("HEAD", true);
 	}
 	
 	//--------------------------------------
@@ -76,14 +77,16 @@ public class GitRepository
 		
 		if(hash == null)
 		{
-			throw new ArgumentError("Cannot read object. Provided SHA-1 is null");
+			throw new ArgumentError("Cannot read object. Provided SHA-1 is null.");
 		}
 		
-		//strip whitespace and ensure correct length
-		hash = hash.replace(/\s*/gm, "");
-		if(hash.length != 40)
+		//resolve references if one was provided
+		hash = lookupReference(hash);
+		//ensure hash is valid
+		//assuming the length property is a quick lookup, if it fails it should do so a bit quicker than doing the regex test
+		if(hash.length != 40 || !/^[a-f0-9]{40}$/.test(hash))
 		{
-			throw new ArgumentError("Cannot read object. Invalid SHA-1 \"" + hash + "\"");
+			throw new ArgumentError("Cannot read object. Invalid SHA-1 \"" + hash + "\". Provided SHA-1 must match /^[a-f0-9]{40}$/");
 		}
 		
 		var rawBytes:ByteArray = readBytesAtPath("objects/" + hash.substr(0, 2) + "/" + hash.substr(2, 38));
@@ -98,68 +101,72 @@ public class GitRepository
 					break;
 				}
 			}
+		}
+		else
+		{
+			// @see: http://www.kernel.org/pub/software/scm/git/docs/v1.7.3/user-manual.html#object-details
+			// The general consistency of an object can always be tested independently of the contents or the type of the object:
+			// all objects can be validated by verifying that
+			// (a) their hashes match the content of the file and
+			// (b) the object successfully inflates to a stream of bytes that forms a sequence of
+			// 	   <ascii type without space> + <space> + <ascii decimal size> + <byte\0> + <binary object data>.
 			
-			if(result == null)
+			rawBytes.uncompress(CompressionAlgorithm.ZLIB);
+			
+			//verify object contents if needed
+			//blooddy uses lowercase chars in the hex string
+			if(verifyContents && hash != SHA1.hashBytes(rawBytes))
 			{
-				//TODO: Throw this once we are properly reading packfile deltas
-				//throw new Error("No object exists with SHA-1 \"" + hash + "\" in this repository");
+				//TODO: Throw a more detailed error type here (GitVerifyError?)
+				throw new Error("Git object content is not consistent with SHA-1 " + hash);
 			}
-			return result;
+			
+			rawBytes.position = 0;
+			
+			var type:String;
+			var size:int;
+			var contentBytes:ByteArray = new ByteArray();
+			
+			//read object data
+			//<ascii type without space> + <space> + <ascii decimal size> + <byte\0> + <binary object data>.
+			var buffer:ByteArray = new ByteArray();
+			while(rawBytes.bytesAvailable > 0)
+			{
+				var byte:int = rawBytes.readUnsignedByte();
+				if(byte == 32 && type == null)
+				{
+					buffer.position = 0;
+					type = buffer.readUTFBytes(buffer.length);
+					buffer.clear();
+					
+					continue;
+				}
+				else if(byte == 0 && size == 0)
+				{
+					buffer.position = 0;
+					size = parseInt(buffer.readUTFBytes(buffer.length));
+					buffer.clear();
+					buffer = null;
+					
+					//put remaining content into contentBytes
+					rawBytes.readBytes(contentBytes, 0, rawBytes.bytesAvailable);
+					rawBytes.clear();
+					
+					continue;
+				}
+				buffer.writeByte(byte);
+			}
+			rawBytes = null;
+			
+			result = GitUtil.createObjectByType(type, hash, contentBytes, size, this);
 		}
 		
-		// @see: http://www.kernel.org/pub/software/scm/git/docs/v1.7.3/user-manual.html#object-details
-		// The general consistency of an object can always be tested independently of the contents or the type of the object:
-		// all objects can be validated by verifying that
-		// (a) their hashes match the content of the file and
-		// (b) the object successfully inflates to a stream of bytes that forms a sequence of
-		// 	   <ascii type without space> + <space> + <ascii decimal size> + <byte\0> + <binary object data>.
-		
-		rawBytes.uncompress(CompressionAlgorithm.ZLIB);
-		
-		//verify object contents if needed. blooddy and git both use lowercase chars in the hex string
-		if(verifyContents && hash != SHA1.hashBytes(rawBytes))
+		if(result == null)
 		{
-			throw new Error("Git object content is not consistent with hash for SHA-1 " + hash);
+			//TODO: Throw this once we are properly reading packfile deltas
+			//throw new Error("No object exists with SHA-1 \"" + hash + "\" in this repository");
 		}
-		
-		rawBytes.position = 0;
-		
-		var type:String;
-		var size:int;
-		var contentBytes:ByteArray = new ByteArray();
-		
-		//read object data
-		//<ascii type without space> + <space> + <ascii decimal size> + <byte\0> + <binary object data>.
-		var buffer:ByteArray = new ByteArray();
-		while(rawBytes.bytesAvailable > 0)
-		{
-			var byte:int = rawBytes.readUnsignedByte();
-			if(byte == 32 && type == null)
-			{
-				buffer.position = 0;
-				type = buffer.readUTFBytes(buffer.length);
-				buffer.clear();
-				
-				continue;
-			}
-			else if(byte == 0 && size == 0)
-			{
-				buffer.position = 0;
-				size = parseInt(buffer.readUTFBytes(buffer.length));
-				buffer.clear();
-				buffer = null;
-				
-				//put remaining content into contentBytes
-				rawBytes.readBytes(contentBytes, 0, rawBytes.bytesAvailable);
-				rawBytes.clear();
-				
-				continue;
-			}
-			buffer.writeByte(byte);
-		}
-		rawBytes = null;
-		
-		return GitUtil.createObjectByType(type, hash, contentBytes, size, this);
+		return result;
 	}
 	
 	public function getPackForObject(hash:String):GitPack
@@ -176,10 +183,11 @@ public class GitRepository
 	
 	public function readBytesAtPath(path:String):ByteArray
 	{
-		var file:File = m_repo.resolvePath(path);
+		var bytes:ByteArray;
+		var file:File = m_dir.resolvePath(path);
 		if(file.exists)
 		{
-			var bytes:ByteArray = new ByteArray();
+			bytes = new ByteArray();
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.READ);
 			fileStream.readBytes(bytes);
@@ -191,102 +199,84 @@ public class GitRepository
 	public function changeRepository(path:String):void
 	{
 		//restore the current repo on error
-		var oldRepo:File = m_repo;
-		m_repo = null;
+		var oldRepo:File = m_dir;
+		m_dir = null;
 		
 		if(path != null && path != "")
 		{
 			try
 			{
-				m_repo = new File(path);
-				m_repo = m_repo.resolvePath(".git");
+				m_dir = new File(path);
+				m_dir = m_dir.resolvePath(".git");
 			}
 			catch(e:Error)
 			{
-				m_repo = null;
+				m_dir = null;
 			}
 		}
 		
-		if(m_repo == null || !m_repo.exists)
+		if(m_dir == null || !m_dir.exists)
 		{
-			m_repo = oldRepo;
-			throw new ArgumentError("Invalid directory \"" + path + "\"");
+			m_dir = oldRepo;
+			throw new ArgumentError("Invalid directory or not a git repository: " + path);
 		}
 		
-		parsePackFileIndexes();
-		parseRefs();
-		trace("Updated repo path to: " + m_repo.nativePath);
+		init();
+		
+		trace("Updated repo path to: " + m_dir.nativePath);
 	}
 	
-	public function debug_readFile(path:String):Object
+	/**
+	 * Follow a possible reference to get the object it points to. If the provided argument is not a ref, it is returned.
+	 * @param	ref			The possible reference to follow
+	 * @param	downTheRabbitHole	If true and following this ref results in another ref, it will continue following that ref and so on.
+	 * Default is true.
+	 * @return	The hash the ref argument was pointing to, or the argument itself if it is not actually a reference.
+	 */
+	public function lookupReference(ref:String, downTheRabbitHole:Boolean = true):String
 	{
-		path = m_repo.resolvePath(path).url.replace(m_repo.url + "/", "");
-		if(/^objects\/[a-f0-9]{2}\/[a-f0-9]{38}$/.test(path))
+		//ensure the string is a ref before following it
+		if(ref != null)
 		{
-			return getObject(path.replace(/objects|\//g, ""));
+			if(ref.substr(0, 3) == "ref")
+			{
+				//parse out the "ref:" prefix if needed and trim whitespace
+				ref = ref.replace(/^\s*ref:\s*|\s*$/g, "");
+				
+				var result:String = ref in m_refs ? m_refs[ref] : null;
+				if(result == null)
+				{
+					//TODO: Throw a more detailed error type here (GitReferenceError?)
+					throw new Error("Cannot find reference \"" + ref + "\" in this repository.");
+				}
+				
+				return downTheRabbitHole ? lookupReference(result, downTheRabbitHole) : result;
+			}
+			else if(ref == "HEAD")
+			{
+				//TODO: Provide some degree of caching of HEAD?
+				return lookupReference(readBytesAtPath("HEAD").toString(), downTheRabbitHole);
+			}
 		}
-		if(path == "index")
-		{
-			return parseIndex(readBytesAtPath(path));
-		}
-		if(/\.idx$/.test(path))
-		{
-			return getPackByName(path.replace(/^objects\/pack\/|\.idx$/g, "")).debug_index();
-		}
-		if(/\.pack$/.test(path))
-		{
-			return getPackByName(path.replace(/^objects\/pack\/|\.pack/g, "")).debug_pack();
-		}
-		return readBytesAtPath(path).toString();
+		return ref;
 	}
 	
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
 	
-	private function getPackByName(name:String):GitPack
+	private function init():void
 	{
-		for each(var pack:GitPack in m_packfiles)
-		{
-			if(pack.name == name)
-			{
-				return pack;
-			}
-		}
-		return null;
-	}
-	
-	private function parsePackFileIndexes():void
-	{
+		m_refs = new Dictionary();
 		m_packfiles = new Vector.<GitPack>();
-		var packDir:File = m_repo.resolvePath("objects/pack");
-		for each(var packfile:File in packDir.getDirectoryListing())
+		
+		//parse packfile indexes
+		var packFiles:Array = m_dir.resolvePath("objects/pack").getDirectoryListing();
+		for each(var packfile:File in packFiles)
 		{
 			if(packfile.extension == "idx")
 			{
-				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), readBytesAtPath(m_repo.getRelativePath(packfile)), this));
-			}
-		}
-	}
-	
-	private function parseRefs():void
-	{
-		m_refs = new Dictionary();
-		
-		//iterate over refs in directory
-		var refDirs:Array = m_repo.resolvePath("refs").getDirectoryListing();
-		while(refDirs.length > 0)
-		{
-			var file:File = refDirs.pop();
-			//follow directories until we find a file
-			if(file.isDirectory)
-			{
-				refDirs = refDirs.concat(file.getDirectoryListing());
-			}
-			else
-			{
-				var relativePath:String = m_repo.getRelativePath(file);
-				m_refs[relativePath] = followRef(readBytesAtPath(relativePath).toString()).replace(/^\s*|\s*$/g, "");
+				m_packfiles.push(new GitPack(packfile.name.replace(".idx", ""), readBytesAtPath(m_dir.getRelativePath(packfile)), this));
 			}
 		}
 		
@@ -294,6 +284,7 @@ public class GitRepository
 		var bytes:ByteArray = readBytesAtPath("packed-refs");
 		if(bytes != null)
 		{
+			//TODO: Handle annotated tag pointers (^lines)
 			var string:String = bytes.toString();
 			var packedRefLines:Array = string.split("\n");
 			for each(var line:String in packedRefLines)
@@ -305,38 +296,42 @@ public class GitRepository
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Follow a possible reference to get the object it points to. If the povided argument is not a ref, it is returned.
-	 * @param	ref			The possible reference to follow
-	 * @param	followToEnd	If true and following this ref results in another ref, it will continue following until a hash is found.
-	 * Default is true.
-	 * @return	The object the ref argumnt was pointing to, or the argumnt itself if it is not a proper ref.
-	 */
-	private function followRef(ref:String, followToEnd:Boolean = true):String
-	{
-		//ensure the string is a ref before following it
-		if(ref.substr(0, 3) == "ref")
+		
+		//iterate over refs in directory
+		var refDirs:Array = m_dir.resolvePath("refs").getDirectoryListing();
+		while(refDirs.length > 0)
 		{
-			//parse out the ref if neded
-			var splitRef:Array = /ref: ([^\n]+)/.exec(ref);
-			ref = splitRef != null && splitRef.length == 2 ? splitRef[1] : ref;
-			
-			var result:String;
-			if(ref in m_refs)
+			var file:File = refDirs.pop();
+			//follow directories until we find a file
+			if(file.isDirectory)
 			{
-				result = m_refs[ref];
+				refDirs = refDirs.concat(file.getDirectoryListing());
 			}
 			else
 			{
-				throw new Error("Cannot find reference \"" + ref + "\" in this repository.");
+				var relativePath:String = m_dir.getRelativePath(file);
+				m_refs[relativePath] = readBytesAtPath(relativePath).toString().replace(/^\s*|\s*$/g, "");
 			}
-			
-			return followToEnd ? followRef(result, followToEnd) : result;
 		}
-		//argument isn't a ref so just return it
-		return ref;
+		
+		//now that all refs have been parsed, iterate over them all once more and update any refs that were pointing to
+		//other refs (ad infinitum) to now point to the hash
+		for(var ref : String in m_refs)
+		{
+			m_refs[ref] = lookupReference(m_refs[ref], true);
+		}
+	}
+	
+	private function getPackByName(name:String):GitPack
+	{
+		for each(var pack:GitPack in m_packfiles)
+		{
+			if(pack.name == name)
+			{
+				return pack;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -378,6 +373,48 @@ public class GitRepository
 		debug += "extension " + ext;
 		
 		return debug;
+	}
+	
+	//--------------------------------------
+	//	TESTING/DEVELOPMENT/DEBUG METHODS
+	//--------------------------------------
+	
+	public function debug_dumpRefs():void
+	{
+		for(var ref : String in m_refs)
+		{
+			trace(ref + " " + m_refs[ref]);
+		}
+	}
+	
+	public function debug_readFile(path:String, followRefs:Boolean=true):Object
+	{
+		path = m_dir.resolvePath(path).url.replace(m_dir.url + "/", "");
+		if(/^objects\/[a-f0-9]{2}\/[a-f0-9]{38}$/.test(path))
+		{
+			return getObject(path.replace(/objects|\//g, ""));
+		}
+		if(path == "index")
+		{
+			return parseIndex(readBytesAtPath(path));
+		}
+		if(/\.idx$/.test(path))
+		{
+			return getPackByName(path.replace(/^objects\/pack\/|\.idx$/g, "")).debug_index();
+		}
+		if(/\.pack$/.test(path))
+		{
+			return getPackByName(path.replace(/^objects\/pack\/|\.pack/g, "")).debug_pack();
+		}
+		if(followRefs && path == "HEAD")
+		{
+			return this.head;
+		}
+		if(followRefs && /^ref/.test(path))
+		{
+			return m_refs[path];
+		}
+		return readBytesAtPath(path).toString();
 	}
 }
 }
