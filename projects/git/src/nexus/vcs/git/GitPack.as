@@ -5,13 +5,16 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 package nexus.vcs.git
 {
+
 import flash.errors.IllegalOperationError;
 import flash.utils.ByteArray;
 import flash.utils.Dictionary;
+
 import nexus.vcs.git.objects.*;
 
 /**
  * @see	https://raw.github.com/git/git/master/Documentation/technical/pack-format.txt
+ * @see https://github.com/git/git/blob/master/builtin/unpack-objects.c#L422
  * @see https://github.com/jelmer/dulwich/blob/master/dulwich/pack.py#L690
  */
 public class GitPack
@@ -39,8 +42,10 @@ public class GitPack
 		m_name = name;
 		m_repo = repo;
 		
+		m_packBytes = new ByteArray();
+		
 		//read index immediately
-		var indexBytes : ByteArray = m_repo.readBytesAtPath("objects/pack/" + m_name + ".idx");
+		var indexBytes:ByteArray = m_repo.readBytesAtPath("objects/pack/" + m_name + ".idx");
 		m_index = new GitPackIndex(name);
 		m_index.initialize(indexBytes);
 		indexBytes.clear();
@@ -64,50 +69,91 @@ public class GitPack
 	
 	public function getObject(hash:String):AbstractGitObject
 	{
-		var offset:int = m_index.getObjectOffset(hash);
+		var offset:int = m_index.getOffsetFromHash(hash);
 		if(offset != -1)
 		{
 			//delay reading in of packfile until we try to access an object from it
 			loadPackfile();
 			
-			m_packBytes.position = offset;
-			
-			//read n-bytes to get object type and (uncompressed) size
-			var byte:int = m_packBytes.readUnsignedByte();
-			//3-bit type
-			var type:int = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
-			//(n-1)*7+4-bit length
-			var size:int = byte & 0x0f; //mask the other four bits
-			var i:int = 0;
-			//read bytes from header to find size, the first byte without the msb set signifies the last byte of the header
+			return readOffset(offset, hash);
+		}
+		return null;
+	}
+	
+	private function readOffset(offset:int):AbstractGitObject
+	{
+		m_packBytes.position = offset;
+		
+		//read n-bytes to get object type and (uncompressed) size
+		var byte:uint = m_packBytes.readUnsignedByte();
+		//3-bit type
+		var type:int = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
+		//(n-1)*7+4-bit length
+		var size:int = byte & 0x0f; //mask the other four bits
+		var shift:int = 4;
+		//read bytes from header to find size, the first byte without the msb set signifies the last byte of the header
+		while((byte & 128) != 0)
+		{
+			byte = m_packBytes.readUnsignedByte();
+			//mask all but msb and shift over depending on # of iterations (plus the 4 bits from the start)
+			size += (byte & 0x7f) << shift;
+			shift += 7;
+		}
+		
+		//find the next sequential offset so we know how much data to read for this object
+		var nextOffset:int = m_index.getNextOffset(offset);
+		//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
+		nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
+		
+		//TODO: support pack deltas
+		//trace("offset", offset, "dataOffset", m_packBytes.position, "dataSize", size, "typeCode", type);
+		if(type == ObjectType.PACK_OFFSET_DELTA)
+		{
+			byte = m_packBytes.readUnsignedByte();
+			var deltaOffset:uint = byte & 0x7f;
+			//the first byte without the msb set signifies the last byte of the delta offset size
 			while((byte & 128) != 0)
 			{
+				//@see: https://github.com/git/git/blob/master/builtin/unpack-objects.c#L365
 				byte = m_packBytes.readUnsignedByte();
-				//mask all but msb and shift over depending on # of iterations (plus the 4 bits from the start)
-				size += ((byte & 0x7f) << ((i * 7) + 4));
-				++i;
+				deltaOffset += 1;
+				deltaOffset <<= 7;
+				deltaOffset += (byte & 0x7f);
 			}
 			
-			//TODO: support pack deltas
-			//trace("offset", offset, "dataOffset", m_packBytes.position, "dataSize", size, "typeCode", type);
-			if(type == ObjectType.PACK_DELTA_OFFSET || type == ObjectType.PACK_DELTA_REFERENCE)
+			deltaOffset = offset - deltaOffset;
+			if(deltaOffset <= 0 || deltaOffset >= offset)
 			{
-				trace("delta", type);
-				return null;
+				throw new Error("Delta offset object " + hash + " value out of bound for delta base object " + (offset - deltaOffset));
 			}
 			
-			//find the next sequential offset so we know how much data to read for this object
-			var nextOffset:int = m_index.getNextOffset(offset);
-			//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
-			nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
-			
-			//read in the content from the packfile
-			var contentBytes:ByteArray = new ByteArray();
-			//read the number of bytes from our current position to the next offset
-			//m_packBytes.position is at the start of the data after we finished reading the header above, so
-			m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
-			contentBytes.uncompress();
-			contentBytes.position = 0;
+			trace("delta_offs", hash, deltaOffset, m_index.getHashFromOffset(deltaOffset));
+		}
+		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		{
+			var sha:String = GitUtil.readSHA1FromStream(m_packBytes);
+			trace("delta_ref", sha);
+			return null;
+		}
+		
+		//read in the content from the packfile
+		var contentBytes:ByteArray = new ByteArray();
+		//read the number of bytes from our current position to the next offset
+		//m_packBytes.position is at the start of the data after we finished reading the header
+		m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
+		contentBytes.uncompress();
+		contentBytes.position = 0;
+		
+		if(type == ObjectType.PACK_OFFSET_DELTA)
+		{
+			var obj : AbstractGitObject = readOffset(deltaOffset);
+		}
+		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		{
+			return null;
+		}
+		else
+		{
 			if(contentBytes.length != size)
 			{
 				//TODO: Throw a more useful error here (GitVerifyError?)
@@ -116,7 +162,6 @@ public class GitPack
 			
 			return GitUtil.createObjectByType(type, size, hash, contentBytes, m_repo);
 		}
-		return null;
 	}
 	
 	public function toString(verbose:Boolean = false):String
@@ -132,6 +177,7 @@ public class GitPack
 	public function debug_pack():String
 	{
 		loadPackfile();
+		m_packBytes.position = 0;
 		return GitUtil.hexDump(m_packBytes);
 	}
 	
@@ -141,9 +187,9 @@ public class GitPack
 	
 	private function loadPackfile():void
 	{
-		if(m_packBytes == null)
+		if(m_packBytes.length == 0)
 		{
-			m_packBytes = m_repo.readBytesAtPath("objects/pack/" + m_name + ".pack");
+			m_repo.readBytesAtPathIntoByteArray("objects/pack/" + m_name + ".pack", m_packBytes);
 			m_packBytes.position = 0;
 			
 			//4-byte signature: The signature is: {'P', 'A', 'C', 'K'}
@@ -168,7 +214,7 @@ public class GitPack
 			
 			//verify SHA-1 checksum with index
 			m_packBytes.position = m_packBytes.length - 20;
-			var hash : String = GitUtil.readSHA1FromStream(m_packBytes);
+			var hash:String = GitUtil.readSHA1FromStream(m_packBytes);
 			if(hash != m_index.packfileHash)
 			{
 				throw new Error("Pack and index report different checksums (" + hash + " vs " + m_index.packfileHash + ") for " + m_name);

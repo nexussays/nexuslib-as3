@@ -33,7 +33,7 @@ public class GitUtil
 		var cursor:int = 0;
 		while(cursor < 20)
 		{
-			var val:int = bytes.readUnsignedByte();
+			var val:uint = bytes.readUnsignedByte();
 			sha1 += (val < 16 ? "0" : "") + val.toString(16);
 			++cursor;
 		}
@@ -62,7 +62,7 @@ public class GitUtil
 				result = new GitTag(hash, repo);
 				break;
 			default:
-				//TODO: Throw a mor specific error type
+				//TODO: Throw a more specific error type
 				throw new Error("Unknown or unsupported git object type \"" + type + "\"");
 		}
 		result.populateContent(contentBytes, size);
@@ -72,16 +72,14 @@ public class GitUtil
 	/**
 	 * Returns the contents of the provided byte stream as a hex-formatted string, with spacing after each group of 2 bytes.
 	 * @param	bytes	The byte stream to read from
+	 * @param	length	The number of bytes to read, read all bytesAvailable if length == 0
 	 */
-	static public function hexDump(bytes:IDataInput):String
+	static public function hexDump(bytes:IDataInput, length:int=int.MAX_VALUE):String
 	{
 		var debug : String = "";
-		if(bytes is ByteArray)
-		{
-			ByteArray(bytes).position = 0;
-		}
 		var count : int = 1;
-		while(bytes.bytesAvailable > 0)
+		var cursor : int = length;
+		while(bytes.bytesAvailable > 0 && cursor > 0)
 		{
 			var byte : int = bytes.readUnsignedByte();
 			debug += (byte < 16 ? "0" : "") + byte.toString(16);
@@ -90,6 +88,7 @@ public class GitUtil
 				debug += " ";
 			}
 			++count;
+			--cursor;
 		}
 		return debug;
 	}

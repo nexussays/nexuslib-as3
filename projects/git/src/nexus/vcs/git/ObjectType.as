@@ -32,7 +32,7 @@ public class ObjectType
 	   for n >= 2 adding 2^7 + 2^14 + ... + 2^(7*(n-1))
 	   to the result.
 	 */
-	public static const PACK_DELTA_OFFSET:int = 6;
+	public static const PACK_OFFSET_DELTA:int = 6;
 	
 	/**
 	   20-byte base object name SHA1 (the size above is the
@@ -40,7 +40,7 @@ public class ObjectType
 	   delta data, deflated.
 	 */
 	//The base object is allowed to be omitted from the packfile, but only in the case of a thin pack being transferred over the network.
-	public static const PACK_DELTA_REFERENCE:int = 7;
+	public static const PACK_REFERENCE_DELTA:int = 7;
 }
 
 }

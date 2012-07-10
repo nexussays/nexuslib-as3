@@ -23,7 +23,7 @@ public class GitRepository
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	///Directory of the repositoy clone on the file system
+	///the .git directory repositoy clone on the file system
 	private var m_gitDir:File;
 	private var m_packfiles:Vector.<GitPack>;
 	private var m_refs:Dictionary;
@@ -44,7 +44,9 @@ public class GitRepository
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get directory():File { return m_gitDir; }
+	public function get gitDirectory():File { return m_gitDir; }
+	
+	public function get directory():File { return m_gitDir.resolvePath(".."); }
 	
 	/**
 	 * Return the SHA-1 pointed to by HEAD
@@ -189,17 +191,25 @@ public class GitRepository
 	
 	public function readBytesAtPath(path:String):ByteArray
 	{
-		var bytes:ByteArray;
+		var bytes:ByteArray = new ByteArray();
+		readBytesAtPathIntoByteArray(path, bytes);
+		if(bytes.length == 0)
+		{
+			bytes = null;
+		}
+		return bytes;
+	}
+	
+	public function readBytesAtPathIntoByteArray(path:String, bytes:ByteArray):void
+	{
 		var file:File = m_gitDir.resolvePath(path);
 		if(file.exists)
 		{
-			bytes = new ByteArray();
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.READ);
 			fileStream.readBytes(bytes);
 			fileStream.close();
 		}
-		return bytes;
 	}
 	
 	public function changeRepository(path:String):void

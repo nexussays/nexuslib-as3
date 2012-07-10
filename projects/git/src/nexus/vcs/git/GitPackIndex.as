@@ -90,7 +90,7 @@ public class GitPackIndex
 		return false;
 	}
 	
-	public function getObjectOffset(hash:String):int
+	public function getOffsetFromHash(hash:String):int
 	{
 		for(var key : String in m_hashesRaw)
 		{
@@ -103,6 +103,21 @@ public class GitPackIndex
 			}
 		}
 		return -1;
+	}
+	
+	public function getHashFromOffset(offset:int):String
+	{
+		for(var key : String in m_offsetsRaw)
+		{
+			for(var i : int = 0; i < m_offsetsRaw[key].length; ++i)
+			{
+				if(m_offsetsRaw[key][i] == offset)
+				{
+					return m_hashesRaw[key][i];
+				}
+			}
+		}
+		return null;
 	}
 	
 	public function getNextOffset(offset:int):int
