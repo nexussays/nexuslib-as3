@@ -23,6 +23,11 @@ public class GitPack
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
+	/**
+	 * The smallest possible delta size is 4 bytes
+	 */
+	public static const DELTA_SIZE_MIN : int = 4;
+	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
@@ -78,90 +83,6 @@ public class GitPack
 			return readOffset(offset, hash);
 		}
 		return null;
-	}
-	
-	private function readOffset(offset:int):AbstractGitObject
-	{
-		m_packBytes.position = offset;
-		
-		//read n-bytes to get object type and (uncompressed) size
-		var byte:uint = m_packBytes.readUnsignedByte();
-		//3-bit type
-		var type:int = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
-		//(n-1)*7+4-bit length
-		var size:int = byte & 0x0f; //mask the other four bits
-		var shift:int = 4;
-		//read bytes from header to find size, the first byte without the msb set signifies the last byte of the header
-		while((byte & 128) != 0)
-		{
-			byte = m_packBytes.readUnsignedByte();
-			//mask all but msb and shift over depending on # of iterations (plus the 4 bits from the start)
-			size += (byte & 0x7f) << shift;
-			shift += 7;
-		}
-		
-		//find the next sequential offset so we know how much data to read for this object
-		var nextOffset:int = m_index.getNextOffset(offset);
-		//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
-		nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
-		
-		//TODO: support pack deltas
-		//trace("offset", offset, "dataOffset", m_packBytes.position, "dataSize", size, "typeCode", type);
-		if(type == ObjectType.PACK_OFFSET_DELTA)
-		{
-			byte = m_packBytes.readUnsignedByte();
-			var deltaOffset:uint = byte & 0x7f;
-			//the first byte without the msb set signifies the last byte of the delta offset size
-			while((byte & 128) != 0)
-			{
-				//@see: https://github.com/git/git/blob/master/builtin/unpack-objects.c#L365
-				byte = m_packBytes.readUnsignedByte();
-				deltaOffset += 1;
-				deltaOffset <<= 7;
-				deltaOffset += (byte & 0x7f);
-			}
-			
-			deltaOffset = offset - deltaOffset;
-			if(deltaOffset <= 0 || deltaOffset >= offset)
-			{
-				throw new Error("Delta offset object " + hash + " value out of bound for delta base object " + (offset - deltaOffset));
-			}
-			
-			trace("delta_offs", hash, deltaOffset, m_index.getHashFromOffset(deltaOffset));
-		}
-		else if(type == ObjectType.PACK_REFERENCE_DELTA)
-		{
-			var sha:String = GitUtil.readSHA1FromStream(m_packBytes);
-			trace("delta_ref", sha);
-			return null;
-		}
-		
-		//read in the content from the packfile
-		var contentBytes:ByteArray = new ByteArray();
-		//read the number of bytes from our current position to the next offset
-		//m_packBytes.position is at the start of the data after we finished reading the header
-		m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
-		contentBytes.uncompress();
-		contentBytes.position = 0;
-		
-		if(type == ObjectType.PACK_OFFSET_DELTA)
-		{
-			var obj : AbstractGitObject = readOffset(deltaOffset);
-		}
-		else if(type == ObjectType.PACK_REFERENCE_DELTA)
-		{
-			return null;
-		}
-		else
-		{
-			if(contentBytes.length != size)
-			{
-				//TODO: Throw a more useful error here (GitVerifyError?)
-				throw new Error("Object data does not match size " + size + " for object " + hash + " in packfile " + m_name);
-			}
-			
-			return GitUtil.createObjectByType(type, size, hash, contentBytes, m_repo);
-		}
 	}
 	
 	public function toString(verbose:Boolean = false):String
@@ -220,6 +141,177 @@ public class GitPack
 				throw new Error("Pack and index report different checksums (" + hash + " vs " + m_index.packfileHash + ") for " + m_name);
 			}
 		}
+	}
+	
+	private function readOffset(offset:int, hash:String=null):AbstractGitObject
+	{
+		m_packBytes.position = offset;
+		hash = hash || m_index.getHashFromOffset(offset);
+		
+		//read n-bytes to get object type and (uncompressed) size
+		var byte:uint = m_packBytes.readUnsignedByte();
+		//3-bit type
+		var type:int = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
+		//(n-1)*7+4-bit length
+		var size:int = byte & 0x0f; //mask the other four bits
+		//read bytes from header to find size
+		//the first byte without the msb set signifies the last byte of the header so make sure the header isn't already over
+		if((byte & 128) != 0)
+		{
+			//can OR this since we're shifting by 4 bytes to start with
+			size |= readSizeHeader(m_packBytes, 4);
+		}
+		
+		//read delta header info
+		if(type == ObjectType.PACK_OFFSET_DELTA)
+		{
+			byte = m_packBytes.readUnsignedByte();
+			var deltaOffset:uint = byte & 0x7f;
+			//the first byte without the msb set signifies the last byte of the delta offset size
+			//@see https://github.com/git/git/blob/master/builtin/unpack-objects.c#L365
+			while((byte & 128) != 0)
+			{
+				byte = m_packBytes.readUnsignedByte();
+				deltaOffset += 1;
+				deltaOffset <<= 7;
+				deltaOffset += (byte & 0x7f);
+			}
+			//delta offset is a negative offset from the start of this object
+			deltaOffset = offset - deltaOffset;
+			if(deltaOffset <= 0 || deltaOffset >= offset)
+			{
+				//TODO: better error message
+				throw new Error("Offset delta " + (offset - deltaOffset) + " on object " + hash + " is out of bounds.");
+			}
+		}
+		//TODO: support reference deltas
+		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		{
+			var sha:String = GitUtil.readSHA1FromStream(m_packBytes);
+			trace("delta_ref", sha);
+			return null;
+		}
+		
+		//find the next sequential offset so we know how much data to read for this object
+		var nextOffset:int = m_index.getNextOffset(offset);
+		//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
+		nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
+		
+		//read in the content from the packfile
+		var contentBytes:ByteArray = new ByteArray();
+		//read the number of bytes from our current position to the next offset
+		//m_packBytes.position is at the start of the data after we finished reading the header
+		m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
+		contentBytes.uncompress();
+		contentBytes.position = 0;
+		
+		if(type == ObjectType.PACK_OFFSET_DELTA)
+		{
+			//get base
+			var obj : AbstractGitObject = readOffset(deltaOffset);
+			//HACK: obj.bytes is a hack, need to replace with better access pattern
+			var resultBytes : ByteArray = patchDelta(obj.bytes, contentBytes);
+			return GitUtil.createObjectByType(obj.type, size, hash, resultBytes, m_repo);
+		}
+		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		{
+			return null;
+		}
+		else
+		{
+			if(contentBytes.length != size)
+			{
+				//TODO: Throw a more useful error here (GitVerifyError?)
+				throw new Error("Object data does not match size " + size + " for object " + hash + " in packfile " + m_name);
+			}
+			return GitUtil.createObjectByType(type, size, hash, contentBytes, m_repo);
+		}
+	}
+	
+	/**
+	 * Merge a delta and its base
+	 * @see	https://github.com/git/git/blob/master/patch-delta.c
+	 */
+	private function patchDelta(deltaBase:ByteArray, delta:ByteArray):ByteArray
+	{
+		if(delta.length < DELTA_SIZE_MIN)
+		{
+			throw new ArgumentError("Cannot patch object, provided delta is less than the minimum " + DELTA_SIZE_MIN + " bytes");
+		}
+		
+		var baseSize : int = readSizeHeader(delta);
+		var finalSize : int = readSizeHeader(delta);
+		
+		if(baseSize != deltaBase.length)
+		{
+			throw new Error("Delta base size differs from size listed in delta: " + baseSize + " vs " + deltaBase.length);
+		}
+		
+		var result : ByteArray = new ByteArray();
+		while(delta.bytesAvailable)
+		{
+			var byte : uint = delta.readUnsignedByte();
+			if(byte & 0x80)
+			{
+				var copyOffset : int = 0;
+				var copyLength : int = 0;
+				
+				if(byte & 0x01) copyOffset = delta.readUnsignedByte();
+				if(byte & 0x02) copyOffset |= (delta.readUnsignedByte() << 8);
+				if(byte & 0x04) copyOffset |= (delta.readUnsignedByte() << 16);
+				if(byte & 0x08) copyOffset |= (delta.readUnsignedByte() << 24);
+				
+				if(byte & 0x10) copyLength = delta.readUnsignedByte();
+				if(byte & 0x20) copyLength |= (delta.readUnsignedByte() << 8);
+				if(byte & 0x40) copyLength |= (delta.readUnsignedByte() << 16);
+				
+				if(copyLength == 0)
+				{
+					copyLength = 0x10000;
+				}
+				
+				if( copyOffset + copyLength < copyLength
+					|| copyOffset + copyLength > baseSize
+					|| copyLength > finalSize)
+				{
+					break;
+				}
+				
+				result.writeBytes(deltaBase, copyOffset, copyLength);
+			}
+			else if(byte != 0)
+			{
+				result.writeBytes(delta, delta.position, byte);
+				delta.position += byte;
+			}
+			else
+			{
+				//TODO: throw a more descriptive error here
+				throw new Error("Invalid opcode " + byte + " provided in delta");
+			}
+		}
+		
+		if(delta.bytesAvailable)
+		{
+			//TODO: need descriptive error message here, especially considering how unlikely it is
+			throw new Error("Problem patching delta");
+		}
+		
+		result.position = 0;
+		return result;
+	}
+	
+	private function readSizeHeader(bytes:ByteArray, shift:int=0):int
+	{
+		var size : int = 0;
+		do
+		{
+			var byte : uint = bytes.readUnsignedByte();
+			//mask all but msb and shift over depending on # of iterations
+			size |= (byte & 0x7f) << shift;
+			shift += 7;
+		} while((byte & 128) != 0 && bytes.bytesAvailable)
+		return size;
 	}
 }
 
