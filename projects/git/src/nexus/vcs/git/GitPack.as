@@ -6,10 +6,10 @@
 package nexus.vcs.git
 {
 
-import flash.errors.IllegalOperationError;
 import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 
+import nexus.vcs.git.*;
 import nexus.vcs.git.objects.*;
 
 /**
@@ -80,7 +80,8 @@ public class GitPack
 			//delay reading in of packfile until we try to access an object from it
 			loadPackfile();
 			
-			return readOffset(offset, hash);
+			var packObject : GitPackObject = readOffset(offset);
+			return GitUtil.createObjectByType(packObject.type, packObject.size, hash, packObject.bytes, m_repo);
 		}
 		return null;
 	}
@@ -143,27 +144,29 @@ public class GitPack
 		}
 	}
 	
-	private function readOffset(offset:int, hash:String=null):AbstractGitObject
+	private function readOffset(offset:int):GitPackObject
 	{
+		var packObject : GitPackObject = new GitPackObject();
+		
 		m_packBytes.position = offset;
-		hash = hash || m_index.getHashFromOffset(offset);
 		
 		//read n-bytes to get object type and (uncompressed) size
 		var byte:uint = m_packBytes.readUnsignedByte();
 		//3-bit type
-		var type:int = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
+		packObject.type = (byte >> 4) & 0x07; //mask the three type bits after we've shifted off the other four
 		//(n-1)*7+4-bit length
 		var size:int = byte & 0x0f; //mask the other four bits
 		//read bytes from header to find size
 		//the first byte without the msb set signifies the last byte of the header so make sure the header isn't already over
 		if((byte & 128) != 0)
 		{
-			//can OR this since we're shifting by 4 bytes to start with
+			//can OR this instead of adding since we're shifting by 4 bytes to start with
 			size |= readSizeHeader(m_packBytes, 4);
 		}
+		packObject.size = size;
 		
-		//read delta header info
-		if(type == ObjectType.PACK_OFFSET_DELTA)
+		//read additional header info for delta objects
+		if(packObject.type == ObjectType.PACK_OFFSET_DELTA)
 		{
 			byte = m_packBytes.readUnsignedByte();
 			var deltaOffset:uint = byte & 0x7f;
@@ -181,11 +184,11 @@ public class GitPack
 			if(deltaOffset <= 0 || deltaOffset >= offset)
 			{
 				//TODO: better error message
-				throw new Error("Offset delta " + (offset - deltaOffset) + " on object " + hash + " is out of bounds.");
+				throw new Error("Offset delta " + (offset - deltaOffset) + " on object " + m_index.getHashFromOffset(offset) + " is out of bounds.");
 			}
 		}
 		//TODO: support reference deltas
-		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		else if(packObject.type == ObjectType.PACK_REFERENCE_DELTA)
 		{
 			var sha:String = GitUtil.readSHA1FromStream(m_packBytes);
 			trace("delta_ref", sha);
@@ -197,35 +200,31 @@ public class GitPack
 		//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
 		nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
 		
-		//read in the content from the packfile
-		var contentBytes:ByteArray = new ByteArray();
 		//read the number of bytes from our current position to the next offset
 		//m_packBytes.position is at the start of the data after we finished reading the header
-		m_packBytes.readBytes(contentBytes, 0, nextOffset - m_packBytes.position);
-		contentBytes.uncompress();
-		contentBytes.position = 0;
+		m_packBytes.readBytes(packObject.bytes, 0, nextOffset - m_packBytes.position);
+		packObject.bytes.uncompress();
+		packObject.bytes.position = 0;
 		
-		if(type == ObjectType.PACK_OFFSET_DELTA)
+		if(packObject.type == ObjectType.PACK_OFFSET_DELTA)
 		{
-			//get base
-			var obj : AbstractGitObject = readOffset(deltaOffset);
-			//HACK: obj.bytes is a hack, need to replace with better access pattern
-			var resultBytes : ByteArray = patchDelta(obj.bytes, contentBytes);
-			return GitUtil.createObjectByType(obj.type, size, hash, resultBytes, m_repo);
+			var parent : GitPackObject = readOffset(deltaOffset);
+			packObject.bytes = patchDelta(parent.bytes, packObject.bytes);
+			packObject.type = parent.type;
 		}
-		else if(type == ObjectType.PACK_REFERENCE_DELTA)
+		else if(packObject.type == ObjectType.PACK_REFERENCE_DELTA)
 		{
+			//TODO: support reference deltas
 			return null;
 		}
-		else
+		//if object isn't a delta, verify that the size matches what is reported in the header
+		else if(packObject.bytes.length != packObject.size)
 		{
-			if(contentBytes.length != size)
-			{
-				//TODO: Throw a more useful error here (GitVerifyError?)
-				throw new Error("Object data does not match size " + size + " for object " + hash + " in packfile " + m_name);
-			}
-			return GitUtil.createObjectByType(type, size, hash, contentBytes, m_repo);
+			//TODO: Throw a more useful error here (GitVerifyError?)
+			throw new Error("Object data does not match size " + packObject.size + " for object " + m_index.getHashFromOffset(offset) + " in packfile " + m_name);
 		}
+		
+		return packObject;
 	}
 	
 	/**
@@ -267,6 +266,7 @@ public class GitPack
 				
 				if(copyLength == 0)
 				{
+					//65536
 					copyLength = 0x10000;
 				}
 				

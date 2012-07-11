@@ -27,8 +27,6 @@ public class AbstractGitObject
 	protected var m_hash : String;
 	protected var m_size : int;
 	protected var m_repo : GitRepository;
-	//HACK: hack for packfiles, will refactor out once logic works
-	private var m_bytes : ByteArray;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -53,14 +51,6 @@ public class AbstractGitObject
 		throw new IllegalOperationError("This method must be implemented by a subclass");
 	}
 	
-	public function get bytes():ByteArray
-	{
-		m_bytes.position = 0;
-		var foo : ByteArray = new ByteArray();
-		m_bytes.readBytes(foo);
-		return foo;
-	}
-	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
@@ -77,9 +67,6 @@ public class AbstractGitObject
 			throw new ArgumentError("Invalid size " + size + " provided for object " + m_hash);
 		}
 		m_size = size;
-		m_bytes = new ByteArray();
-		content.readBytes(m_bytes);
-		ByteArray(content).position = 0;
 	}
 	
 	public function toString(verbose:Boolean = false):String

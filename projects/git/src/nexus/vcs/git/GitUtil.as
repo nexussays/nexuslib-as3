@@ -16,24 +16,22 @@ import nexus.vcs.git.objects.*;
 public class GitUtil
 {
 	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	CLASS VARIABLES
-	//--------------------------------------
-	
-	//--------------------------------------
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	static public function readSHA1FromStream(bytes:IDataInput):String
+	/**
+	 * Read 20 bytes from the input stream and return it as a hex-formatted string. The position of the stream will
+	 * be moved 20 bytes as a result.
+	 * @param	stream	Input stream from which to read.
+	 * @return	A 40-charatcer hex-formatted (lowercase) string
+	 */
+	static public function readSHA1FromStream(stream:IDataInput):String
 	{
 		var sha1:String = "";
 		var cursor:int = 0;
 		while(cursor < 20)
 		{
-			var val:uint = bytes.readUnsignedByte();
+			var val:uint = stream.readUnsignedByte();
 			sha1 += (val < 16 ? "0" : "") + val.toString(16);
 			++cursor;
 		}
@@ -74,11 +72,11 @@ public class GitUtil
 	 * @param	bytes	The byte stream to read from
 	 * @param	length	The number of bytes to read, read all bytesAvailable if length == 0
 	 */
-	static public function hexDump(bytes:IDataInput, length:int=int.MAX_VALUE):String
+	static public function hexDump(bytes:IDataInput, length:uint=uint.MAX_VALUE):String
 	{
 		var debug : String = "";
 		var count : int = 1;
-		var cursor : int = length;
+		var cursor : uint = length;
 		while(bytes.bytesAvailable > 0 && cursor > 0)
 		{
 			var byte : int = bytes.readUnsignedByte();

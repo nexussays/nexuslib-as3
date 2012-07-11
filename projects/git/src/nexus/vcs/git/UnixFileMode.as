@@ -11,12 +11,12 @@ public class UnixFileMode
 	/**
 	 * 0100000000000000 (040000): Directory
 	 */
-	public static const DIRECTORY	: String = "040000";
+	public static const DIRECTORY:String = "040000";
 	
 	/**
 	 * 1000000110100100 (100644): Regular non-executable file
 	 */
-	public static const REGULAR_FILE: String = "100644";
+	public static const REGULAR_FILE:String = "100644";
 	
 	/**
 	 * 1000000110110100 (100664): Regular non-executable group-writeable file
@@ -27,17 +27,17 @@ public class UnixFileMode
 	/**
 	 * 1000000111101101 (100755): Regular executable file
 	 */
-	public static const REGULAR_EXE	: String = "100755";
+	public static const REGULAR_EXE:String = "100755";
 	
 	/**
 	 * 1010000000000000 (120000): Symbolic link
 	 */
-	public static const SYMLINK		: String = "120000";
+	public static const SYMLINK:String = "120000";
 	
 	/**
 	 * 1110000000000000 (160000): Gitlink
 	 */
-	public static const GITLINK		: String = "160000";
+	public static const GITLINK:String = "160000";
 }
 
 }
