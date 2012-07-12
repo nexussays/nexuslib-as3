@@ -227,11 +227,28 @@ public class GitPack
 		return packObject;
 	}
 	
+	//--------------------------------------
+	//	PRIVATE CLASS METHODS
+	//--------------------------------------
+	
+	private static function readSizeHeader(bytes:ByteArray, shift:int=0):int
+	{
+		var size : int = 0;
+		do
+		{
+			var byte : uint = bytes.readUnsignedByte();
+			//mask all but msb and shift over depending on # of iterations
+			size |= (byte & 0x7f) << shift;
+			shift += 7;
+		} while((byte & 128) != 0 && bytes.bytesAvailable)
+		return size;
+	}
+	
 	/**
 	 * Merge a delta and its base
 	 * @see	https://github.com/git/git/blob/master/patch-delta.c
 	 */
-	private function patchDelta(deltaBase:ByteArray, delta:ByteArray):ByteArray
+	private static function patchDelta(deltaBase:ByteArray, delta:ByteArray):ByteArray
 	{
 		if(delta.length < DELTA_SIZE_MIN)
 		{
@@ -243,7 +260,7 @@ public class GitPack
 		
 		if(baseSize != deltaBase.length)
 		{
-			throw new Error("Delta base size differs from size listed in delta: " + baseSize + " vs " + deltaBase.length);
+			throw new Error("Delta base size (" + deltaBase.length + ") differs from size listed in delta (" + baseSize + ")");
 		}
 		
 		var result : ByteArray = new ByteArray();
@@ -271,7 +288,9 @@ public class GitPack
 				}
 				
 				if( copyOffset + copyLength < copyLength
+					//if we're copying beyond the length of the deltaBase
 					|| copyOffset + copyLength > baseSize
+					//if we're copying more than the entire size of the final object
 					|| copyLength > finalSize)
 				{
 					break;
@@ -286,7 +305,7 @@ public class GitPack
 			}
 			else
 			{
-				//TODO: throw a more descriptive error here
+				//TODO: throw a more descriptive error type here?
 				throw new Error("Invalid opcode " + byte + " provided in delta");
 			}
 		}
@@ -299,19 +318,6 @@ public class GitPack
 		
 		result.position = 0;
 		return result;
-	}
-	
-	private function readSizeHeader(bytes:ByteArray, shift:int=0):int
-	{
-		var size : int = 0;
-		do
-		{
-			var byte : uint = bytes.readUnsignedByte();
-			//mask all but msb and shift over depending on # of iterations
-			size |= (byte & 0x7f) << shift;
-			shift += 7;
-		} while((byte & 128) != 0 && bytes.bytesAvailable)
-		return size;
 	}
 }
 

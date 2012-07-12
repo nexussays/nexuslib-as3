@@ -135,25 +135,20 @@ public class GitPackIndex
 	
 	public function debug_index():String
 	{
-		var debug:ByteArray = new ByteArray();
-		//debug += "version " +  + "\n";
-		//debug += m_fanout + "\n";
+		var debug:String = "";
 		for(var x:int = 0; x < 256; ++x)
 		{
 			var bucketCount:int = x == 0 ? m_fanout[x] : m_fanout[x] - m_fanout[x - 1];
 			if(bucketCount > 0)
 			{
-				debug.writeUTFBytes((x < 16 ? "0" : "") + x.toString(16) + ":" + bucketCount + " (fanout " + m_fanout[x] + ")\n");
+				debug += (x < 16 ? "0" : "") + x.toString(16) + ":" + bucketCount + " (fanout " + m_fanout[x] + ")\n";
 				for(var y:int = 0; y < m_hashesRaw[x].length; ++y)
 				{
-					debug.writeUTFBytes(m_hashesRaw[x][y] + ":" + m_crc32sRaw[x][y] + ":" + m_offsetsRaw[x][y] + "\n");
+					debug += m_hashesRaw[x][y] + ":" + m_crc32sRaw[x][y] + ":" + m_offsetsRaw[x][y] + "\n";
 				}
 			}
 		}
-		//debug.writeUTFBytes("packfileHash: " + m_packHash + "\n");
-		//debug += "checksum: " + m_indexHash + "\n";
-		debug.position = 0;
-		return debug.readUTFBytes(debug.length);
+		return debug;
 	}
 	
 	//--------------------------------------
