@@ -8,6 +8,7 @@ package nexus.vcs.git
 
 import flash.utils.ByteArray;
 import flash.utils.Dictionary;
+import nexus.vcs.git.errors.GitPackError;
 
 import nexus.vcs.git.*;
 import nexus.vcs.git.objects.*;
@@ -117,21 +118,21 @@ public class GitPack
 			//4-byte signature: The signature is: {'P', 'A', 'C', 'K'}
 			if(m_packBytes.readUTFBytes(4) != "PACK")
 			{
-				throw new ArgumentError("Invalid pack bytes. Signature is incorrect.");
+				throw new GitPackError(m_name, "Invalid pack bytes. Signature is incorrect.");
 			}
 			
 			//4-byte version number (network byte order): GIT currently accepts version number 2 or 3 but generates version 2 only.
 			var version:int = m_packBytes.readInt();
 			if(version != 2)
 			{
-				throw new Error("Pack version is " + version + " but currently only version 2 is able to be parsed correctly");
+				throw new GitPackError(m_name, "Pack version is " + version + " but this library can only parse version 2.");
 			}
 			
 			//4-byte number of objects contained in the pack (network byte order)
 			var objectCount:int = m_packBytes.readInt();
 			if(objectCount != m_index.objectCount)
 			{
-				throw new Error("Pack and index report different object counts (" + objectCount + " vs " + m_index.objectCount + ") for " + m_name);
+				throw new GitPackError(m_name, "Pack and index report different object counts (" + objectCount + " vs " + m_index.objectCount + ")");
 			}
 			
 			//verify SHA-1 checksum with index
@@ -139,7 +140,7 @@ public class GitPack
 			var hash:String = GitUtil.readSHA1FromStream(m_packBytes);
 			if(hash != m_index.packfileHash)
 			{
-				throw new Error("Pack and index report different checksums (" + hash + " vs " + m_index.packfileHash + ") for " + m_name);
+				throw new GitPackError(m_name, "Pack and index report different checksums (" + hash + " vs " + m_index.packfileHash + ")");
 			}
 		}
 	}
@@ -183,8 +184,7 @@ public class GitPack
 			deltaOffset = offset - deltaOffset;
 			if(deltaOffset <= 0 || deltaOffset >= offset)
 			{
-				//TODO: better error message
-				throw new Error("Offset delta " + (offset - deltaOffset) + " on object " + m_index.getHashFromOffset(offset) + " is out of bounds.");
+				throw new GitPackError(m_name, "Offset delta " + (offset - deltaOffset) + " is out of bounds for object " + m_index.getHashFromOffset(offset));
 			}
 		}
 		else if(packObject.type == ObjectType.PACK_REFERENCE_DELTA)
@@ -217,8 +217,7 @@ public class GitPack
 		//if object isn't a delta, verify that the size matches what is reported in the header
 		else if(packObject.bytes.length != packObject.size)
 		{
-			//TODO: Throw a more useful error here (GitVerifyError?)
-			throw new Error("Object data does not match size " + packObject.size + " for object " + m_index.getHashFromOffset(offset) + " in packfile " + m_name);
+			throw new GitPackError(m_name, "Object data does not match size " + packObject.size + " for object " + m_index.getHashFromOffset(offset));
 		}
 		
 		return packObject;
@@ -302,15 +301,13 @@ public class GitPack
 			}
 			else
 			{
-				//TODO: throw a more descriptive error type here?
 				throw new Error("Invalid opcode " + byte + " provided in delta");
 			}
 		}
 		
 		if(delta.bytesAvailable)
 		{
-			//TODO: need descriptive error message here, especially considering how unlikely it is
-			throw new Error("Problem patching delta");
+			throw new Error("Problem patching delta, bytes remaining: " + GitUtil.hexDump(delta));
 		}
 		
 		result.position = 0;

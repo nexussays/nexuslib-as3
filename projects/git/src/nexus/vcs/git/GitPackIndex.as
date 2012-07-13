@@ -9,6 +9,7 @@ package nexus.vcs.git
 import by.blooddy.crypto.SHA1;
 import flash.errors.IllegalOperationError;
 import flash.utils.*;
+import nexus.vcs.git.errors.GitPackError;
 
 /**
  * ...
@@ -157,7 +158,7 @@ public class GitPackIndex
 	
 	private function parseIndex_v1(index:ByteArray):void
 	{
-		throw new IllegalOperationError("Not yet able to parse packfile index version 1");
+		throw new IllegalOperationError("This libray is not yet able to parse packfile index version 1");
 	}
 	
 	private function parseIndex_v2(index:ByteArray):void
@@ -166,7 +167,7 @@ public class GitPackIndex
 		var version : int = index.readInt();
 		if(version != 2)
 		{
-			throw new Error("Error parsing " + m_name + ".idx, magic number indicated version 2 but version number is " + version);
+			throw new GitPackError(m_name, "Pack index magic number indicated version 2 but version number is actually " + version);
 		}
 		
 		//256 4-byte integers. N-th entry of this table records the number of objects in the corresponding pack,
@@ -261,7 +262,7 @@ public class GitPackIndex
 			var generatedHash : String = SHA1.hashBytes(contentBytes);
 			if(storedHash != generatedHash)
 			{
-				throw new Error("Checksum in " + m_name + ".idx (" + storedHash + ") does not match the hash of its contents (" + generatedHash + ")");
+				throw new GitPackError(m_name, "Pack index stored checksum " + storedHash + " does not match the hash of its contents " + generatedHash);
 			}
 		}
 		finally
