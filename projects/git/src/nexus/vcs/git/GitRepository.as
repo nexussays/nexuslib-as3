@@ -23,10 +23,10 @@ public class GitRepository
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	///the .git directory repositoy clone on the file system
 	private var m_gitDir:File;
 	private var m_packfiles:Vector.<GitPack>;
 	private var m_refs:Dictionary;
+	private var m_objectCache : Dictionary;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -85,10 +85,15 @@ public class GitRepository
 			throw new ArgumentError("Cannot read object. Provided SHA-1 is null.");
 		}
 		
-		//assuming here that the length property is a fast lookup, so if it fails it should do so a bit quicker by skipping the regex test
+		//failing on length should be a bit quicker since it skips the regex test (assuming (!) that the length property is a fast lookup)
 		if(hash.length != 40 || !/^[a-f0-9]{40}$/.test(hash))
 		{
 			throw new ArgumentError("Cannot read object. Invalid SHA-1 \"" + hash + "\". Provided SHA-1 must match /^[a-f0-9]{40}$/");
+		}
+		
+		if(hash in m_objectCache)
+		{
+			return m_objectCache[hash];
 		}
 		
 		var rawBytes:ByteArray = readBytesAtPath("objects/" + hash.substr(0, 2) + "/" + hash.substr(2, 38));
@@ -119,6 +124,7 @@ public class GitRepository
 			//blooddy uses lowercase chars in the hex string
 			if(verifyContents && hash != SHA1.hashBytes(rawBytes))
 			{
+				rawBytes.clear();
 				//TODO: Throw a more detailed error type here (GitVerifyError?)
 				throw new Error("Git object content is not consistent with SHA-1 " + hash);
 			}
@@ -158,22 +164,29 @@ public class GitRepository
 				buffer.writeByte(byte);
 			}
 			
-			result = GitUtil.createObjectByType(type, size, hash, contentBytes, this);
-			
-			//don't forget to clean up
-			buffer.clear();
-			buffer = null;
-			rawBytes.clear();
-			rawBytes = null;
-			contentBytes.clear();
-			contentBytes = null;
+			try
+			{
+				result = GitUtil.createObjectByType(type, size, hash, contentBytes, this);
+				m_objectCache[hash] = result;
+			}
+			finally
+			{
+				//don't forget to clean up
+				buffer.clear();
+				buffer = null;
+				rawBytes.clear();
+				rawBytes = null;
+				contentBytes.clear();
+				contentBytes = null;
+			}
 		}
 		
 		if(result == null)
 		{
-			//TODO: Throw this once we are properly reading packfile deltas
-			//throw new Error("No object exists with SHA-1 \"" + hash + "\" in this repository");
+			//TODO: Throw a more detailed error type here (ObjectNotFound?)
+			throw new Error("No object " + hash + " exists in this repository");
 		}
+		
 		return result;
 	}
 	
@@ -237,54 +250,13 @@ public class GitRepository
 			throw new ArgumentError("Invalid directory or not a git repository: " + path);
 		}
 		
-		init();
+		//
+		// initialize repo
+		//
 		
-		trace("Updated repo path to: " + m_gitDir.nativePath);
-	}
-	
-	/**
-	 * Follow a possible reference to get the object it points to. If the provided argument is not a ref, it is returned.
-	 * @param	ref			The possible reference to follow
-	 * @param	downTheRabbitHole	If true and following this ref results in another ref, it will continue following that ref and so on.
-	 * Default is true.
-	 * @return	The hash the ref argument was pointing to, or the argument itself if it is not actually a reference.
-	 */
-	public function lookupReference(ref:String, downTheRabbitHole:Boolean = true):String
-	{
-		//ensure the string is a ref before following it
-		if(ref != null)
-		{
-			if(ref.substr(0, 3) == "ref")
-			{
-				//parse out the "ref:" prefix if needed and trim whitespace
-				ref = ref.replace(/^\s*ref:\s*|\s*$/g, "");
-				
-				var result:String = ref in m_refs ? m_refs[ref] : null;
-				if(result == null)
-				{
-					//TODO: Throw a more detailed error type here (GitReferenceError?)
-					throw new Error("Cannot find reference \"" + ref + "\" in this repository.");
-				}
-				
-				return downTheRabbitHole ? lookupReference(result, downTheRabbitHole) : result;
-			}
-			else if(ref == "HEAD")
-			{
-				//TODO: Provide some degree of caching of HEAD?
-				return lookupReference(readBytesAtPath("HEAD").toString(), downTheRabbitHole);
-			}
-		}
-		return ref;
-	}
-	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
-	
-	private function init():void
-	{
 		m_refs = new Dictionary();
 		m_packfiles = new Vector.<GitPack>();
+		m_objectCache = new Dictionary();
 		
 		//parse packfile indexes
 		var packFiles:Array = m_gitDir.resolvePath("objects/pack").getDirectoryListing();
@@ -336,18 +308,45 @@ public class GitRepository
 		{
 			m_refs[ref] = lookupReference(m_refs[ref], true);
 		}
+		
+		trace("Updated repo path to: " + m_gitDir.nativePath);
 	}
 	
-	private function getPackByName(name:String):GitPack
+	//--------------------------------------
+	//	PRIVATE & PROTECTED INSTANCE METHODS
+	//--------------------------------------
+	
+	/**
+	 * Follow a possible reference to get the object it points to. If the provided argument is not a ref, the argument is returned.
+	 * @param	ref			The possible reference to follow
+	 * @param	downTheRabbitHole	If true and following this ref results in another ref, it will continue following that ref and so on.
+	 * Default is true.
+	 * @return	The hash the ref argument was pointing to, or the argument itself if it is not actually a reference.
+	 */
+	private function lookupReference(ref:String, downTheRabbitHole:Boolean = true):String
 	{
-		for each(var pack:GitPack in m_packfiles)
+		if(ref != null)
 		{
-			if(pack.name == name)
+			//ensure the string is a ref before following it
+			if(ref.substr(0, 3) == "ref")
 			{
-				return pack;
+				//parse out the "ref:" prefix if needed and trim whitespace
+				ref = ref.replace(/^\s*ref:\s*|\s*$/g, "");
+				if(!(ref in m_refs))
+				{
+					//TODO: Throw a more detailed error type here (GitReferenceError?)
+					throw new Error("Cannot find reference \"" + ref + "\" in this repository.");
+				}
+				
+				return downTheRabbitHole ? lookupReference(m_refs[ref], downTheRabbitHole) : m_refs[ref];
+			}
+			else if(ref == "HEAD")
+			{
+				//TODO: Provide some degree of caching of HEAD?
+				return lookupReference(readBytesAtPath("HEAD").toString(), downTheRabbitHole);
 			}
 		}
-		return null;
+		return ref;
 	}
 	
 	/**
@@ -405,7 +404,7 @@ public class GitRepository
 	
 	public function debug_readFile(path:String, followRefs:Boolean=true):Object
 	{
-		path = m_gitDir.resolvePath(path).url.replace(m_gitDir.url + "/", "");
+		path = m_gitDir.getRelativePath(new File(path));
 		if(/^objects\/[a-f0-9]{2}\/[a-f0-9]{38}$/.test(path))
 		{
 			return getObject(path.replace(/objects|\//g, ""));
@@ -414,13 +413,16 @@ public class GitRepository
 		{
 			return parseIndex(readBytesAtPath(path));
 		}
-		if(/\.idx$/.test(path))
+		if(/\.idx$/.test(path) || /\.pack$/.test(path))
 		{
-			return getPackByName(path.replace(/^objects\/pack\/|\.idx$/g, "")).debug_index();
-		}
-		if(/\.pack$/.test(path))
-		{
-			return getPackByName(path.replace(/^objects\/pack\/|\.pack/g, "")).debug_pack();
+			var name : String = path.replace(/^objects\/pack\/|\.idx$|\.pack/g, "");
+			for each(var pack:GitPack in m_packfiles)
+			{
+				if(pack.name == name)
+				{
+					return /\.pack$/.test(path) ? pack.debug_pack() : pack.debug_index();
+				}
+			}
 		}
 		if(followRefs && path == "HEAD")
 		{
