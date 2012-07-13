@@ -31,14 +31,12 @@ public class GitTree extends AbstractGitObject
 	
 	public function GitTree(hash:String, repo:GitRepository)
 	{
-		super(hash, repo);
+		super(ObjectType.TREE, hash, repo);
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	override public function get type():String { return ObjectType.TREE; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS

@@ -28,15 +28,13 @@ public class GitBlob extends AbstractGitObject
 	
 	public function GitBlob(hash:String, repo:GitRepository)
 	{
-		super(hash, repo);
+		super(ObjectType.BLOB, hash, repo);
 		m_bytes = new ByteArray();
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	override public function get type():String { return ObjectType.BLOB; }
 	
 	public function get content():IDataInput { return m_bytes; }
 	

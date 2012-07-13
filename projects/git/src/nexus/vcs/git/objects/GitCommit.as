@@ -12,7 +12,7 @@ import nexus.vcs.git.*;
 
 /**
  * An object epresenting a commit
- * @see: http://www.kernel.org/pub/software/scm/git/docs/v1.7.3/user-manual.html#commit-object
+ * @see http://www.kernel.org/pub/software/scm/git/docs/v1.7.3/user-manual.html#commit-object
  */
 public class GitCommit extends AbstractGitObject
 {
@@ -36,7 +36,7 @@ public class GitCommit extends AbstractGitObject
 	
 	public function GitCommit(hash:String, repo:GitRepository)
 	{
-		super(hash, repo);
+		super(ObjectType.COMMIT, hash, repo);
 		
 		m_parents = new Vector.<GitCommit>();
 	}
@@ -44,8 +44,6 @@ public class GitCommit extends AbstractGitObject
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
-	
-	override public function get type():String { return ObjectType.COMMIT; }
 	
 	/**
 	 * The tree object this commit points to.

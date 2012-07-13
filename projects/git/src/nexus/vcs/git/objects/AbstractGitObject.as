@@ -27,13 +27,15 @@ public class AbstractGitObject
 	protected var m_hash : String;
 	protected var m_size : int;
 	protected var m_repo : GitRepository;
+	protected var m_type : String;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function AbstractGitObject(hash:String, repo:GitRepository)
+	public function AbstractGitObject(type:String, hash:String, repo:GitRepository)
 	{
+		m_type = type;
 		m_hash = hash;
 		m_repo = repo;
 	}
@@ -46,10 +48,7 @@ public class AbstractGitObject
 	
 	public function get size():int { return m_size; }
 	
-	public function get type():String
-	{
-		throw new IllegalOperationError("This method must be implemented by a subclass");
-	}
+	public function get type():String { return m_type; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
