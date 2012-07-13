@@ -55,9 +55,9 @@ public class TreeEntry
 	{
 		if(verbose)
 		{
-			return "[TreeEntry:mode=" + mode + ",filename=" + fileName + ",hash=" + hash + "]";
+			return "[TreeEntry:mode=" + m_mode + ",filename=" + m_fileName + ",hash=" + m_hash + "]";
 		}
-		return mode + " " + hash + " " + fileName;
+		return m_mode + " " + m_hash + " " + m_fileName;
 	}
 	
 	//--------------------------------------

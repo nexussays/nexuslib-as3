@@ -60,7 +60,6 @@ public class GitUtil
 				result = new GitTag(hash, repo);
 				break;
 			default:
-				//TODO: Throw a more specific error type
 				throw new Error("Unknown or unsupported git object type \"" + type + "\"");
 		}
 		result.populateContent(contentBytes, size);

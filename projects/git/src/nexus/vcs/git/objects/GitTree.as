@@ -94,9 +94,14 @@ public class GitTree extends AbstractGitObject
 	{
 		if(verbose)
 		{
-			return "tree " + size + "\n" + m_entries.join("\n");
+			var result : String = "[GitTree:hash=" + m_hash + ", entries=\n";
+			for each(var entry : TreeEntry in m_entries)
+			{
+				result += "\t" + entry.toString(verbose) + "\n";
+			}
+			return result = "]";
 		}
-		return m_entries.join("\n");
+		return "tree " + size + "\n" + m_entries.join("\n");
 	}
 	
 	//--------------------------------------

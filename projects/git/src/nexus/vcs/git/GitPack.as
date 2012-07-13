@@ -187,12 +187,9 @@ public class GitPack
 				throw new Error("Offset delta " + (offset - deltaOffset) + " on object " + m_index.getHashFromOffset(offset) + " is out of bounds.");
 			}
 		}
-		//TODO: support reference deltas
 		else if(packObject.type == ObjectType.PACK_REFERENCE_DELTA)
 		{
-			var sha:String = GitUtil.readSHA1FromStream(m_packBytes);
-			trace("delta_ref", sha);
-			return null;
+			var reference:String = GitUtil.readSHA1FromStream(m_packBytes);
 		}
 		
 		//find the next sequential offset so we know how much data to read for this object
