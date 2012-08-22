@@ -10,7 +10,8 @@ import flash.utils.*;
 import nexus.utils.ByteUtils;
 
 /**
- * ...
+ * Implementation of hash-based message authentication code
+ * @see	http://tools.ietf.org/html/rfc2104
  */
 public class HMAC
 {
@@ -20,21 +21,22 @@ public class HMAC
 	
 	private static const BLOCKSIZE_BYTES:int = 64;
 	private static const HMAC_SHA1 : HMAC = new HMAC(new SHA1());
+	private static const HMAC_SHA256 : HMAC = new HMAC(new SHA256());
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_hash : SHA1;
+	private var m_hashFunction : IHashFunction;
 	private var m_secretKey : ByteArray;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
 	//--------------------------------------
 	
-	public function HMAC(hashFunction:SHA1)
+	public function HMAC(hashFunction:IHashFunction)
 	{
-		m_hash = hashFunction;
+		m_hashFunction = hashFunction;
 	}
 	
 	//--------------------------------------
@@ -52,18 +54,14 @@ public class HMAC
 	//--------------------------------------
 	
 	/**
-	 * Generates an HMAC with the provided key and message. This is a convenience method for compute() that converts the
-	 * String arguments into ByteArrays.
-	 * @param	key
-	 * @param	message
-	 * @return
+	 * Generate a message authentication code for the given message. If a key is provided, it will be used. If the
+	 * key is null, the value set in secretKey will be used. If both are null, an exception is thrown.
+	 * @param	message			The message from which to generate the authentication code.
+	 * @param	key				The secret key to use. Optional if secretKey has been set.
+	 * @throws	ArgumentError	If key is null and secretKey has not been set
+	 * @return	A ByteArray whose length is determined by the hash algorithm used.
 	 */
-	public function computeWithStrings(message:String, key:String=null):ByteArray
-	{
-		return compute(ByteUtils.fromString(message), key != null ? ByteUtils.fromString(key) : null);
-	}
-	
-	public function compute(message:ByteArray, key:ByteArray=null):ByteArray
+	public function generate(message:ByteArray, key:ByteArray=null):ByteArray
 	{
 		key = key || m_secretKey;
 		if(key == null)
@@ -71,10 +69,11 @@ public class HMAC
 			throw new ArgumentError("Cannot compute HMAC without secret key.");
 		}
 		
+		//write the key to a different ByteArray so we don't mutate it
 		var value:ByteArray = new ByteArray();
 		if(key.length > BLOCKSIZE_BYTES)
 		{
-			value.writeBytes(m_hash.hash(key));
+			value.writeBytes(m_hashFunction.hash(key));
 		}
 		else
 		{
@@ -94,15 +93,18 @@ public class HMAC
 			outerPad.writeByte(value[x] ^ 0x5c);
 		}
 		
-		innerPad.writeBytes(message);
-		outerPad.writeBytes(m_hash.hash(innerPad));
+		if(message != null)
+		{
+			innerPad.writeBytes(message);
+		}
+		outerPad.writeBytes(m_hashFunction.hash(innerPad));
 		
 		value.clear();
 		value = null;
 		innerPad.clear();
 		innerPad = null;
 		
-		return m_hash.hash(outerPad);
+		return m_hashFunction.hash(outerPad);
 	}
 	
 	//--------------------------------------
@@ -113,9 +115,14 @@ public class HMAC
 	//	PUBLIC CLASS METHODS
 	//--------------------------------------
 	
-	static public function sha1(key:ByteArray, message:ByteArray):ByteArray
+	static public function sha1(message:ByteArray, key:ByteArray):ByteArray
 	{
-		return HMAC_SHA1.compute(key, message);
+		return HMAC_SHA1.generate(message, key);
+	}
+	
+	static public function sha256(message:ByteArray, key:ByteArray):ByteArray
+	{
+		return HMAC_SHA256.generate(message, key);
 	}
 }
 

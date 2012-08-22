@@ -3,15 +3,16 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-package
+package nexus.security.crypto
 {
+import flash.utils.ByteArray;
 
-import test.nexus.security.crypto.*;
-
-[Suite]
-public class EnigmaTests// extends TestSuite
+/**
+ * Interface for all cryptographic hash functions to implement so they can be used as primitives to construct
+ */
+public interface IHashFunction
 {
-	public var test01 : HMACTest;
+	function hash(bytes:ByteArray):ByteArray;
 }
 
 }
