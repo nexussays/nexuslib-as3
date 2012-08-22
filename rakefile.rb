@@ -21,7 +21,7 @@ task :clean
 desc "Clobber all projects"
 task :clobber
 
-%w{reflection}.each do |project|
+%w{reflection enigma}.each do |project|
 	project = project.to_sym
 
 	namespace project do
