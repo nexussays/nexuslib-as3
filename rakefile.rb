@@ -30,30 +30,29 @@ task :clobber
 		proj = "nexuslib.#{project}"
 		version_file = "#{root}/VERSION"
 		version = "#{Version.current(version_file) || '0.0.0'}"
-
-		compc = ASRake::CompcArguments.new
-		compc.target_player = 11.0
-		compc.output = "#{root}/bin/#{proj}.swc"
-		compc.debug = true
-		compc.source_path << "#{root}/src"
-		compc.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
-		#compc.dump_config = "#{root}/src/compc_config.xml"
 		
 		desc "Build nexuslib.#{project}"
-		ASRake::CompcTask.new :build, compc
+		build = ASRake::CompcTask.new :build do |compc|
+			compc.target_player = 11.0
+			compc.output = "#{root}/bin/#{proj}.swc"
+			compc.debug = true
+			compc.source_path << "#{root}/src"
+			compc.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
+			#compc.dump_config = "#{root}/src/compc_config.xml"
+		end
 
 		desc "Package #{proj}-#{version}.zip"
 		ASRake::PackageTask.new :package => :build do |package|
-			package.output = "#{compc.output_dir}/#{proj}-#{version}.zip"
+			package.output = "#{build.output_dir}/#{proj}-#{version}.zip"
 			package.files = {
 				"license.txt" => "LICENSE",
-				"#{proj}-#{version}.swc" => compc.output
+				"#{proj}-#{version}.swc" => build.output
 			}
 		end
 
 		ASRake::VersionTask.new :version, version_file
 
-		ASRake::CleanTask.new compc
+		ASRake::CleanTask.new build
 
 	end
 
