@@ -20,22 +20,28 @@ public class GitUtil
 	//--------------------------------------
 	
 	/**
-	 * Read 20 bytes from the input stream and return it as a hex-formatted string. The position of the stream will
-	 * be moved 20 bytes as a result.
+	 * Read the provided number of bytes from the input stream and return it as a hex-formatted string.
+	 * The position of the stream will be moved that number of bytes as a result.
 	 * @param	stream	Input stream from which to read.
-	 * @return	A 40-charatcer hex-formatted (lowercase) string
+	 * @param	bytes	The number of bytes to read from the stream
+	 * @return	A hex-formatted, lowercase string of (bytes * 2) length
 	 */
-	static public function readSHA1FromStream(stream:IDataInput):String
+	static public function readHexFromStream(stream:IDataInput, bytes:uint):String
 	{
-		var sha1:String = "";
-		var cursor:int = 0;
-		while(cursor < 20)
+		var hex:String = "";
+		var cursor:uint = bytes;
+		while(cursor > 0)
 		{
 			var val:uint = stream.readUnsignedByte();
-			sha1 += (val < 16 ? "0" : "") + val.toString(16);
-			++cursor;
+			hex += (val < 16 ? "0" : "") + val.toString(16);
+			--cursor;
 		}
-		return sha1;
+		return hex;
+	}
+	
+	static public function readSHA1FromStream(stream:IDataInput):String
+	{
+		return readHexFromStream(stream, 20);
 	}
 	
 	static public function createObjectByType(type:Object, size:int, hash:String, contentBytes:ByteArray, repo:GitRepository):AbstractGitObject
@@ -69,7 +75,7 @@ public class GitUtil
 	/**
 	 * Returns the contents of the provided byte stream as a hex-formatted string, with spacing after each group of 2 bytes.
 	 * @param	bytes	The byte stream to read from
-	 * @param	length	The number of bytes to read, read all bytesAvailable if length == 0
+	 * @param	length	The number of bytes to read
 	 */
 	static public function hexDump(bytes:IDataInput, length:uint=uint.MAX_VALUE):String
 	{
