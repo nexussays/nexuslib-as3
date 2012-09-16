@@ -1,4 +1,4 @@
-gem 'asrake', ">=0.8"
+gem 'asrake', ">=0.9"
 require 'asrake'
 
 FlexSDK::SDK_PATHS << 'C:\develop\sdk\flex_sdk_4.6.0.23201'
