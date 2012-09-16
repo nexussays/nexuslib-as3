@@ -20,7 +20,7 @@ public class GitBlob extends AbstractGitObject
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_bytes : ByteArray;
+	private var m_content : ByteArray;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -29,14 +29,14 @@ public class GitBlob extends AbstractGitObject
 	public function GitBlob(hash:String, repo:GitRepository)
 	{
 		super(ObjectType.BLOB, hash, repo);
-		m_bytes = new ByteArray();
+		m_content = new ByteArray();
 	}
 	
 	//--------------------------------------
 	//	GETTER/SETTERS
 	//--------------------------------------
 	
-	public function get content():IDataInput { return m_bytes; }
+	public function get content():IDataInput { return m_content; }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -47,15 +47,15 @@ public class GitBlob extends AbstractGitObject
 		var result : ByteArray = new ByteArray();
 		result.writeUTFBytes(this.type + " " + m_size);
 		result.writeByte(0);
-		result.writeBytes(m_bytes, 0, m_bytes.length);
+		result.writeBytes(m_content, 0, m_content.length);
 		return result;
 	}
 	
 	override public function populateContent(content:IDataInput, size:int):void
 	{
 		super.populateContent(content, size);
-		m_bytes.clear();
-		content.readBytes(m_bytes, 0, 0);
+		m_content.clear();
+		content.readBytes(m_content, 0, 0);
 	}
 	
 	/**
@@ -63,13 +63,9 @@ public class GitBlob extends AbstractGitObject
 	 * @param	verbose	If true, the object header is output as well
 	 * @return	This object as a string
 	 */
-	override public function toString(verbose:Boolean=false):String
+	override public function toString():String
 	{
-		if(verbose)
-		{
-			return "blob " + size + "\n" + m_bytes.toString();
-		}
-		return m_bytes.toString();
+		return m_type + " " + m_size + "\n" + m_content;
 	}
 	
 	//--------------------------------------

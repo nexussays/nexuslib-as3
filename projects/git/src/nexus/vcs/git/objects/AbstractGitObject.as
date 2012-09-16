@@ -68,7 +68,7 @@ public class AbstractGitObject
 		m_size = size;
 	}
 	
-	public function toString(verbose:Boolean = false):String
+	public function toString():String
 	{
 		return "[GitObject:" + m_hash + "]";
 	}

@@ -145,21 +145,17 @@ public class GitCommit extends AbstractGitObject
 	 * @param	verbose	If true, the object header is output as well
 	 * @return	This object as a string
 	 */
-	override public function toString(verbose:Boolean=false):String
+	override public function toString():String
 	{
-		var header : String = "";
-		if(verbose)
-		{
-			header = "commit " + size + "\n";
-		}
-		header += "tree " + m_tree.hash + "\n";
+		var result : String = "commit " + size + "\n" +
+			"tree " + m_tree.hash + "\n";
 		//oh, if only
 		//header += "parent ${x.hash}\n" foreach x in m_parents
 		for each(var commit : GitCommit in m_parents)
 		{
-			header += "parent " + commit.hash + "\n";
+			result += "parent " + commit.hash + "\n";
 		}
-		return header +
+		return result +
 			"author " + m_author + "\n" +
 			"committer " + m_committer + "\n" +
 			"\n" +

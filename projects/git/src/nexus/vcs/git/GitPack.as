@@ -135,7 +135,7 @@ public class GitPack
 				throw new GitPackError(m_name, "Pack and index report different object counts (" + objectCount + " vs " + m_index.objectCount + ")");
 			}
 			
-			//verify SHA-1 checksum with index
+			//verify hash checksum with index
 			m_packBytes.position = m_packBytes.length - 20;
 			var hash:String = GitUtil.readSHA1FromStream(m_packBytes);
 			if(hash != m_index.packfileHash)
@@ -194,7 +194,7 @@ public class GitPack
 		
 		//find the next sequential offset so we know how much data to read for this object
 		var nextOffset:int = m_index.getNextOffset(offset);
-		//if the next offset is invalid, then we'll read up to the SHA-1 at the end of the pack
+		//if the next offset is invalid, then we'll read up to the hash at the end of the pack
 		nextOffset = nextOffset == -1 ? m_packBytes.length - 20 : nextOffset;
 		
 		//read the number of bytes from our current position to the next offset

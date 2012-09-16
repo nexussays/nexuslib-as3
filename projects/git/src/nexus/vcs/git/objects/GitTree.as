@@ -90,17 +90,19 @@ public class GitTree extends AbstractGitObject
 	 * @param	verbose	If true, the object header is output as well
 	 * @return	This object as a string
 	 */
-	override public function toString(verbose:Boolean=false):String
+	override public function toString():String
 	{
+		/*
 		if(verbose)
 		{
-			var result : String = "[GitTree:hash=" + m_hash + ", entries=\n";
+			var result : String = "[GitTree:hash=" + m_hash + ",entries=\n";
 			for each(var entry : TreeEntry in m_entries)
 			{
 				result += "\t" + entry.toString(verbose) + "\n";
 			}
-			return result = "]";
+			return result + "]";
 		}
+		//*/
 		return "tree " + size + "\n" + m_entries.join("\n");
 	}
 	
