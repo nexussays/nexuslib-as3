@@ -6,7 +6,6 @@
 package nexus.utils
 {
 
-
 import flash.utils.*;
 
 /**
@@ -19,7 +18,7 @@ public class ByteUtils
 	 * @param	hexString	A String composed of only the characters [a-fA-F0-9]
 	 * @return	A new ByteArray
 	 */
-	static public function hexStringToBytes(hexString:String):ByteArray
+	static public function hexFormattedStringToBytes(hexString:String):ByteArray
 	{
 		if(hexString.length % 2 == 1)
 		{
@@ -38,7 +37,7 @@ public class ByteUtils
 	 * @param	stream	The ByteArray to parse
 	 * @return	A lowercase hex-formatted string
 	 */
-	static public function bytesToHexString(stream:ByteArray):String
+	static public function bytesToHexFormattedString(stream:ByteArray):String
 	{
 		stream.position = 0;
 		var sha1:String = "";
@@ -51,9 +50,9 @@ public class ByteUtils
 	}
 	
 	/**
-	 * Convert the provided string into a ByteArray
+	 * Write the provided string into a new ByteArray
 	 * @param	string
-	 * @return
+	 * @return	A new ByteArray
 	 */
 	static public function fromString(string:String):ByteArray
 	{

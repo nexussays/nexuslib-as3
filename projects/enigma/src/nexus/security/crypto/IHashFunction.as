@@ -12,6 +12,11 @@ import flash.utils.ByteArray;
  */
 public interface IHashFunction
 {
+	/**
+	 * Hash the provided bytes and returned the hashed value
+	 * @param	bytes	The bytes to hash
+	 * @return	The hashed bytes
+	 */
 	function hash(bytes:ByteArray):ByteArray;
 }
 

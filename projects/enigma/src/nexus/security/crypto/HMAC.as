@@ -20,6 +20,7 @@ public class HMAC
 	//--------------------------------------
 	
 	private static const BLOCKSIZE_BYTES:int = 64;
+	
 	private static const HMAC_SHA1 : HMAC = new HMAC(new SHA1());
 	private static const HMAC_SHA256 : HMAC = new HMAC(new SHA256());
 	
