@@ -46,10 +46,10 @@ public class GitRepository
 	
 	public function get gitDirectory():File { return m_gitDir; }
 	
-	public function get directory():File { return m_gitDir.resolvePath(".."); }
+	public function get directory():File { return m_gitDir != null ? m_gitDir.resolvePath("..") : null; }
 	
 	/**
-	 * Return the SHA-1 pointed to by HEAD
+	 * Return the hash pointed to by HEAD
 	 */
 	public function get head():String
 	{
@@ -82,13 +82,13 @@ public class GitRepository
 		
 		if(hash == null)
 		{
-			throw new ArgumentError("Cannot read object. Provided SHA-1 is null.");
+			throw new ArgumentError("Cannot read object. Provided hash is null.");
 		}
 		
 		//failing on length should be a bit quicker since it skips the regex test (assuming (!) that the length property is a fast lookup)
 		if(hash.length != 40 || !/^[a-f0-9]{40}$/.test(hash))
 		{
-			throw new ArgumentError("Cannot read object. Invalid SHA-1 \"" + hash + "\". Provided SHA-1 must match /^[a-f0-9]{40}$/");
+			throw new ArgumentError("Cannot read object. Invalid hash \"" + hash + "\". Provided hash must match /^[a-f0-9]{40}$/");
 		}
 		
 		if(hash in m_objectCache)
@@ -126,7 +126,7 @@ public class GitRepository
 			{
 				rawBytes.clear();
 				//TODO: Throw a more detailed error type here (GitVerifyError?)
-				throw new Error("Git object content is not consistent with SHA-1 " + hash);
+				throw new Error("Git object content is not consistent with hash " + hash);
 			}
 			
 			rawBytes.position = 0;
@@ -236,7 +236,10 @@ public class GitRepository
 			try
 			{
 				m_gitDir = new File(path);
-				m_gitDir = m_gitDir.resolvePath(".git");
+				if(m_gitDir.name != ".git")
+				{
+					m_gitDir = m_gitDir.resolvePath(".git");
+				}
 			}
 			catch(e:Error)
 			{
@@ -474,7 +477,7 @@ internal class Entry
 		//32-bit file size. This is the on-disk size from stat(2), truncated to 32-bit.
 		var filesize:int = index.readInt();
 		
-		//SHA-1
+		//hash
 		var sha:String = GitUtil.readSHA1FromStream(index);
 		
 		var flags:int = index.readShort();
