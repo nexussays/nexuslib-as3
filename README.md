@@ -10,6 +10,10 @@ None.
 
 Download one of the [compiled swcs](https://github.com/nexussays/nexuslib/downloads), or clone the repo and reference in your project.
 
+## API Docs
+
+http://docs.nexussays.com/nexuslib/index.html
+
 # Components
 
 ## `nexuslib.reflection`
