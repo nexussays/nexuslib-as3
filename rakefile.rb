@@ -1,5 +1,6 @@
-gem 'asrake', ">=0.9"
+gem 'asrake', ">=0.10"
 require 'asrake'
+require 'rake/clean'
 
 FlexSDK::SDK_PATHS << 'C:\develop\sdk\flex_sdk_4.6.0.23201'
 
@@ -15,11 +16,14 @@ task :build
 desc "Package all projects"
 task :package
 
-desc "Clean all projects"
-task :clean
+desc "Generate docs for all projects"
+task :doc do
+	@doc.execute
+end
+@doc = ASRake::Asdoc.new
+@doc.output = "bin/doc/"
 
-desc "Clobber all projects"
-task :clobber
+CLEAN.include(@doc.output)
 
 %w{reflection enigma}.each do |project|
 	project = project.to_sym
@@ -30,19 +34,20 @@ task :clobber
 		proj = "nexuslib.#{project}"
 		version_file = "#{root}/VERSION"
 		version = "#{Version.current(version_file) || '0.0.0'}"
-		
+
 		desc "Build nexuslib.#{project}"
 		build = ASRake::CompcTask.new :build do |compc|
 			compc.target_player = 11.0
-			compc.output = "#{root}/bin/#{proj}.swc"
+			compc.output = "bin/#{proj}.swc"
 			compc.debug = true
 			compc.source_path << "#{root}/src"
 			compc.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
+			compc.include_asdoc = true
 			#compc.dump_config = "#{root}/src/compc_config.xml"
 		end
 
 		desc "Package #{proj}-#{version}.zip"
-		ASRake::PackageTask.new :package => :build do |package|
+		package = ASRake::PackageTask.new :package => :build do |package|
 			package.output = "#{build.output_dir}/#{proj}-#{version}.zip"
 			package.files = {
 				"license.txt" => "LICENSE",
@@ -52,13 +57,18 @@ task :clobber
 
 		ASRake::VersionTask.new :version, version_file
 
-		ASRake::CleanTask.new build
+		# add paths to asdoc task
+		@doc.source_path << build.source_path
+		@doc.library_path << build.library_path
+		@doc.library_path << build.include_libraries
+
+		# clean
+		CLEAN.include(build.output)
+		CLOBBER.include(package.output)
 
 	end
 
 	#add to root tasks
 	task :build => "#{project}:build"
 	task :package => "#{project}:package"
-	task :clean => "#{project}:clean"
-	task :clobber => "#{project}:clobber"
 end
