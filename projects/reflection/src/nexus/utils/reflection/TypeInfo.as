@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -229,21 +229,33 @@ public final class TypeInfo extends AbstractMetadataRecipient
 	//	INTERNAL INSTANCE METHODS
 	//--------------------------------------
 	
+	/**
+	 * @private
+	 */
 	internal function setIsDynamic(value:Boolean):void
 	{
 		m_isDynamic = value;
 	}
 	
+	/**
+	 * @private
+	 */
 	internal function setIsFinal(value:Boolean):void
 	{
 		m_isFinal = value;
 	}
-
+	
+	/**
+	 * @private
+	 */
 	internal function setConstructor(constructor:MethodInfo):void
 	{
 		m_constructor = constructor;
 	}
 	
+	/**
+	 * @private
+	 */
 	internal function addMember(member:AbstractMemberInfo):void
 	{
 		if(member is PropertyInfo)

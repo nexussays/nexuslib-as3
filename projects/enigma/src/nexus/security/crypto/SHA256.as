@@ -12,7 +12,7 @@ import nexus.utils.ByteUtils;
 
 /**
  * Wraps by.blooddy.crypto.SHA256 to provide an instance implementation that implements an interface for
- * use in various higher-level crypto functions (eg, HMAC). For static operations and optimum performance,
+ * use in various higher-level crypto functions. For static operations and optimum performance,
  * call the blooddy library directly.
  */
 public class SHA256 implements IHashFunction

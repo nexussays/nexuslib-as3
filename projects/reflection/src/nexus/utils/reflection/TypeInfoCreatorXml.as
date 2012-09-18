@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -15,20 +15,12 @@ import nexus.utils.Parse;
 
 /**
  * Creates a TypeInfo object using flash.utils.describeType
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * @private
  */
 internal class TypeInfoCreatorXml implements ITypeInfoCreator
 {
 	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	CLASS VARIABLES
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PUBLIC STATIC METHODS
+	//	PUBLIC METHODS
 	//--------------------------------------
 	
 	public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo

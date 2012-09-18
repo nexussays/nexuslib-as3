@@ -1,5 +1,5 @@
 ﻿// Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,8 +16,7 @@ import nexus.nexuslib_internal;
 import nexus.utils.Parse;
 
 /**
- * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * Provides a collection of reflection methods
  */
 public final class Reflection
 {
@@ -31,28 +30,47 @@ public final class Reflection
 	 * instance with each call.
 	 */
 	static public const SYSTEM_DOMAIN : ApplicationDomain = ApplicationDomain.currentDomain;
-	
+	/**
+	 * __AS3__.vec::Vector
+	 */
 	//call flash.utils.getQualifiedClassName(Vector) instead of hardcoding the string just in case Adobe ever changes the class or package
-	///__AS3__.vec::Vector
 	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
-	///__AS3__.vec::Vector.<*>
+	/**
+	 * __AS3__.vec::Vector.<*>
+	 */
 	static private const UNTYPEDVECTOR_CLASSNAME_QUALIFIED:String = flash.utils.getQualifiedClassName(Vector.<*>);
-	///class typed as __AS3__.vec::Vector.<*>
+	/**
+	 * class typed as __AS3__.vec::Vector.<*>
+	 */
 	static private const UNTYPEDVECTOR_CLASS:Class = Class(Vector.<*>);
 	
-	///used in applicationDomainsAreEqual to check for equality
+	/**
+	 * Used in applicationDomainsAreEqual to check for equality
+	 */
 	static private const EQUALITYTEST_DOMAINMEMORY:ByteArray = new ByteArray();
 	
-	///cache all TypeInfo information so parsing in the describeType() call only happens once
+	/**
+	 * Cache all TypeInfo information so parsing in the describeType() call only happens once
+	 */
 	static private const CACHED_TYPEINFO:Dictionary = new Dictionary(true);
-	///cache all namespaces by their URI
+	/**
+	 * Cache all namespaces by their URI
+	 */
 	static private const CACHED_NAMESPACES:Dictionary = new Dictionary();
 	
-	///ApplicationDomains can be registered so they don't always have to be provided to Reflection methods
+	/**
+	 * ApplicationDomains can be registered so they don't always have to be provided to Reflection methods
+	 */
 	static private const REGISTERED_APPDOMAINS : Vector.<ApplicationDomain> = new Vector.<ApplicationDomain>();
 	
-	///store strongly-typed classes that represent metadata on members
+	/**
+	 * @private
+	 * store strongly-typed classes that represent metadata on members
+	 */
 	static internal const REGISTERED_METADATA_CLASSES:Dictionary = new Dictionary();
+	/**
+	 * @private
+	 */
 	static internal const REGISTERED_METADATA_NAMES:Dictionary = new Dictionary();
 	
 	//--------------------------------------
@@ -60,11 +78,19 @@ public final class Reflection
 	//--------------------------------------
 	
 	/**
-	 * Determines if the Reflection library should throw an error if it doesn't have access to the avmplus describeTypeJson interface or
-	 * if it should use flash.utils.describeType in its place and accept any data errors that result.
+	 * A flag for determining the allowed sources of type information. If the creators allowed by this flag are
+	 * not present at runtime an exception is thrown.
+	 * <strong>This is an advanced option.</strong>
+	 * @default TYPEINFOCREATOR_NEW
 	 */
 	static nexuslib_internal var allowedTypeInfoCreators : int = nexuslib_internal::TYPEINFOCREATOR_NEW;// | nexuslib_internal::TYPEINFOCREATOR_OLD;
+	/**
+	 * Used as a bitwise flag on allowedTypeInfoCreators to allow avmplus.describeTypeJson
+	 */
 	static nexuslib_internal const TYPEINFOCREATOR_NEW : int = 1;
+	/**
+	 * Used as a bitwise flag on allowedTypeInfoCreators to allow flash.utils.describeType
+	 */
 	static nexuslib_internal const TYPEINFOCREATOR_OLD : int = 2;
 	
 	static private var s_typeInfoCreator : ITypeInfoCreator;
@@ -253,7 +279,7 @@ public final class Reflection
 	 * getUnqualifiedClassName(instanceOfSomeClass) => "SomeClass"
 	 * getUnqualifiedClassName("com.example.as3::SomeClass") => "SomeClass"
 	 * getUnqualifiedClassName("[class SomeClass]") => "SomeClass"
-	 * getUnqualifiedClassName("some string value") => "String"
+	 * getUnqualifiedClassName("foobar baz") => "String"
 	 * </listing>
 	 * @param	object	An object instance, a Class, or a String representing a class name
 	 * @return
@@ -420,7 +446,7 @@ public final class Reflection
 			}
 			else
 			{
-				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. If you believe this message is in error, please see the docs for Reflection.allowedTypeInfoCreators.");
+				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. For more information, see the docs for Reflection.allowedTypeInfoCreators");
 			}
 		}
 		
@@ -553,6 +579,7 @@ public final class Reflection
 	 * ensures there are no ApplicationDomain-related issues.
 	 * @param	instance
 	 * @return
+	 * @private
 	 */
 	static internal function getMetadataClass(instance:MetadataInfo):Class
 	{
@@ -562,6 +589,7 @@ public final class Reflection
 	/**
 	 * Retrieves the cached Namespace for the given namespace URI
 	 * @param	namespaceUri
+	 * @private
 	 */
 	static internal function getNamespace(namespaceUri:String):Namespace
 	{
