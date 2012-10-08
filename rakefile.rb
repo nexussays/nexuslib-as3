@@ -42,12 +42,7 @@ multitask :deploy
 
 desc "Deploy"
 task :deploy, [:key, :secret_key] => [:package_all, :doc] do |t, args|
-	aws_secret_key = args[:secret_key].chomp
-	aws_key = args[:key].chomp
-	
-	fail "Must provide AWS keys" if aws_secret_key == nil || aws_key == nil
-
-	s3 = RightAws::S3.new(aws_key, aws_secret_key)
+	s3 = RightAws::S3.new(args[:key], args[:secret_key])
 	docs = s3.bucket('docs.nexussays.com')
 	#docs.delete_folder('nexuslib')
 	Dir.chdir(asdoc.output) do
