@@ -1,4 +1,4 @@
-gem 'asrake', ">=1.0"
+gem 'asrake', "~>1.0"
 gem 'right_aws', ">=3.0"
 require 'asrake'
 require 'rake/clean'
@@ -12,8 +12,7 @@ FlexSDK::SDK_PATHS << 'C:\develop\sdk\flex_sdk_4.6.0.23201'
 
 PROJECTS = %w{reflection enigma mercury}
 
-asdoc = ASRake::Asdoc.new
-asdoc.output = "bin/doc"
+asdoc = ASRake::Asdoc.new "bin/doc"
 asdoc.window_title = "\"nexuslib API Documentation\""
 CLEAN.include(asdoc.output)
 
@@ -23,13 +22,15 @@ asdoc_footer = []
 # Tasks
 #
 
-task :default => :build_all
+task :default do
+	system "rake --tasks"
+end
 
 desc "Build all projects"
 multitask :build_all
 
 desc "Package all projects"
-task :package
+multitask :package_all
 
 desc "Generate docs for all projects"
 task :doc do
@@ -40,7 +41,7 @@ end
 multitask :deploy
 
 desc "Deploy"
-task :deploy, [:key, :secret_key] => [:package, :doc] do |t, args|
+task :deploy, [:key, :secret_key] => [:package_all, :doc] do |t, args|
 	aws_secret_key = args[:secret_key].chomp
 	aws_key = args[:key].chomp
 	
@@ -96,21 +97,19 @@ PROJECTS.each do |name|
 	# add version info to asdoc_footer of docs
 	asdoc_footer << "#{project}-#{version}"
 
-	namespace name do
-
-		desc "Package #{project}-#{version}.zip"
-		task :package => [build, package]
-
-		ASRake::VersionTask.new :version, version_file
-
-	end
-
 	# default build task to namespace name
 	desc "Build nexuslib.#{name}"
 	task name => build
+
+	namespace name do
+		desc "Package #{project}-#{version}.zip"
+		task :package => package
+
+		ASRake::VersionTask.new :version, version_file
+	end
 	
 	# add to root tasks
 	task :build_all => build
-	task :package => "#{name}:package"
+	task :package_all => package
 
 end
