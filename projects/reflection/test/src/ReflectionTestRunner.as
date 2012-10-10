@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -17,10 +17,6 @@ import flash.system.Capabilities;
 import flash.text.TextFormat;
 import nexus.utils.reflection.Reflection;
 
-/**
- * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
- */
 [SWF(width="800",height="600",backgroundColor="#333333",frameRate="30")]
 public class ReflectionTestRunner extends Sprite
 {
@@ -28,7 +24,8 @@ public class ReflectionTestRunner extends Sprite
 	
 	public function ReflectionTestRunner()
 	{
-		//*
+		//Use to trigger the FPL warning
+		/*
 		var stage3D:Stage3D = stage.stage3Ds[0];
 		stage.stage3Ds[0].addEventListener(Event.CONTEXT3D_CREATE, function(e:Event):void
 			{
@@ -44,15 +41,6 @@ public class ReflectionTestRunner extends Sprite
 		core.textPrinter.hideLocalPaths = true;
 		core.textPrinter.traceOnComplete = false;
 		core.start(ReflectionTests, null, this);
-		
-		//this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));
-		// NOTE: sending a particular class and method name will
-		// execute setUp(), the method and NOT tearDown.
-		// This allows you to get visual confirmation while developing
-		// visual entities
-		// start(AllTests, null, TestRunner.SHOW_TRACE);
-	
-		//start(ReflectionTests);
 	}
 }
 
