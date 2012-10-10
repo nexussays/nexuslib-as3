@@ -27,7 +27,7 @@ task :default do
 end
 
 desc "Build all projects"
-multitask :build_all
+task :build_all
 
 desc "Package all projects"
 multitask :package_all
@@ -38,25 +38,24 @@ task :doc do
 	asdoc.execute
 end
 
-multitask :deploy
-
-desc "Deploy"
-task :deploy, [:key, :secret_key] => [:package_all, :doc] do |t, args|
-	s3 = RightAws::S3.new(args[:key], args[:secret_key])
-	docs = s3.bucket('docs.nexussays.com')
-	#docs.delete_folder('nexuslib')
-	Dir.chdir(asdoc.output) do
-		Dir.glob("**/*") do |file|
-			if !File.directory?(file)
-				key = File.join('nexuslib', file)
-				puts key
-				# TODO: Only put if source is newer than destination
-				docs.put(key, File.open(file), {}, 'public-read')
+namespace :doc do
+	desc "Deploy docs to S3"
+	task :deploy, [:key, :secret_key] => [:doc] do |t, args|
+		s3 = RightAws::S3.new(args[:key], args[:secret_key])
+		docs = s3.bucket('docs.nexussays.com')
+		#docs.delete_folder('nexuslib')
+		Dir.chdir(asdoc.output) do
+			Dir.glob("**/*") do |file|
+				if !File.directory?(file)
+					key = File.join('nexuslib', file)
+					puts key
+					# TODO: Only put if source is newer than destination
+					docs.put(key, File.open(file), {}, 'public-read')
+				end
 			end
 		end
 	end
 end
-
 #
 # Generate Project Tasks
 #
