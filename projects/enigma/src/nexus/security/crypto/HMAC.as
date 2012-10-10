@@ -21,8 +21,8 @@ public class HMAC
 	
 	private static const BLOCKSIZE_BYTES:int = 64;
 	
-	private static const HMAC_SHA1 : HMAC = new HMAC(new SHA1());
-	private static const HMAC_SHA256 : HMAC = new HMAC(new SHA256());
+	private static const HMAC_SHA1 : HMAC = new HMAC(new SHA1HashFunction());
+	private static const HMAC_SHA256 : HMAC = new HMAC(new SHA256HashFunction());
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
@@ -62,23 +62,23 @@ public class HMAC
 	 * @throws	ArgumentError	If key is null and secretKey has not been set
 	 * @return	A ByteArray whose length is determined by the hash algorithm used.
 	 */
-	public function generate(message:ByteArray, key:ByteArray=null):ByteArray
+	public function generate(message:ByteArray, secretKey:ByteArray=null):ByteArray
 	{
-		key = key || m_secretKey;
-		if(key == null)
+		secretKey = secretKey || m_secretKey;
+		if(secretKey == null)
 		{
 			throw new ArgumentError("Cannot compute HMAC without secret key.");
 		}
 		
 		//write the key to a different ByteArray so we don't mutate it
 		var value:ByteArray = new ByteArray();
-		if(key.length > BLOCKSIZE_BYTES)
+		if(secretKey.length > BLOCKSIZE_BYTES)
 		{
-			value.writeBytes(m_hashFunction.hash(key));
+			value.writeBytes(m_hashFunction.hash(secretKey));
 		}
 		else
 		{
-			value.writeBytes(key);
+			value.writeBytes(secretKey);
 		}
 		
 		while(value.length < BLOCKSIZE_BYTES)

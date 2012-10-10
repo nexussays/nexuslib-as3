@@ -120,8 +120,8 @@ public class HMACTest extends TestCase
 	
 	override protected function setUp():void
 	{
-		hmac_sha1 = new HMAC(new SHA1());
-		hmac_sha256 = new HMAC(new SHA256());
+		hmac_sha1 = new HMAC(new SHA1HashFunction());
+		hmac_sha256 = new HMAC(new SHA256HashFunction());
 	}
 	
 	override protected function tearDown():void

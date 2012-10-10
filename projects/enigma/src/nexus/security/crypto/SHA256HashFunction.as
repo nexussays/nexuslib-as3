@@ -6,16 +6,16 @@
 package nexus.security.crypto
 {
 
-import by.blooddy.crypto.SHA1;
+import by.blooddy.crypto.SHA256;
 import flash.utils.ByteArray;
 import nexus.utils.ByteUtils;
 
 /**
- * Wraps by.blooddy.crypto.SHA1 to provide an instance implementation that implements an interface for
+ * Wraps by.blooddy.crypto.SHA256 to provide an instance implementation that implements an interface for
  * use in various higher-level crypto functions. For static operations and optimum performance,
  * call the blooddy library directly.
  */
-public class SHA1 implements IHashFunction
+public class SHA256HashFunction implements IHashFunction
 {
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
@@ -29,13 +29,12 @@ public class SHA1 implements IHashFunction
 	public function hash(bytes:ByteArray):ByteArray
 	{
 		//would be really nice if the blooddy lib just returned a damn byte array
-		return ByteUtils.hexFormattedStringToBytes(by.blooddy.crypto.SHA1.hashBytes(bytes));
+		return ByteUtils.hexFormattedStringToBytes(SHA256.hashBytes(bytes));
 	}
 	
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
-	
 	
 }
 
