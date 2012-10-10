@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -17,8 +17,6 @@ import flash.utils.*;
  * <li>A metadata tag on a property or method that is not overridden in a subclass is always available when reflecting on the subclass.</li>
  * <li>A metadata tag on an overridden property getter/setter or method is only inherited if the overriding method or property does not have any metadata itself.</li>
  * </ul>
-
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
 public class MetadataInfo
 {

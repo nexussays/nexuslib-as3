@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,7 +10,6 @@ import flash.utils.*;
 
 /**
  * Thrown by various methods in the Reflection framework when a class object cannot be found in a particular context.
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
 public class ClassNotFoundError extends Error
 {

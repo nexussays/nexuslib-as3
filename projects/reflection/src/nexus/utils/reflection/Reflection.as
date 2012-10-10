@@ -31,14 +31,14 @@ public final class Reflection
 	 */
 	static public const SYSTEM_DOMAIN : ApplicationDomain = ApplicationDomain.currentDomain;
 	/**
-	 * __AS3__.vec::Vector
+	 * "__AS3__.vec::Vector"
 	 */
 	//call flash.utils.getQualifiedClassName(Vector) instead of hardcoding the string just in case Adobe ever changes the class or package
 	static private const VECTOR_PREFIX:String = flash.utils.getQualifiedClassName(Vector);
 	/**
-	 * __AS3__.vec::Vector.<*>
+	 * "__AS3__.vec::Vector.<*>"
 	 */
-	static private const UNTYPEDVECTOR_CLASSNAME_QUALIFIED:String = flash.utils.getQualifiedClassName(Vector.<*>);
+	static private const UNTYPEDVECTOR_CLASSNAME:String = flash.utils.getQualifiedClassName(Vector.<*>);
 	/**
 	 * class typed as __AS3__.vec::Vector.<*>
 	 */
@@ -138,7 +138,7 @@ public final class Reflection
 			return Object;
 		}
 		//looking up the class for an untyped vector currently does not work
-		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED || qualifiedName == "Vector.<*>")
+		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME || qualifiedName == "Vector.<*>")
 		{
 			return UNTYPEDVECTOR_CLASS;
 		}
@@ -149,7 +149,7 @@ public final class Reflection
 		}
 		else
 		{
-			//walk up parent app domains while the class is still defined to get the top-most reference
+			//walk up parent app domains to get the top-most reference
 			while(applicationDomain.parentDomain != null && applicationDomain.parentDomain.hasDefinition(qualifiedName))
 			{
 				applicationDomain = applicationDomain.parentDomain;
@@ -163,10 +163,7 @@ public final class Reflection
 			{
 				throw new ClassNotFoundError(qualifiedName);
 			}
-			else
-			{
-				return result;
-			}
+			return result;
 		}
 		catch(e:ReferenceError)
 		{
@@ -215,7 +212,7 @@ public final class Reflection
 	static public function getApplicationDomainOfClassName(qualifiedName:String):ApplicationDomain
 	{
 		if(	qualifiedName == null || qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null"
-			|| qualifiedName == "*" || qualifiedName == "Object" || qualifiedName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED
+			|| qualifiedName == "*" || qualifiedName == "Object" || qualifiedName == UNTYPEDVECTOR_CLASSNAME
 			|| qualifiedName == "Vector.<*>")
 		{
 			return SYSTEM_DOMAIN;
@@ -226,10 +223,10 @@ public final class Reflection
 		{
 			if(registeredAppDomain.hasDefinition(qualifiedName))
 			{
-				//if an app domain with this definition was found, throw an error because we don't know which reference is desired
+				//if an app domain with this definition was already found, throw an error because we don't know which reference is desired
 				if(applicationDomain != null)
 				{
-					throw new Error("The desired class \"" + qualifiedName + "\" is found in two different registered ApplicationDomains, an explicit ApplicationDomain must be provided in order to obtain a Class.");
+					throw new Error("The desired class \"" + qualifiedName + "\" is found in two different registered ApplicationDomains.");
 				}
 				applicationDomain = registeredAppDomain;
 			}
@@ -248,7 +245,7 @@ public final class Reflection
 	{
 		var typeName:String = flash.utils.getQualifiedClassName(vector);
 		
-		if(typeName == UNTYPEDVECTOR_CLASSNAME_QUALIFIED)
+		if(typeName == UNTYPEDVECTOR_CLASSNAME)
 		{
 			return Object;
 		}
@@ -359,6 +356,10 @@ public final class Reflection
 	
 	/**
 	 * Checks it two application domains point to the same reference.
+	 * Due to the implementation details of this method, it may cause issues in Flash versions > 11.2 due to new licensing restrictions
+	 * Adobe is putting in place.
+	 * see the announcement: http://blogs.adobe.com/flashplayer/2011/09/updates-from-the-lab.html
+	 * see license information: http://www.adobe.com/devnet/flashplayer/articles/premium-features.html
 	 * @param	applicationDomainOne	One of the <code>ApplicationDomain</code>s to check for equality
 	 * @param	applicationDomainTwo	One of the <code>ApplicationDomain</code>s to check for equality
 	 * @return	True if the two provided application domains point to the same reference
@@ -378,13 +379,10 @@ public final class Reflection
 		//Testing ApplicationDomains for equality is difficult since all methods that return ApplicationDomains return new instances
 		//for more information, see: http://hg.mozilla.org/tamarin-redux/file/tip/shell/DomainClass.cpp
 		
-		//The approach in use here to assign a ByteArray to the domainMemory of both application domains and then compare the getters
-		//to one another. We can't just compare the domainMemory getters to one another directly, because the by default, each application
-		//domain has an instance to the same memory.
-		
-		//This will cause issues in Flash 11.2 after August 2012 due to new licensing restrictions Adobe is putting in place
-		//see the announcement: http://blogs.adobe.com/flashplayer/2011/09/updates-from-the-lab.html
-		//see license information: http://www.adobe.com/devnet/flashplayer/articles/premium-features.html
+		//The approach in use here is to assign a ByteArray to the domainMemory of both application domains and then compare them
+		//to one another. We can't just compare the domainMemory getters to one another directly without first assigning them because
+		//by default all application domains share a refernce to the same domainMemory, so they would always be equal. By first setting
+		//domainMemory, we change that reference for all equal app domains.
 		
 		var domainMemoryOne:ByteArray = applicationDomainOne.domainMemory;
 		
@@ -409,14 +407,35 @@ public final class Reflection
 	{
 		if(applicationDomain != null)
 		{
-			for each(var appDomain : ApplicationDomain in REGISTERED_APPDOMAINS)
+			for each(var registeredDomain : ApplicationDomain in REGISTERED_APPDOMAINS)
 			{
-				if(Reflection.areApplicationDomainsEqual(applicationDomain, appDomain))
+				if(Reflection.areApplicationDomainsEqual(applicationDomain, registeredDomain))
 				{
 					return;
 				}
 			}
 			REGISTERED_APPDOMAINS.push(applicationDomain);
+		}
+	}
+	
+	/**
+	 * Remove the provided <code>ApplicationDomain</code> from any reflection lookups.
+	 * @param	applicationDomain
+	 */
+	static public function unregisterApplicationDomain(applicationDomain:ApplicationDomain):void
+	{
+		if(applicationDomain != null)
+		{
+			for(var x : int = REGISTERED_APPDOMAINS.length - 1; x >= 0; --x)
+			{
+				var registeredDomain : ApplicationDomain = REGISTERED_APPDOMAINS[x];
+				if(Reflection.areApplicationDomainsEqual(applicationDomain, registeredDomain))
+				{
+					REGISTERED_APPDOMAINS.splice(x, 1);
+					delete CACHED_TYPEINFO[registeredDomain];
+					return;
+				}
+			}
 		}
 	}
 	
@@ -456,14 +475,13 @@ public final class Reflection
 			applicationDomain = getApplicationDomain(object);
 		}
 		
-		//ensure the application domain exists in the cache
+		//see if the application domain already exists in the cache
 		var appDomainExists : Boolean = false;
-		for(var appDomainKey : Object in CACHED_TYPEINFO)
+		for(var key : Object in CACHED_TYPEINFO)
 		{
-			var cachedAppDomain : ApplicationDomain = appDomainKey as ApplicationDomain;
-			if(Reflection.areApplicationDomainsEqual(cachedAppDomain, applicationDomain))
+			if(Reflection.areApplicationDomainsEqual((key as ApplicationDomain), applicationDomain))
 			{
-				applicationDomain = cachedAppDomain;
+				applicationDomain = (key as ApplicationDomain);
 				appDomainExists = true;
 				break;
 			}
@@ -486,9 +504,10 @@ public final class Reflection
 	}
 	
 	/**
-	 * Check if the provided object is an instance of a primitive class or is a Class object of a primitive type
+	 * Check if the provided object is a scalar value or a Class of a scalar type. Where scalar is defined as one of
+	 * <code>int</code>, <code>uint</code>, <code>Number</code>, <code>Boolean</code>, and <code>String</code>.
 	 * @param	value	The object to test
-	 * @return	True if the provided object is an instance of a primitive class or is a Class object of a primitive type
+	 * @return	True if the provided object is a scalar value or a Class of a scalar type.
 	 */
 	public static function isScalar(value:Object):Boolean
 	{
@@ -542,8 +561,8 @@ public final class Reflection
 	}
 	
 	/**
-	 * Provide a class which extends Metadata, and reflected TypeInfo will parse any matching metadata into
-	 * an instance of the strongly-typed class provided.
+	 * Provide a class which extends <code>MetadataInfo</code>, and reflected <code>TypeInfo</code> will parse any
+	 * matching metadata into an instance of the class provided instead of just <code>MetadataInfo</code>.
 	 * @param	type	A class which must be a subclass of Metadata
 	 */
 	public static function registerMetadataClass(type:Class):void
