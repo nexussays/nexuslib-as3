@@ -1,4 +1,4 @@
-gem 'asrake', "~>1.0"
+gem 'asrake', "~>0.13.0"
 gem 'right_aws', ">=3.0"
 require 'asrake'
 require 'rake/clean'
@@ -30,7 +30,7 @@ desc "Build all projects"
 task :build_all
 
 desc "Package all projects"
-multitask :package_all
+task :package_all => :build_all
 
 desc "Generate docs for all projects"
 task :doc do
@@ -56,6 +56,7 @@ namespace :doc do
 		end
 	end
 end
+
 #
 # Generate Project Tasks
 #
