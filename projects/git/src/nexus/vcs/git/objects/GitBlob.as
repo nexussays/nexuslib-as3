@@ -42,10 +42,10 @@ public class GitBlob extends AbstractGitObject
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	override public function generateBytes():ByteArray
+	override public function toBytes():ByteArray
 	{
 		var result : ByteArray = new ByteArray();
-		result.writeUTFBytes(this.type + " " + m_size);
+		result.writeUTFBytes(m_type + " " + m_size);
 		result.writeByte(0);
 		result.writeBytes(m_content, 0, m_content.length);
 		return result;
@@ -54,12 +54,13 @@ public class GitBlob extends AbstractGitObject
 	override public function populateContent(content:IDataInput, size:int):void
 	{
 		super.populateContent(content, size);
+		//copy everything to m_content
 		m_content.clear();
 		content.readBytes(m_content, 0, 0);
 	}
 	
 	/**
-	 * Return a string reprsentation of this object
+	 * Return a string representation of this object
 	 * @param	verbose	If true, the object header is output as well
 	 * @return	This object as a string
 	 */

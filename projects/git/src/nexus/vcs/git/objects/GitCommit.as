@@ -87,9 +87,9 @@ public class GitCommit extends AbstractGitObject
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	override public function generateBytes():ByteArray
+	override public function toBytes():ByteArray
 	{
-		return super.generateBytes();
+		return super.toBytes();
 	}
 	
 	override public function populateContent(content:IDataInput, size:int):void
@@ -141,8 +141,7 @@ public class GitCommit extends AbstractGitObject
 	}
 	
 	/**
-	 * Return a string reprsentation of this object
-	 * @param	verbose	If true, the object header is output as well
+	 * Return a string representation of this object
 	 * @return	This object as a string
 	 */
 	override public function toString():String

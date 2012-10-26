@@ -42,11 +42,6 @@ public class GitTree extends AbstractGitObject
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	override public function generateBytes():ByteArray
-	{
-		return super.generateBytes();
-	}
-	
 	override public function populateContent(content:IDataInput, size:int):void
 	{
 		super.populateContent(content, size);
@@ -85,24 +80,17 @@ public class GitTree extends AbstractGitObject
 		buffer = null;
 	}
 	
+	override public function toBytes():ByteArray
+	{
+		return super.toBytes();
+	}
+	
 	/**
-	 * Return a string reprsentation of this object
-	 * @param	verbose	If true, the object header is output as well
+	 * Return a string representation of this object
 	 * @return	This object as a string
 	 */
 	override public function toString():String
 	{
-		/*
-		if(verbose)
-		{
-			var result : String = "[GitTree:hash=" + m_hash + ",entries=\n";
-			for each(var entry : TreeEntry in m_entries)
-			{
-				result += "\t" + entry.toString(verbose) + "\n";
-			}
-			return result + "]";
-		}
-		//*/
 		return "tree " + size + "\n" + m_entries.join("\n");
 	}
 	

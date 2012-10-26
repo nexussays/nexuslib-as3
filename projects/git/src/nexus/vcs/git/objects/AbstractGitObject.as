@@ -54,11 +54,6 @@ public class AbstractGitObject
 	//	PUBLIC INSTANCE METHODS
 	//--------------------------------------
 	
-	public function generateBytes():ByteArray
-	{
-		throw new IllegalOperationError("This method must be implemented by a subclass");
-	}
-	
 	public function populateContent(content:IDataInput, size:int):void
 	{
 		if(size <= 0)
@@ -66,6 +61,14 @@ public class AbstractGitObject
 			throw new ArgumentError("Invalid size " + size + " provided for object " + m_hash);
 		}
 		m_size = size;
+	}
+	
+	/**
+	 * @abstract
+	 */
+	public function toBytes():ByteArray
+	{
+		throw new IllegalOperationError("This method must be implemented by a subclass");
 	}
 	
 	public function toString():String
