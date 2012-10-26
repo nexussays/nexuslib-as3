@@ -1,4 +1,4 @@
-gem 'asrake', "~>0.13.0"
+gem 'asrake', "~>0.13.2"
 gem 'right_aws', ">=3.0"
 require 'asrake'
 require 'rake/clean'
@@ -10,13 +10,30 @@ FlexSDK::SDK_PATHS << 'C:\develop\sdk\flex_sdk_4.6.0.23201'
 # Setup
 #
 
-PROJECTS = %w{reflection enigma mercury}
+version = "#{Version.current || '0.0.0'}"
+
+compc = ASRake::Compc.new "bin/nexuslib.swc"
+compc.target_player = 11.0
+compc.debug = false
+compc.source_path << "src"
+compc.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
+compc.include_asdoc = true
+#compc.dump_config = "compc_config.xml"
+CLEAN.add compc
+
+# create task to package into a zip file
+zip = ASRake::Package.new "#{compc.output_dir}/nexuslib-#{version}.zip"
+zip.files = {
+	"license.txt" => "LICENSE",
+	"nexuslib-#{version}.swc" => compc.output
+}
+CLOBBER.add zip.output
 
 asdoc = ASRake::Asdoc.new "bin/doc"
 asdoc.window_title = "\"nexuslib API Documentation\""
-CLEAN.include(asdoc.output)
-
-asdoc_footer = []
+asdoc.footer = "nexuslib-#{version}"
+asdoc.add compc
+CLEAN.add asdoc
 
 #
 # Tasks
@@ -26,17 +43,16 @@ task :default do
 	system "rake --tasks"
 end
 
-desc "Build all projects"
-task :build_all
+desc "Build nexuslib"
+task :build => compc
 
-desc "Package all projects"
-task :package_all => :build_all
+desc "Package zip"
+task :package => [:build, zip]
 
-desc "Generate docs for all projects"
-task :doc do
-	asdoc.footer = asdoc_footer.join("/")
-	asdoc.execute
-end
+ASRake::VersionTask.new :version
+
+desc "Generate docs"
+task :doc => asdoc
 
 namespace :doc do
 	desc "Deploy docs to S3"
@@ -55,56 +71,4 @@ namespace :doc do
 			end
 		end
 	end
-end
-
-#
-# Generate Project Tasks
-#
-
-PROJECTS.each do |name|
-
-	name = name.to_sym
-	root = "projects/#{name}"
-	project = "nexuslib.#{name}"
-	version_file = "#{root}/VERSION"
-	version = "#{Version.current(version_file) || '0.0.0'}"
-
-	# create tasks to build the swc
-	build = ASRake::Compc.new "bin/#{project}.swc"
-	build.target_player = 11.0
-	build.debug = true
-	build.source_path << "#{root}/src"
-	build.statically_link_only_referenced_classes << "lib/blooddy_crypto_0.3.5/blooddy_crypto.swc"
-	build.include_asdoc = true
-	#build.dump_config = "#{root}/src/compc_config.xml"
-	CLEAN.include(build.output)
-
-	# create task to package into a zip file
-	package = ASRake::Package.new "#{build.output_dir}/#{project}-#{version}.zip"
-	package.files = {
-		"license.txt" => "LICENSE",
-		"#{project}-#{version}.swc" => build.output
-	}
-	CLOBBER.include(package.output)
-
-	# add to asdoc
-	asdoc.add(build)
-	# add version info to asdoc_footer of docs
-	asdoc_footer << "#{project}-#{version}"
-
-	# default build task to namespace name
-	desc "Build nexuslib.#{name}"
-	task name => build
-
-	namespace name do
-		desc "Package #{project}-#{version}.zip"
-		task :package => package
-
-		ASRake::VersionTask.new :version, version_file
-	end
-	
-	# add to root tasks
-	task :build_all => build
-	task :package_all => package
-
 end
