@@ -24,7 +24,7 @@ See the [nexuslib.reflection wiki page](https://github.com/nexussays/nexuslib/wi
 
 ## `nexuslib.git`
 
-Pure-actionscript git library. Currently handles reading packfiles (except reference deltas), all git objects, references, and the index.
+see: https://github.com/nexussays/nexuslib-git
 
 ## `nexuslib.enigma`
 
