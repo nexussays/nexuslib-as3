@@ -13,7 +13,7 @@ import nexus.utils.reflection.MetadataInfo;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * 
  */
 public class XmlMetadata extends MetadataInfo
 {

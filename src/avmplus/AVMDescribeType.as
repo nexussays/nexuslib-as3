@@ -8,7 +8,7 @@ package avmplus
 
 /**
  * Provides access to the avmplus.describeTypeJSON method which was (accidentally?) exposed in Flash 10.1
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * 
  * @see	http://hg.mozilla.org/tamarin-redux/file/tip/core/DescribeType.as
  * @private
  */

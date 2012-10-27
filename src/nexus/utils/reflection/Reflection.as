@@ -38,11 +38,11 @@ public final class Reflection
 	/**
 	 * "__AS3__.vec::Vector.<*>"
 	 */
-	static private const UNTYPEDVECTOR_CLASSNAME:String = flash.utils.getQualifiedClassName(Vector.<*>);
+	static private const UNTYPEDVECTOR_QUALIFIEDCLASSNAME:String = flash.utils.getQualifiedClassName(Vector.<*>);
 	/**
-	 * class typed as __AS3__.vec::Vector.<*>
+	 * "Vector.<*>"
 	 */
-	static private const UNTYPEDVECTOR_CLASS:Class = Class(Vector.<*>);
+	static private const UNTYPEDVECTOR_UNQUALIFIEDCLASSNAME:String = "Vector.<*>";
 	
 	/**
 	 * Used in applicationDomainsAreEqual to check for equality
@@ -82,14 +82,20 @@ public final class Reflection
 	 * not present at runtime an exception is thrown.
 	 * <strong>This is an advanced option.</strong>
 	 * @default TYPEINFOCREATOR_NEW
+	 * @see TYPEINFOCREATOR_NEW
+	 * @see TYPEINFOCREATOR_OLD
 	 */
 	static nexuslib_internal var allowedTypeInfoCreators : int = nexuslib_internal::TYPEINFOCREATOR_NEW;// | nexuslib_internal::TYPEINFOCREATOR_OLD;
 	/**
 	 * Used as a bitwise flag on allowedTypeInfoCreators to allow avmplus.describeTypeJson
+	 * @see allowedTypeInfoCreators
+	 * @see TYPEINFOCREATOR_OLD
 	 */
 	static nexuslib_internal const TYPEINFOCREATOR_NEW : int = 1;
 	/**
 	 * Used as a bitwise flag on allowedTypeInfoCreators to allow flash.utils.describeType
+	 * @see allowedTypeInfoCreators
+	 * @see TYPEINFOCREATOR_NEW
 	 */
 	static nexuslib_internal const TYPEINFOCREATOR_OLD : int = 2;
 	
@@ -138,9 +144,9 @@ public final class Reflection
 			return Object;
 		}
 		//looking up the class for an untyped vector currently does not work
-		else if(qualifiedName == UNTYPEDVECTOR_CLASSNAME || qualifiedName == "Vector.<*>")
+		else if(qualifiedName == UNTYPEDVECTOR_QUALIFIEDCLASSNAME || qualifiedName == UNTYPEDVECTOR_UNQUALIFIEDCLASSNAME)
 		{
-			return UNTYPEDVECTOR_CLASS;
+			return Class(Vector.<*>);
 		}
 		
 		if(applicationDomain == null)
@@ -211,9 +217,14 @@ public final class Reflection
 	 */
 	static public function getApplicationDomainOfClassName(qualifiedName:String):ApplicationDomain
 	{
-		if(	qualifiedName == null || qualifiedName == "void" || qualifiedName == "undefined" || qualifiedName == "null"
-			|| qualifiedName == "*" || qualifiedName == "Object" || qualifiedName == UNTYPEDVECTOR_CLASSNAME
-			|| qualifiedName == "Vector.<*>")
+		if(	qualifiedName == null
+			|| qualifiedName == "void"
+			|| qualifiedName == "undefined"
+			|| qualifiedName == "null"
+			|| qualifiedName == "*"
+			|| qualifiedName == "Object"
+			|| qualifiedName == UNTYPEDVECTOR_QUALIFIEDCLASSNAME
+			|| qualifiedName == UNTYPEDVECTOR_UNQUALIFIEDCLASSNAME)
 		{
 			return SYSTEM_DOMAIN;
 		}
@@ -245,7 +256,7 @@ public final class Reflection
 	{
 		var typeName:String = flash.utils.getQualifiedClassName(vector);
 		
-		if(typeName == UNTYPEDVECTOR_CLASSNAME)
+		if(typeName == UNTYPEDVECTOR_QUALIFIEDCLASSNAME)
 		{
 			return Object;
 		}

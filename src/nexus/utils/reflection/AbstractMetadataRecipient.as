@@ -10,9 +10,8 @@ import flash.utils.*;
 import nexus.nexuslib_internal;
 
 /**
- * Abstract base class for any reflected object that can be tagged with metadata
- * @private
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * Abstract base class for any reflected object that can be tagged with metadata which includes all members
+ * as well as TypeInfo itself
  */
 public class AbstractMetadataRecipient
 {
@@ -20,13 +19,25 @@ public class AbstractMetadataRecipient
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
+	/**
+	 * @private
+	 */
 	protected var m_name:String;
 	
+	/**
+	 * @private
+	 */
 	protected var m_metadata:Vector.<MetadataInfo>;
 	
+	/**
+	 * @private
+	 */
 	protected var m_metadataByName:Dictionary;
 	
-	///as defined in the debug-only metadata tag __go_to_definition_help
+	/**
+	 * @private
+	 * As defined in the debug-only metadata tag __go_to_definition_help
+	 */
 	protected var m_position:int;
 	
 	//--------------------------------------

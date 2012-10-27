@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -13,7 +13,6 @@ import nexus.errors.NotImplementedError;
 
 /**
  * Base class for PropertyInfo and FieldInfo
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
 public class AbstractFieldInfo extends AbstractMemberInfo
 {
@@ -25,10 +24,22 @@ public class AbstractFieldInfo extends AbstractMemberInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
+	/**
+	 * @private
+	 */
 	protected var m_type:Class;
+	/**
+	 * @private
+	 */
 	protected var m_typeName : String;
 	
+	/**
+	 * @private
+	 */
 	protected var m_canRead : Boolean;
+	/**
+	 * @private
+	 */
 	protected var m_canWrite : Boolean;
 	
 	//--------------------------------------

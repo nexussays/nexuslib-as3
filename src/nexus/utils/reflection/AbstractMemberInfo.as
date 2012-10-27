@@ -10,7 +10,6 @@ import flash.utils.*;
 
 /**
  * Base class for reflected member info for a class
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
  */
 public class AbstractMemberInfo extends AbstractMetadataRecipient
 {
@@ -18,12 +17,27 @@ public class AbstractMemberInfo extends AbstractMetadataRecipient
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
+	/**
+	 * @private
+	 */
 	protected var m_declaringType:Class;
+	/**
+	 * @private
+	 */
 	protected var m_reflectedFrom : TypeInfo;
 	
+	/**
+	 * @private
+	 */
 	protected var m_isStatic : Boolean;
 	
+	/**
+	 * @private
+	 */
 	protected var m_namespace : Namespace;
+	/**
+	 * @private
+	 */
 	protected var m_qname : QName;
 	
 	//--------------------------------------

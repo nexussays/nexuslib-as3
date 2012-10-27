@@ -10,8 +10,7 @@ import nexus.errors.NotImplementedError;
 import flash.utils.*;
 
 /**
- * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * Represents a reflected type information for a method of a class.
  */
 public final class MethodInfo extends AbstractMemberInfo
 {

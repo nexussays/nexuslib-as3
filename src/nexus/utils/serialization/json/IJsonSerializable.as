@@ -10,7 +10,7 @@ package nexus.utils.serialization.json
  * An interface for objects to provide custom serialization to and from JSON. It is not required that objects implement this in order to
  * serialize to JSON, and in fact most objects will not need to implement this at all as the native serialization provided by JsonSerializer
  * will be adequate.
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * 
  */
 public interface IJsonSerializable
 {

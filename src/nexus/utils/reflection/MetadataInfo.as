@@ -24,7 +24,13 @@ public class MetadataInfo
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
+	/**
+	 * @private
+	 */
 	protected var m_metadataName : String;
+	/**
+	 * @private
+	 */
 	protected var m_metadataKeyValuePairs : Dictionary;
 	
 	//--------------------------------------

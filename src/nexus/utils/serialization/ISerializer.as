@@ -9,7 +9,7 @@ package nexus.utils.serialization
 	
 /**
  * A standardized interface for serializers
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * 
  */
 public interface ISerializer
 {

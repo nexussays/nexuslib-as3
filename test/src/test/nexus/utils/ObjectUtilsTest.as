@@ -13,7 +13,7 @@ import nexus.utils.reflection.Reflection;
 
 /**
  * ...
- * @author	Malachi Griffie <malachi&#64;nexussays.com>
+ * 
  */
 public class ObjectUtilsTest extends TestCase
 {
