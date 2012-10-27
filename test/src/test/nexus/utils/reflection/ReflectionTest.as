@@ -231,6 +231,15 @@ public class ReflectionTest extends AbstractReflectionTest
 		assertTrue(Reflection.isVector(new Vector.<*>));
 		assertTrue(Reflection.isVector(Vector));
 		
+		assertFalse(Reflection.isVector(null));
+		assertFalse(Reflection.isVector(undefined));
+		assertFalse(Reflection.isVector(false));
+		assertFalse(Reflection.isVector(0));
+		
+		assertFalse(Reflection.isVector("Vector.<*>"));
+		assertFalse(Reflection.isVector("new Vector.<*>"));
+		assertFalse(Reflection.isVector("Vector"));
+		
 		assertFalse(Reflection.isVector(Array));
 		assertFalse(Reflection.isVector([]));
 		
@@ -248,6 +257,16 @@ public class ReflectionTest extends AbstractReflectionTest
 		assertFalse(Reflection.isAssociativeArray(new Vector.<String>()));
 		assertFalse(Reflection.isAssociativeArray(new <TestClass>[new TestClass(), m_test]));
 		assertFalse(Reflection.isAssociativeArray(Vector.<TestClass>));
+		
+		assertFalse(Reflection.isAssociativeArray("Object"));
+		assertFalse(Reflection.isAssociativeArray("{}"));
+		assertFalse(Reflection.isAssociativeArray("new Dictionary()"));
+		assertFalse(Reflection.isAssociativeArray("Dictionary"));
+		
+		assertFalse(Reflection.isAssociativeArray(null));
+		assertFalse(Reflection.isAssociativeArray(undefined));
+		assertFalse(Reflection.isAssociativeArray(false));
+		assertFalse(Reflection.isAssociativeArray(0));
 		
 		assertFalse(Reflection.isAssociativeArray(Array));
 		assertFalse(Reflection.isAssociativeArray([]));

@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\Enigma_UnitTest.swf" />
+    <movie path="bin\nexuslib-test.swf" />
     <movie fps="30" />
     <movie width="400" />
     <movie height="300" />
@@ -27,7 +27,7 @@
     <option benchmark="False" />
     <option es="False" />
     <option locale="" />
-    <option loadConfig="" />
+    <option loadConfig="mxmlc_config.xml" />
     <option optimize="True" />
     <option omitTraces="True" />
     <option showActionScriptWarnings="True" />
@@ -43,7 +43,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="" />
+    <option additional="-keep-as3-metadata+=Suite" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>
@@ -75,11 +75,11 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\EnigmaTestRunner.as" />
+    <compile path="src\NexuslibTestRunner.as" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
-    <hidden path="nexuslib.enigma.test.lxml" />
+    <hidden path="nexuslib-test.lxml" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
