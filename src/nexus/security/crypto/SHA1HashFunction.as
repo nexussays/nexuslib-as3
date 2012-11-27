@@ -29,7 +29,7 @@ public class SHA1HashFunction implements IHashFunction
 	public function hash(bytes:ByteArray):ByteArray
 	{
 		//would be really nice if the blooddy lib just returned a damn byte array
-		return ByteUtils.hexFormattedStringToBytes(SHA1.hashBytes(bytes));
+		return ByteUtils.hexToBytes(SHA1.hashBytes(bytes));
 	}
 	
 	//--------------------------------------
