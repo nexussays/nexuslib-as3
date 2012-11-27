@@ -7,6 +7,7 @@ package
 {
 
 import test.nexus.*;
+import test.nexus.math.*;
 import test.nexus.security.crypto.*;
 import test.nexus.utils.*;
 import test.nexus.utils.reflection.*;
@@ -18,12 +19,15 @@ public class MainTestSuite// extends TestSuite
 	public var enum : EnumTest;
 	public var enumSet : EnumSetTest;
 	
-	//public var test01 : ReflectionTest;
-	//public var test02 : TypeInfoTest;
-	//public var test03 : ObjectUtilsTest;
-	//public var test04 : JsonSerializerTest;
-	//
-	//public var hmac : HMACTest;
+	public var reflection : ReflectionTest;
+	public var reflection2 : TypeInfoTest;
+	public var objectUtils : ObjectUtilsTest;
+	public var json : JsonSerializerTest;
+	
+	public var rngLehmer : LehmerGeneratorTest;
+	//public var rngNative : NativeRandomGeneratorTest;
+	
+	public var hmac : HMACTest;
 	
 	public function MainTestSuite()
 	{

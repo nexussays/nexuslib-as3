@@ -41,7 +41,7 @@ public class NexuslibTestRunner extends Sprite
 		// This allows you to get visual confirmation while developing
 		// visual entities
 		// start(AllTests, null, TestRunner.SHOW_TRACE);
-	
+		
 		//start(MainTestSuite);
 	}
 }
