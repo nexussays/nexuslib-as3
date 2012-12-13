@@ -14,7 +14,7 @@ import flash.system.ApplicationDomain;
  */
 public interface ITypeInfoCreator
 {
-	function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo;
+	function create(type:Class, applicationDomain:ApplicationDomain):TypeInfo;
 }
 
 }

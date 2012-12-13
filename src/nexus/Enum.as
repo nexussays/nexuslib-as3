@@ -30,23 +30,27 @@ public class Enum implements IEnum
 	/**
 	 * Internal method used to register a class in the registry and initialize all instance values
 	 */
-	private static function initialize(enumType : Class) : void
+	protected static function initialize(enumType : Class) : void
     {
 		if(s_enumRegistry[enumType] == null)
 		{
 			var typeArray : Array = new Array();
-			var typeInfo : TypeInfo = Reflection.getTypeInfo(enumType);
+			var typeInfo : TypeInfo = Reflection.nexuslib_internal::getTypeInfo(enumType);
 			var flag : uint = 1;
-			for(var x : int = 0; x < typeInfo.allMembersSortedByPosition.length; ++x)
+			for(var x : int = 0; x < typeInfo.allMembersSortedByName.length; ++x)
 			{
-				var constant : FieldInfo = typeInfo.allMembersSortedByPosition[x] as FieldInfo;
-				if(constant != null && constant.isStatic && constant.isConstant)
+				var fieldInfo : FieldInfo = typeInfo.allMembersSortedByName[x] as FieldInfo;
+				if(fieldInfo != null && fieldInfo.isStatic)
 				{
-					var enum : Enum = enumType[constant.qname] as Enum;
+					var enum : Enum = enumType[fieldInfo.qname] as Enum;
 					if(enum != null)
 					{
-						enum.m_name = constant.name;
-						enum.m_fullname = Reflection.getQualifiedClassName(enum) + "." + constant.name;
+						if(!fieldInfo.isConstant)
+						{
+							throw new SyntaxError("All Enum values must be defined as constants");
+						}
+						enum.m_name = fieldInfo.name;
+						enum.m_fullname = Reflection.getQualifiedClassName(enum) + "." + fieldInfo.name;
 						if(enum.m_value == int.MIN_VALUE)
 						{
 							enum.m_value = flag;
@@ -87,16 +91,9 @@ public class Enum implements IEnum
 	
 	public function Enum(valueOverride: Number = NaN)
 	{
-		m_value = int.MIN_VALUE;
+		m_value = (!isNaN(valueOverride) && isFinite(valueOverride)) ? valueOverride : int.MIN_VALUE;
 		
-		super();
-		
-		if(!isNaN(valueOverride) && isFinite(valueOverride))
-		{
-			m_value = valueOverride;
-		}
-		
-		//Class will not be available for Reflection until it has finished instantiating all its constants, so if weare
+		//Class will not be available for Reflection until it has finished instantiating all its constants, so if we are
 		//able to get the class, then it has already been fully initialized and therefore this constructor was called
 		//from outside the class definition
 		if(getDefinitionByName(getQualifiedClassName(this)) != null)
@@ -115,6 +112,7 @@ public class Enum implements IEnum
 	public function get name():String
 	{
 		confirmInit();
+		
 		return m_name;
 	}
 	
@@ -124,6 +122,7 @@ public class Enum implements IEnum
 	public final function get fullname():String
 	{
 		confirmInit();
+		
 		return m_fullname;
 	}
 	
@@ -134,6 +133,7 @@ public class Enum implements IEnum
 	public function get value():int
 	{
 		confirmInit();
+		
 		return m_value;
 	}
 	
@@ -146,6 +146,8 @@ public class Enum implements IEnum
 	 */
 	public final function equals(matchValue:Object):Boolean
 	{
+		confirmInit();
+		
 		if(matchValue == null)
 		{
 			return false;
@@ -170,6 +172,8 @@ public class Enum implements IEnum
 	 */
 	public final function intersects(matchValue:Object):Boolean
 	{
+		confirmInit();
+		
 		if(matchValue == null)
 		{
 			return false;
@@ -198,7 +202,7 @@ public class Enum implements IEnum
 	
 	public function toString():String
 	{
-		return m_name;
+		return this.name;
 	}
 	
 	//--------------------------------------
@@ -213,6 +217,7 @@ public class Enum implements IEnum
 	public static function values(enumType:Class):EnumSet
 	{
 		initialize(enumType);
+		
 		return s_enumRegistry[enumType];
 	}
 	

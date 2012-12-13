@@ -7,7 +7,6 @@ package test.nexus.utils.reflection
 {
 
 import asunit.framework.*;
-import flash.utils.getTimer;
 
 import flash.system.ApplicationDomain;
 import flash.utils.Dictionary;

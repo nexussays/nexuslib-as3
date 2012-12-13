@@ -462,24 +462,6 @@ public final class Reflection
 			return null;
 		}
 		
-		//get the typeinfo creator
-		if(s_typeInfoCreator == null)
-		{
-			use namespace nexuslib_internal;
-			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorJson();
-			}
-			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorXml();
-			}
-			else
-			{
-				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. For more information, see the docs for Reflection.allowedTypeInfoCreators");
-			}
-		}
-		
 		//get proper application domain instance to lookup in the dictionary
 		if(applicationDomain == null)
 		{
@@ -507,11 +489,38 @@ public final class Reflection
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
+			reflectedType = getTypeInfoInternal(type, applicationDomain);
 			//create and cache TypeInfo for the provided object if it is not present in the cache
-			reflectedType = s_typeInfoCreator.create(object, type, applicationDomain);
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 		}
 		return reflectedType;
+	}
+	
+	internal static function getTypeInfoInternal(type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	{
+		//get the typeinfo creator
+		if(s_typeInfoCreator == null)
+		{
+			use namespace nexuslib_internal;
+			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorJson();
+			}
+			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorXml();
+			}
+			else
+			{
+				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. For more information, see the docs for Reflection.allowedTypeInfoCreators");
+			}
+		}
+		return s_typeInfoCreator.create(type, applicationDomain);
+	}
+	
+	nexuslib_internal static function getTypeInfo(type:Class, applicationDomain:ApplicationDomain = null):TypeInfo
+	{
+		return getTypeInfoInternal(type, applicationDomain);
 	}
 	
 	/**
