@@ -138,16 +138,33 @@ public class EnumTest extends TestCase
 	
 	public function test_instantiation():void
 	{
-		assertThrows(IllegalOperationError, function():void { BadEnum.Value1 } );
-		
-		//should have thrown in the constructor and should not exist
-		assertThrows(TypeError, function():void { BadEnum.Value1 } );
-		
 		assertThrows(IllegalOperationError, function():void { new MockEnum() } );
 		
 		var fail : MockEnum;
 		assertThrows(IllegalOperationError, function():void { fail = new MockEnum() } );
 		assertNull(fail);
+	}
+	
+	public function test_badEnum1():void
+	{
+		assertThrows(IllegalOperationError, function():void { BadEnum.Value1 } );
+		
+		//should have thrown in the constructor and should not exist
+		assertThrows(TypeError, function():void { BadEnum.Value1 } );
+	}
+	
+	public function test_badEnum2():void
+	{
+		assertThrows(SyntaxError, function():void { BadEnum2.Value1 } );
+	}
+	
+	public function test_badEnum3():void
+	{
+		assertFalse(BadEnum3.Value1 == BadEnum3.Value2);
+		BadEnum3.Value1 = BadEnum3.Value2;
+		assertTrue(BadEnum3.Value1 == BadEnum3.Value2);
+		
+		assertThrows(SyntaxError, function():void { BadEnum3.Value1.name } );
 	}
 	
 	//--------------------------------------

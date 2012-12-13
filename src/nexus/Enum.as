@@ -6,15 +6,23 @@
 package nexus
 {
 
+import avmplus.AVMDescribeType;
+
 import flash.errors.IllegalOperationError;
 import flash.utils.*;
-import nexus.utils.reflection.*;
+
+import nexus.utils.reflection.Reflection;
+
 
 /**
  * Base class for enumerations. Used extensively throughout the system.
  * @example	<listing version="3.0">
 public class MyEnum extends Enum
 {
+   //This provides additional assurance that your Enum will be properly created. However, if
+   //you use proper syntax, it is not required.
+   {Enum.initialize(MyEnum)}
+
    public static const Enum1 : MyEnum = new MyEnum();
    public static const Enum2 : MyEnum = new MyEnum();
 }
@@ -35,32 +43,31 @@ public class Enum implements IEnum
 		if(s_enumRegistry[enumType] == null)
 		{
 			var typeArray : Array = new Array();
-			var typeInfo : TypeInfo = Reflection.nexuslib_internal::getTypeInfo(enumType);
+			var typeInfo : Object = AVMDescribeType.getJson(enumType);
 			var flag : uint = 1;
-			for(var x : int = 0; x < typeInfo.allMembersSortedByName.length; ++x)
+			typeInfo.variables.sortOn("name");
+			for(var x : int = 0; x < typeInfo.variables.length; ++x)
 			{
-				var fieldInfo : FieldInfo = typeInfo.allMembersSortedByName[x] as FieldInfo;
-				if(fieldInfo != null && fieldInfo.isStatic)
+				var fieldInfo : Object = typeInfo.variables[x];
+				//account for namespaces
+				var enum : Enum = enumType[new QName(fieldInfo.uri == null ? "" : new Namespace("", fieldInfo.uri), fieldInfo.name)] as Enum;
+				if(enum != null)
 				{
-					var enum : Enum = enumType[fieldInfo.qname] as Enum;
-					if(enum != null)
+					if(fieldInfo.access == "readwrite")
 					{
-						if(!fieldInfo.isConstant)
-						{
-							throw new SyntaxError("All Enum values must be defined as constants");
-						}
-						enum.m_name = fieldInfo.name;
-						enum.m_fullname = Reflection.getQualifiedClassName(enum) + "." + fieldInfo.name;
-						if(enum.m_value == int.MIN_VALUE)
-						{
-							enum.m_value = flag;
-						}
-						enum.m_isInitialized = true;
-						
-						flag <<= 1;
-						
-						typeArray.push(enum);
+						throw new SyntaxError("All Enum values must be defined as constants");
 					}
+					enum.m_name = fieldInfo.name;
+					enum.m_fullname = Reflection.getQualifiedClassName(enum) + "." + fieldInfo.name;
+					if(enum.m_value == int.MIN_VALUE)
+					{
+						enum.m_value = flag;
+					}
+					enum.m_isInitialized = true;
+					
+					flag <<= 1;
+					
+					typeArray.push(enum);
 				}
 			}
 			
