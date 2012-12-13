@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -8,7 +8,7 @@ package avmplus
 
 /**
  * Provides access to the avmplus.describeTypeJSON method which was (accidentally?) exposed in Flash 10.1
- * 
+ *
  * @see	http://hg.mozilla.org/tamarin-redux/file/tip/core/DescribeType.as
  * @private
  */

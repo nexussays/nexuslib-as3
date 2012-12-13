@@ -14,22 +14,9 @@ import test.nexus.utils.reflection.*;
 import test.nexus.utils.serialization.json.*;
 
 [Suite]
-public class MainTestSuite// extends TestSuite
+public class PerformanceTestSuite
 {
-	public var basic : BasicTest;
-	public var enum : EnumTest;
-	public var enumSet : EnumSetTest;
-	public var reflection : ReflectionTest;
-	public var reflection_typeInfo : TypeInfoTest;
-	public var objectUtils : ObjectUtilsTest;
-	public var json : JsonSerializerTest;
-	public var hmac : HMACTest;
-	
-	public function MainTestSuite()
-	{
-		//addTest(new ReflectionCoreTest());
-		//addTest(new ReflectionTypeInfoTest());
-	}
+	public var reflection : ReflectionPerfTest;
 }
 
 }

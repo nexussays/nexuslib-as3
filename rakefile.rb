@@ -1,4 +1,4 @@
-gem 'asrake', "~>0.13.2"
+gem 'asrake', "~>0.14.0"
 gem 'right_aws', ">=3.0"
 require 'asrake'
 require 'rake/clean'

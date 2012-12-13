@@ -38,6 +38,7 @@ public class EnumSet implements IEnum
 	/**
 	 * Create a new EnumSet from the enum values in the provided array
 	 * @param	values
+	 * @throws  ArgumentError	If any of the values in the provided Array do not extend Enum
 	 * @return
 	 */
 	static public function fromArray(values:Array):EnumSet

@@ -530,7 +530,7 @@ public final class Reflection
 	}
 	
 	/**
-	 * Check if the provided object is an Array or Vector
+	 * Check if the provided object is an instance of an Array or Vector or the class Array or a Vector Class
 	 * @param	value	The object to test
 	 * @return	True if the provided object is an Array or Vector
 	 */
@@ -540,13 +540,17 @@ public final class Reflection
 	}
 	
 	/**
-	 * Check if the provided object is a Vector
+	 * Check if the provided object is an instance of a Vector or a Vector Class
 	 * @param	value	The object to test
 	 * @return	True if the provided object is a Vector
 	 */
 	public static function isVector(value:Object):Boolean
 	{
-		return flash.utils.getQualifiedClassName(value).substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX;
+		return (value is Class ? flash.utils.getQualifiedClassName(value).indexOf(VECTOR_PREFIX) != -1 :
+			value is Vector.<*>
+			|| value is Vector.<int>
+			|| value is Vector.<uint>
+			|| value is Vector.<Number>);
 	}
 	
 	/**
