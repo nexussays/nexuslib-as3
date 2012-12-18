@@ -4,11 +4,11 @@ nexuslib is a collection of Actionscript libraries, with a focus on game develop
 
 ## Dependencies
 
-None.
+blooddy-crypto (linked with swc)
 
 ## Getting Started
 
-Download one of the [compiled swcs](https://github.com/nexussays/nexuslib/downloads), or clone the repo and reference in your project.
+Download one of the [compiled swcs](http://public.nexussays.com/code/nexuslib/index.html), or clone the repo and reference in your project.
 
 ## API Docs
 

@@ -43,7 +43,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="-keep-as3-metadata+=Suite" />
+    <option additional="" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>
