@@ -12,7 +12,7 @@ import nexus.math.LehmerGenerator;
 /**
  * ...
  */
-public class LehmerGeneratorTest extends AbstractIPRNGTest
+public class LehmerGeneratorTest extends AbstractISeededPRNGTest
 {
 	//--------------------------------------
 	//	CLASS CONSTANTS
@@ -38,8 +38,9 @@ public class LehmerGeneratorTest extends AbstractIPRNGTest
 	
 	override protected function setUp():void
 	{
-		super.setUp();
 		m_algorithm = LehmerGenerator;
+		
+		super.setUp();
 	}
 	
 	override protected function tearDown():void

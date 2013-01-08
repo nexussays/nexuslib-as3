@@ -21,14 +21,14 @@ public class AbstractIPRNGTest extends TestCase
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	private static const DISTRIBUTION_ITERATIONS : int = 1000;
-	private static const STRESS_ITERATIONS : int = 1000000;
+	public static const DISTRIBUTION_ITERATIONS:int = 10000;
+	public static const STRESS_ITERATIONS:int = 1000000;
 	
 	//--------------------------------------
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	protected var m_algorithm : Class;
+	protected var m_generator:IPRNG;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -45,40 +45,24 @@ public class AbstractIPRNGTest extends TestCase
 	
 	override protected function setUp():void
 	{
-		
+	
 	}
 	
 	override protected function tearDown():void
 	{
-		
+	
 	}
 	
 	//--------------------------------------
 	//	TESTS
 	//--------------------------------------
 	
-	public function test_seeds():void
-	{
-		assertEqualsArrays(get100(m_algorithm, 0), get100(m_algorithm, 0));
-		assertEqualsArrays(get100(m_algorithm, 1), get100(m_algorithm, 1));
-		assertEqualsArrays(get100(m_algorithm, 2), get100(m_algorithm, 2));
-		assertEqualsArrays(get100(m_algorithm, 1000), get100(m_algorithm, 1000));
-		//prime
-		assertEqualsArrays(get100(m_algorithm, 214021), get100(m_algorithm, 214021));
-		
-		assertEqualsArrays(get100(m_algorithm, int.MAX_VALUE), get100(m_algorithm, int.MAX_VALUE));
-		assertEqualsArrays(get100(m_algorithm, int.MIN_VALUE), get100(m_algorithm, int.MIN_VALUE));
-		assertEqualsArrays(get100(m_algorithm, uint.MAX_VALUE), get100(m_algorithm, uint.MAX_VALUE));
-		assertEqualsArrays(get100(m_algorithm, uint.MIN_VALUE), get100(m_algorithm, uint.MIN_VALUE));
-	}
-	
 	public function test_distribution():void
 	{
-		var prng : IPRNG = new m_algorithm((new Date()).getTime());
-		var dist : Dictionary = new Dictionary();
-		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		var dist:Dictionary = new Dictionary();
+		for(var x:int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
 		{
-			var num : int = ((prng.next()/ int.MAX_VALUE) * (10 - 0)) + 0;
+			var num:int = ((m_generator.next() / int.MAX_VALUE) * (10 - 0)) + 0;
 			if(!(num in dist))
 			{
 				dist[num] = 0;
@@ -86,43 +70,72 @@ public class AbstractIPRNGTest extends TestCase
 			dist[num]++;
 		}
 		
+		//trace(m_generator);
 		for(x = 0; x < 10; ++x)
 		{
-			trace(x, dist[x]);
+			if(!(x in dist))
+			{
+				dist[x] = 0;
+			}
+				//trace(x, dist[x]);
 		}
 	}
 	
-	/*
-	public function test_performance():void
+	public function test_monteCarlo():void
 	{
-		var prng : IPRNG = new m_algorithm(100);
-		
-		var start : int = getTimer();
-		for(var x : int = 0; x < STRESS_ITERATIONS; ++x)
+		for(var x:int = 0; x < 10; ++x)
 		{
-			prng.next();
-			//Math.random();
+			runMonteCarloTest();
 		}
-		var end : int = getTimer() - start;
-		trace("test_performance", m_algorithm, STRESS_ITERATIONS + " iterations: " + end + "ms");
-		assertTrue(end < 1000);
 	}
-	//*/
 	
+/*
+   public function test_performance():void
+   {
+   var prng : IPRNG = new m_algorithm(100);
+
+   var start : int = getTimer();
+   for(var x : int = 0; x < STRESS_ITERATIONS; ++x)
+   {
+   prng.next();
+   //Math.random();
+   }
+   var end : int = getTimer() - start;
+   trace("test_performance", m_algorithm, STRESS_ITERATIONS + " iterations: " + end + "ms");
+   assertTrue(end < 1000);
+   }
+ //*/
+
 	//--------------------------------------
 	//	HELPER METHODS
 	//--------------------------------------
 	
-	private function get100(type:Class, seed:int):Array
+	protected function runMonteCarloTest():void
 	{
-		var result : Array = [];
-		var prng : IPRNG = new type(seed);
-		for(var x : int = 0; x < 100; ++x)
+		var inCircle:int = 0;
+		for(var i:int = 0; i < DISTRIBUTION_ITERATIONS; ++i)
 		{
-			result[x] = prng.next();
+			// xr and yr will be the random point
+			var xr:Number = m_generator.next() / m_generator.period;
+			var yr:Number = m_generator.next() / m_generator.period;
+			// zr will be the calculated distance to the center
+			var zr:Number = (xr * xr) + (yr * yr);
+			
+			if(zr <= 1.0)
+			{
+				inCircle++;
+			}
 		}
-		return result;
+		
+		// calculate the Pi approximations
+		var calculatedPi:Number = inCircle / DISTRIBUTION_ITERATIONS * 4;
+		
+		// calculate the % error
+		var error:Number = Math.abs((calculatedPi - Math.PI) / Math.PI * 100);
+		var resultText : String = "Random Pi Approximation: " + calculatedPi + " Error: " + (Math.floor(error * 100) / 100) + "%";
+		//trace(resultText);
+		assertTrue(resultText, error < 1.5);
 	}
 }
-	
+
 }

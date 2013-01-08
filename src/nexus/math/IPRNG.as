@@ -11,7 +11,9 @@ package nexus.math
  */
 public interface IPRNG
 {
-	function get state():int;
+	function get currentState():int;
+	
+	function get period():int;
 	
 	function next():int;
 }

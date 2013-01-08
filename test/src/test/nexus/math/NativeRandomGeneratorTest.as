@@ -26,8 +26,9 @@ public class NativeRandomGeneratorTest extends AbstractIPRNGTest
 	
 	override protected function setUp():void
 	{
+		m_generator = new NativeRandomGenerator();
+		
 		super.setUp();
-		m_algorithm = NativeRandomGenerator;
 	}
 	
 	override protected function tearDown():void

@@ -12,23 +12,38 @@ import flash.utils.*;
  * Variant on Linear Congruential Generator.
  * @see http://en.wikipedia.org/wiki/Lehmer_random_number_generator
  */
-public final class LehmerGenerator implements IPRNG
+public final class LehmerGenerator implements ISeededPRNG
 {
-	private var m_startingSeed:int;
-	private var m_state:int;
+	private var m_seed:int;
+	private var m_currentState:int;
 	private var m_numbersGenerated:int;
 	
-	public function LehmerGenerator(seed:int)
+	public function LehmerGenerator(seed:int=1)
 	{
-		m_startingSeed = seed;
-		m_state = m_startingSeed;
+		this.seed = seed;
 	}
 	
 	[Inline]
-	public final function get startingSeed():int { return m_startingSeed; }
+	public final function get seed():int { return m_seed; }
+	public final function set seed(value:int):void
+	{
+		//if(value > 0 && value < 2147483647)
+		//{
+		m_seed = value;
+		m_currentState = m_seed;
+		m_numbersGenerated = 0;
+		//}
+		//else
+		//{
+			//throw new ArgumentError("Seed must be between 0 and 2147483647");
+		//}
+	}
 	
 	[Inline]
-	public final function get state():int { return m_state; }
+	public final function get currentState():int { return m_currentState; }
+	
+	[Inline]
+	public function get period():int { return 2147483647; }
 	
 	[Inline]
 	public final function get numbersGenerated():int { return m_numbersGenerated; }
@@ -36,7 +51,7 @@ public final class LehmerGenerator implements IPRNG
 	public function next():int
 	{
 		++m_numbersGenerated;
-		return m_state = ((m_state * 16807) % 2147483647);
+		return m_currentState = ((m_currentState * 16807) % 2147483647);
 		//return m_state = ((m_state * 279470273) % 4294967291);
 	}
 }

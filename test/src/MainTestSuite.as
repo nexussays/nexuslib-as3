@@ -29,7 +29,7 @@ public class MainTestSuite// extends TestSuite
 	public var json : JsonSerializerTest;
 	
 	public var rngLehmer : LehmerGeneratorTest;
-	//public var rngNative : NativeRandomGeneratorTest;
+	public var rngNative : NativeRandomGeneratorTest;
 	
 	public var hmac : HMACTest;
 	
