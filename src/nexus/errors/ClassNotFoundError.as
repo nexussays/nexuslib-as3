@@ -29,7 +29,7 @@ public class ClassNotFoundError extends Error
 	
 	public function ClassNotFoundError(qualifiedName : String)
 	{
-		super("Cannot find definition for " + qualifiedName + ", the class is either not present in the application domain or is not public.");
+		super("Cannot find definition for " + qualifiedName + ". Be sure the class is present in the registered application domains and is public.");
 		
 		m_qualifiedClassName = qualifiedName;
 		this.name = "ClassNotFoundError";

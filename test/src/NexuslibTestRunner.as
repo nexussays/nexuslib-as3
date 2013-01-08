@@ -34,6 +34,7 @@ public class NexuslibTestRunner extends Sprite
 		core.textPrinter.hideLocalPaths = true;
 		core.textPrinter.traceOnComplete = false;
 		core.start(MainTestSuite, null, this);
+		//core.start(PerformanceTestSuite, null, this);
 		
 		//this.setPrinter(new ResultPrinter(false, 0x333333, new TextFormat("Consolas", 12, 0xffffff)));
 		// NOTE: sending a particular class and method name will

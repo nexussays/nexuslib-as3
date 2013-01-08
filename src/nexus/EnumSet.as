@@ -1,3 +1,8 @@
+// Copyright 2012 Malachi Griffie <malachi@nexussays.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 package nexus
 {
 
@@ -33,6 +38,7 @@ public class EnumSet implements IEnum
 	/**
 	 * Create a new EnumSet from the enum values in the provided array
 	 * @param	values
+	 * @throws  ArgumentError	If any of the values in the provided Array do not extend Enum
 	 * @return
 	 */
 	static public function fromArray(values:Array):EnumSet

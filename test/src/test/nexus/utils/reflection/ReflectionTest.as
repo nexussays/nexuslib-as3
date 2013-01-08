@@ -225,10 +225,18 @@ public class ReflectionTest extends AbstractReflectionTest
 	public function test_isVector():void
 	{
 		assertTrue(Reflection.isVector(new Vector.<String>()));
+		assertTrue(Reflection.isVector(new Vector.<int>()));
+		assertTrue(Reflection.isVector(new Vector.<Boolean>()));
+		assertTrue(Reflection.isVector(new Vector.<TestClass>()));
+		assertTrue(Reflection.isVector(new Vector.<Object>()));
+		assertTrue(Reflection.isVector(new Vector.<*>()));
 		assertTrue(Reflection.isVector(new <TestClass>[new TestClass(), m_test]));
+		assertTrue(Reflection.isVector(Vector.<String>));
+		assertTrue(Reflection.isVector(Vector.<int>));
+		assertTrue(Reflection.isVector(Vector.<Boolean>));
 		assertTrue(Reflection.isVector(Vector.<TestClass>));
+		assertTrue(Reflection.isVector(Vector.<Object>));
 		assertTrue(Reflection.isVector(Vector.<*>));
-		assertTrue(Reflection.isVector(new Vector.<*>));
 		assertTrue(Reflection.isVector(Vector));
 		
 		assertFalse(Reflection.isVector(null));
@@ -238,6 +246,7 @@ public class ReflectionTest extends AbstractReflectionTest
 		
 		assertFalse(Reflection.isVector("Vector.<*>"));
 		assertFalse(Reflection.isVector("new Vector.<*>"));
+		assertFalse(Reflection.isVector("new Vector.<*>()"));
 		assertFalse(Reflection.isVector("Vector"));
 		
 		assertFalse(Reflection.isVector(Array));

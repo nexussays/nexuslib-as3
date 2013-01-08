@@ -23,7 +23,7 @@ internal class TypeInfoCreatorXml implements ITypeInfoCreator
 	//	PUBLIC METHODS
 	//--------------------------------------
 	
-	public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	public function create(type:Class, applicationDomain:ApplicationDomain):TypeInfo
 	{
 		var xml:XML = describeType(type);
 		
@@ -68,8 +68,9 @@ internal class TypeInfoCreatorXml implements ITypeInfoCreator
 		}
 		//trace(reflectedType.implementedInterfaces);
 		
+		var object:Object;
 		//isDynamic info is incorrect if doing a describeType of a Class instead of an instance
-		if(object is Class && reflectedType.constructor.requiredParametersCount == 0)
+		if(reflectedType.constructor.requiredParametersCount == 0)
 		{
 			//try to instantiate so we can do a describe type of the instance
 			try
@@ -83,7 +84,7 @@ internal class TypeInfoCreatorXml implements ITypeInfoCreator
 		}
 		
 		//if the object provided was an instance or we were able to create one above
-		if(!(object is Class))
+		if(object != null)
 		{
 			if("disposeXML" in System)
 			{

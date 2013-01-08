@@ -25,7 +25,7 @@ internal class TypeInfoCreatorJson implements ITypeInfoCreator
 	//	PUBLIC STATIC METHODS
 	//--------------------------------------
 	
-	public function create(object:Object, type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	public function create(type:Class, applicationDomain:ApplicationDomain):TypeInfo
 	{
 		var json : Object = AVMDescribeType.getJson(type);
 		var x : int;

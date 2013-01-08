@@ -5,6 +5,7 @@
 			<name>ClassMetadata</name>
 			<name>FieldMetadata</name>
 			<name>CtorMetadata</name>
+			<name>Suite</name>
 		</keep-as3-metadata>
 		<verbose-stacktraces>true</verbose-stacktraces>
 	</compiler>

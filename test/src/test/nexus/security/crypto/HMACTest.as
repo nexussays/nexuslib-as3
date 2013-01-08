@@ -41,7 +41,7 @@ public class HMACTest extends TestCase
 		//
 		
 		emptyBytes = new ByteArray();
-		randomBytes = ByteUtils.fromString("Lorem Ipsum" + (new Date()).getTime());
+		randomBytes = ByteUtils.createByteArrayFromString("Lorem Ipsum" + (new Date()).getTime());
 		
 		// http://tools.ietf.org/html/rfc2202
 		// http://tools.ietf.org/html/rfc4231
@@ -71,46 +71,46 @@ public class HMACTest extends TestCase
 			"9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2"
 		];
 		keys = [
-			ByteUtils.fromString(""),
+			ByteUtils.createByteArrayFromString(""),
 			// 20 bytes
-			ByteUtils.hexFormattedStringToBytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"),
+			ByteUtils.hexToBytes("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"),
 			// "Jefe"
-			ByteUtils.hexFormattedStringToBytes("4a656665"),
+			ByteUtils.hexToBytes("4a656665"),
 			// 20 bytes
-			ByteUtils.hexFormattedStringToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			ByteUtils.hexToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			// 25 bytes
-			ByteUtils.hexFormattedStringToBytes("0102030405060708090a0b0c0d0e0f10111213141516171819"),
+			ByteUtils.hexToBytes("0102030405060708090a0b0c0d0e0f10111213141516171819"),
 			// 20 bytes
-			ByteUtils.hexFormattedStringToBytes("0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"),
+			ByteUtils.hexToBytes("0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"),
 			// 80 bytes
-			ByteUtils.hexFormattedStringToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			ByteUtils.hexToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			// 131 bytes
-			ByteUtils.hexFormattedStringToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			ByteUtils.hexToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			// 80 bytes
-			ByteUtils.hexFormattedStringToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			ByteUtils.hexToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			// 131 bytes
-			ByteUtils.hexFormattedStringToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			ByteUtils.hexToBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 		];
 		messages = [
-			ByteUtils.fromString(""),
+			ByteUtils.createByteArrayFromString(""),
 			//"Hi There"
-			ByteUtils.hexFormattedStringToBytes("4869205468657265"),
+			ByteUtils.hexToBytes("4869205468657265"),
 			//"what do ya want for nothing?"
-			ByteUtils.hexFormattedStringToBytes("7768617420646f2079612077616e7420666f72206e6f7468696e673f"),
+			ByteUtils.hexToBytes("7768617420646f2079612077616e7420666f72206e6f7468696e673f"),
 			// 50 bytes
-			ByteUtils.hexFormattedStringToBytes("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
+			ByteUtils.hexToBytes("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),
 			//50 bytes
-			ByteUtils.hexFormattedStringToBytes("cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"),
+			ByteUtils.hexToBytes("cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"),
 			// "Test With Truncation"
-			ByteUtils.hexFormattedStringToBytes("546573742057697468205472756e636174696f6e"),
+			ByteUtils.hexToBytes("546573742057697468205472756e636174696f6e"),
 			// "Test Using Larger Than Block-Size Key - Hash Key First"
-			ByteUtils.hexFormattedStringToBytes("54657374205573696e67204c6172676572205468616e20426c6f636b2d53697a65204b6579202d2048617368204b6579204669727374"),
+			ByteUtils.hexToBytes("54657374205573696e67204c6172676572205468616e20426c6f636b2d53697a65204b6579202d2048617368204b6579204669727374"),
 			// "Test Using Larger Than Block-Size Key - Hash Key First"
-			ByteUtils.hexFormattedStringToBytes("54657374205573696e67204c6172676572205468616e20426c6f636b2d53697a65204b6579202d2048617368204b6579204669727374"),
+			ByteUtils.hexToBytes("54657374205573696e67204c6172676572205468616e20426c6f636b2d53697a65204b6579202d2048617368204b6579204669727374"),
 			// "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data"
-			ByteUtils.fromString("Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data"),
+			ByteUtils.createByteArrayFromString("Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data"),
 			// "This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm."
-			ByteUtils.hexFormattedStringToBytes("5468697320697320612074657374207573696e672061206c6172676572207468616e20626c6f636b2d73697a65206b657920616e642061206c6172676572207468616e20626c6f636b2d73697a6520646174612e20546865206b6579206e6565647320746f20626520686173686564206265666f7265206265696e6720757365642062792074686520484d414320616c676f726974686d2e")
+			ByteUtils.hexToBytes("5468697320697320612074657374207573696e672061206c6172676572207468616e20626c6f636b2d73697a65206b657920616e642061206c6172676572207468616e20626c6f636b2d73697a6520646174612e20546865206b6579206e6565647320746f20626520686173686564206265666f7265206265696e6720757365642062792074686520484d414320616c676f726974686d2e")
 		];
 	}
 	
@@ -175,11 +175,11 @@ public class HMACTest extends TestCase
 	
 	public function test_emptyMessage():void
 	{
-		assertSame(ByteUtils.bytesToHexFormattedString(hmac_sha1.generate(null, emptyBytes)),
-			ByteUtils.bytesToHexFormattedString(hmac_sha1.generate(emptyBytes, emptyBytes)));
+		assertSame(ByteUtils.bytesToHex(hmac_sha1.generate(null, emptyBytes)),
+			ByteUtils.bytesToHex(hmac_sha1.generate(emptyBytes, emptyBytes)));
 		
-		assertSame(ByteUtils.bytesToHexFormattedString(hmac_sha256.generate(null, emptyBytes)),
-			ByteUtils.bytesToHexFormattedString(hmac_sha256.generate(emptyBytes, emptyBytes)));
+		assertSame(ByteUtils.bytesToHex(hmac_sha256.generate(null, emptyBytes)),
+			ByteUtils.bytesToHex(hmac_sha256.generate(emptyBytes, emptyBytes)));
 	}
 	
 	/*
@@ -211,7 +211,7 @@ public class HMACTest extends TestCase
 			if(digests[x] != null)
 			{
 				hmac.secretKey = keys[x];
-				assertEquals(digests[x], ByteUtils.bytesToHexFormattedString(hmac.generate(messages[x])));
+				assertEquals(digests[x], ByteUtils.bytesToHex(hmac.generate(messages[x])));
 			}
 		}
 	}
@@ -222,7 +222,7 @@ public class HMACTest extends TestCase
 		{
 			if(digests[x] != null)
 			{
-				assertEquals(digests[x], ByteUtils.bytesToHexFormattedString(func(messages[x], keys[x])));
+				assertEquals(digests[x], ByteUtils.bytesToHex(func(messages[x], keys[x])));
 			}
 		}
 	}

@@ -452,32 +452,16 @@ public final class Reflection
 	
 	/**
 	 * Reflects into the given object and returns a TypeInfo object
-	 * @param	obj	The object to reflect
-	 * @return	A TypeInfo that represents the given object's Class information
+	 * @param	object	The object or class to reflect
+	 * @param	applicationDomain The ApplicationDomain in which to reflect. If the provided object instance is in a different
+	 * application domain than the one provided, the application domain's version of the class will be reflected.
+	 * @return	A TypeInfo that represents the given object or class
 	 */
 	public static function getTypeInfo(object:Object, applicationDomain:ApplicationDomain = null):TypeInfo
 	{
 		if(object == null)
 		{
 			return null;
-		}
-		
-		//get the typeinfo creator
-		if(s_typeInfoCreator == null)
-		{
-			use namespace nexuslib_internal;
-			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorJson();
-			}
-			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
-			{
-				s_typeInfoCreator = new TypeInfoCreatorXml();
-			}
-			else
-			{
-				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. For more information, see the docs for Reflection.allowedTypeInfoCreators");
-			}
 		}
 		
 		//get proper application domain instance to lookup in the dictionary
@@ -507,8 +491,8 @@ public final class Reflection
 		var reflectedType:TypeInfo = CACHED_TYPEINFO[applicationDomain][type];
 		if(reflectedType == null)
 		{
+			reflectedType = getTypeInfoInternal(type, applicationDomain);
 			//create and cache TypeInfo for the provided object if it is not present in the cache
-			reflectedType = s_typeInfoCreator.create(object, type, applicationDomain);
 			CACHED_TYPEINFO[applicationDomain][type] = reflectedType;
 		}
 		return reflectedType;
@@ -530,7 +514,7 @@ public final class Reflection
 	}
 	
 	/**
-	 * Check if the provided object is an Array or Vector
+	 * Check if the provided object is an instance of an Array or Vector or the class Array or a Vector Class
 	 * @param	value	The object to test
 	 * @return	True if the provided object is an Array or Vector
 	 */
@@ -540,13 +524,17 @@ public final class Reflection
 	}
 	
 	/**
-	 * Check if the provided object is a Vector
+	 * Check if the provided object is an instance of a Vector or a Vector Class
 	 * @param	value	The object to test
 	 * @return	True if the provided object is a Vector
 	 */
 	public static function isVector(value:Object):Boolean
 	{
-		return flash.utils.getQualifiedClassName(value).substr(0, VECTOR_PREFIX.length) == VECTOR_PREFIX;
+		return (value is Class ? flash.utils.getQualifiedClassName(value).indexOf(VECTOR_PREFIX) != -1 :
+			value is Vector.<*>
+			|| value is Vector.<int>
+			|| value is Vector.<uint>
+			|| value is Vector.<Number>);
 	}
 	
 	/**
@@ -574,7 +562,8 @@ public final class Reflection
 	/**
 	 * Provide a class which extends <code>MetadataInfo</code>, and reflected <code>TypeInfo</code> will parse any
 	 * matching metadata into an instance of the class provided instead of just <code>MetadataInfo</code>.
-	 * @param	type	A class which must be a subclass of Metadata
+	 * @param	type	A class which must be a subclass of <code>MetadataInfo</code>
+	 * @see	MetadataInfo
 	 */
 	public static function registerMetadataClass(type:Class):void
 	{
@@ -605,10 +594,36 @@ public final class Reflection
 	//--------------------------------------
 	
 	/**
+	 * Returns a TypeInfo without doing a cache lookup or any alteration of the application domain or object provided.
+	 *
+	 * @private
+	 */
+	static internal function getTypeInfoInternal(type:Class, applicationDomain:ApplicationDomain):TypeInfo
+	{
+		//get the typeinfo creator
+		if(s_typeInfoCreator == null)
+		{
+			use namespace nexuslib_internal;
+			if(AVMDescribeType.isAvailable && (allowedTypeInfoCreators & TYPEINFOCREATOR_NEW) == TYPEINFOCREATOR_NEW)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorJson();
+			}
+			else if((allowedTypeInfoCreators & TYPEINFOCREATOR_OLD) == TYPEINFOCREATOR_OLD)
+			{
+				s_typeInfoCreator = new TypeInfoCreatorXml();
+			}
+			else
+			{
+				throw new IllegalOperationError("Cannot get type information for object, Flash 10.1 or higher is required. For more information, see the docs for Reflection.allowedTypeInfoCreators");
+			}
+		}
+		return s_typeInfoCreator.create(type, applicationDomain);
+	}
+	
+	/**
 	 * Returns the Metadata Class registered for the given instance. Faster than a getClass() lookup and
 	 * ensures there are no ApplicationDomain-related issues.
-	 * @param	instance
-	 * @return
+	 *
 	 * @private
 	 */
 	static internal function getMetadataClass(instance:MetadataInfo):Class
@@ -618,7 +633,7 @@ public final class Reflection
 	
 	/**
 	 * Retrieves the cached Namespace for the given namespace URI
-	 * @param	namespaceUri
+	 *
 	 * @private
 	 */
 	static internal function getNamespace(namespaceUri:String):Namespace
