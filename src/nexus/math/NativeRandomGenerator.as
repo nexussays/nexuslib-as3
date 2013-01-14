@@ -13,21 +13,22 @@ import flash.utils.*;
  */
 public final class NativeRandomGenerator implements IPRNG
 {
-	private var m_currentState:int;
+	private var m_currentState:uint;
 	
 	public function NativeRandomGenerator()
 	{
 		
 	}
 	
-	public function get period():int { return int.MAX_VALUE; }
+	[Inline]
+	public function get period():int { return 2147483647 /*int.MAX_VALUE*/; }
 	
 	[Inline]
-	public final function get currentState():int { return m_currentState; }
+	public final function get currentState():uint { return m_currentState; }
 	
-	public function next():int
+	public function next():uint
 	{
-		return m_currentState = Math.random() * int.MAX_VALUE;
+		return m_currentState = Math.random() * 2147483647;
 	}
 }
 }

@@ -15,7 +15,7 @@ import flash.utils.*;
 public final class LehmerGenerator implements ISeededPRNG
 {
 	private var m_seed:int;
-	private var m_currentState:int;
+	private var m_currentState:uint;
 	private var m_numbersGenerated:int;
 	
 	public function LehmerGenerator(seed:int=1)
@@ -40,15 +40,15 @@ public final class LehmerGenerator implements ISeededPRNG
 	}
 	
 	[Inline]
-	public final function get currentState():int { return m_currentState; }
+	public final function get currentState():uint { return m_currentState; }
 	
 	[Inline]
-	public function get period():int { return 2147483647; }
+	public function get period():int { return 2147483647 /*int.MAX_VALUE*/; }
 	
 	[Inline]
 	public final function get numbersGenerated():int { return m_numbersGenerated; }
 	
-	public function next():int
+	public function next():uint
 	{
 		++m_numbersGenerated;
 		return m_currentState = ((m_currentState * 16807) % 2147483647);
