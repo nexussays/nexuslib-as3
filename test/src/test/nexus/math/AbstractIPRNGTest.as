@@ -7,8 +7,8 @@ package test.nexus.math
 {
 
 import asunit.framework.TestCase;
-import flash.utils.Dictionary;
-import flash.utils.getTimer;
+
+import flash.utils.*;
 
 import nexus.math.*;
 
@@ -57,30 +57,6 @@ public class AbstractIPRNGTest extends TestCase
 	//	TESTS
 	//--------------------------------------
 	
-	public function test_distribution():void
-	{
-		var dist:Dictionary = new Dictionary();
-		for(var x:int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
-		{
-			var num:int = ((m_generator.next() / int.MAX_VALUE) * (10 - 0)) + 0;
-			if(!(num in dist))
-			{
-				dist[num] = 0;
-			}
-			dist[num]++;
-		}
-		
-		//trace(m_generator);
-		for(x = 0; x < 10; ++x)
-		{
-			if(!(x in dist))
-			{
-				dist[x] = 0;
-			}
-				//trace(x, dist[x]);
-		}
-	}
-	
 	public function test_monteCarlo():void
 	{
 		for(var x:int = 0; x < 10; ++x)
@@ -89,23 +65,113 @@ public class AbstractIPRNGTest extends TestCase
 		}
 	}
 	
-/*
-   public function test_performance():void
-   {
-   var prng : IPRNG = new m_algorithm(100);
-
-   var start : int = getTimer();
-   for(var x : int = 0; x < STRESS_ITERATIONS; ++x)
-   {
-   prng.next();
-   //Math.random();
-   }
-   var end : int = getTimer() - start;
-   trace("test_performance", m_algorithm, STRESS_ITERATIONS + " iterations: " + end + "ms");
-   assertTrue(end < 1000);
-   }
- //*/
-
+	public function off_test_performance():void
+	{
+		var start:int = getTimer();
+		for(var x:int = 0; x < STRESS_ITERATIONS; ++x)
+		{
+			m_generator.next();
+		}
+		var end:int = getTimer() - start;
+		trace("test_performance", m_generator, STRESS_ITERATIONS + " iterations: " + end + "ms");
+		assertTrue(end < 800);
+	}
+	
+	public function test_randomInteger():void
+	{
+		var rand : Random = new Random(m_generator);
+		var highHit : Boolean = false;
+		var lowHit : Boolean = false;
+		const low : int = 1;
+		const high : int = 100;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			var num : int = rand.integer(low, high);
+			assertTrue(num + " is not <= " + high,	num <= high);
+			assertTrue(num + " is not >= " + low,	num >= low);
+			if(!lowHit && num == low)
+			{
+				lowHit = true;
+			}
+			if(!highHit && num == high)
+			{
+				highHit = true;
+			}
+		}
+		
+		assertTrue(high + " never generated", highHit);
+		assertTrue(low + " never generated", lowHit);
+	}
+	
+	public function test_randomFloat():void
+	{
+		var rand : Random = new Random(m_generator);
+		var highHit : Boolean = false;
+		var lowHit : Boolean = false;
+		const low : Number = 1.0;
+		const high : Number = 100.0;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			var num : int = rand.float(low, high);
+			assertTrue(num + " is not <= " + high,	num <= high);
+			assertTrue(num + " is not >= " + low,	num >= low);
+			if(!lowHit && num == low)
+			{
+				lowHit = true;
+			}
+			if(!highHit && num == high - 1)
+			{
+				highHit = true;
+			}
+		}
+		
+		assertTrue((high - 1).toFixed(1) + " never generated", highHit);
+		assertTrue(low.toFixed(1) + " never generated", lowHit);
+	}
+	
+	public function test_boolean():void
+	{
+		var rand : Random = new Random(m_generator);
+		var trueCount : int = 0;
+		var falseCount : int = 0;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			if(rand.boolean())
+			{
+				trueCount++;
+			}
+			else
+			{
+				falseCount++;
+			}
+		}
+		var diff : int = Math.abs(trueCount - falseCount);
+		trace("test_boolean", m_generator, diff, trueCount, falseCount, diff / DISTRIBUTION_ITERATIONS * 100);
+		assertTrue((diff / DISTRIBUTION_ITERATIONS * 100) < 2.0);
+	}
+	
+	public function test_round1():void
+	{
+		var rand : Random = new Random(m_generator);
+		var upCount : int = 0;
+		var downCount : int = 0;
+		const num : Number = 4.5;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			if(rand.round(num) == 4)
+			{
+				downCount++;
+			}
+			else
+			{
+				upCount++;
+			}
+		}
+		var diff : int = Math.abs(upCount - downCount);
+		trace("test_round1", m_generator, diff, upCount, downCount, diff / DISTRIBUTION_ITERATIONS * 100);
+		assertTrue((diff / DISTRIBUTION_ITERATIONS * 100) < 2.0);
+	}
+	
 	//--------------------------------------
 	//	HELPER METHODS
 	//--------------------------------------
@@ -115,13 +181,10 @@ public class AbstractIPRNGTest extends TestCase
 		var inCircle:int = 0;
 		for(var i:int = 0; i < DISTRIBUTION_ITERATIONS; ++i)
 		{
-			// xr and yr will be the random point
 			var xr:Number = m_generator.next() / m_generator.period;
 			var yr:Number = m_generator.next() / m_generator.period;
-			// zr will be the calculated distance to the center
-			var zr:Number = (xr * xr) + (yr * yr);
-			
-			if(zr <= 1.0)
+			// find the calculated distance to the center
+			if((xr * xr) + (yr * yr) <= 1.0)
 			{
 				inCircle++;
 			}
@@ -132,8 +195,10 @@ public class AbstractIPRNGTest extends TestCase
 		
 		// calculate the % error
 		var error:Number = Math.abs((calculatedPi - Math.PI) / Math.PI * 100);
-		var resultText : String = "Random Pi Approximation: " + calculatedPi + " Error: " + (Math.floor(error * 100) / 100) + "%";
-		//trace(resultText);
+		
+		var resultText:String = "Random Pi Approximation: " + calculatedPi + " Error: " + (Math.floor(error * 100) / 100) + "%";
+		//trace(m_generator + " " + resultText);
+		
 		assertTrue(resultText, error < 1.5);
 	}
 }

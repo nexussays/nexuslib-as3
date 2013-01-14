@@ -78,23 +78,6 @@ public class AbstractISeededPRNGTest extends AbstractIPRNGTest
 		assertEqualsArrays(get100(m_seededGenerator1, uint.MIN_VALUE), 	get100(m_seededGenerator2, uint.MIN_VALUE));
 	}
 	
-	/*
-	public function test_performance():void
-	{
-		var prng : IPRNG = new m_algorithm(100);
-		
-		var start : int = getTimer();
-		for(var x : int = 0; x < STRESS_ITERATIONS; ++x)
-		{
-			prng.next();
-			//Math.random();
-		}
-		var end : int = getTimer() - start;
-		trace("test_performance", m_algorithm, STRESS_ITERATIONS + " iterations: " + end + "ms");
-		assertTrue(end < 1000);
-	}
-	//*/
-	
 	//--------------------------------------
 	//	HELPER METHODS
 	//--------------------------------------
