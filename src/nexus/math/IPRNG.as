@@ -13,7 +13,7 @@ public interface IPRNG
 {
 	function get currentState():uint;
 	
-	function get period():int;
+	function get period():uint;
 	
 	function next():uint;
 }

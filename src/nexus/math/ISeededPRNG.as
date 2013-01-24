@@ -11,8 +11,8 @@ package nexus.math
  */
 public interface ISeededPRNG extends IPRNG
 {
-	function get seed():int;
-	function set seed(value:int):void;
+	function get seed():uint;
+	function set seed(value:uint):void;
 }
 
 }
