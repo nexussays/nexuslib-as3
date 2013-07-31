@@ -18,9 +18,9 @@ http://docs.nexussays.com/nexuslib/index.html
 
 ## Components
 
-### Reflection
+### Reflection & Serialization
 
-`nexus.utils.reflection`
+`nexus.utils.reflection`, `nexus.utils.serialization`
 
 Reflection & serialization library. Features deterministic JSON de/serialization, deserializing directly to typed AS objects, a structured reflection class heirarchy, and more. Full support for Application Domains and namespaces.
 
