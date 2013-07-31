@@ -1,41 +1,43 @@
 # Overview
 
-nexuslib is a collection of Actionscript libraries, with a focus on game development.
+nexuslib is a collection of (in-development) Actionscript libraries.
 
-## Dependencies
-
-blooddy-crypto (linked with swc)
+The reflection library is production ready (and in-use in production environments).
 
 ## Getting Started
 
 Download one of the [compiled swcs](http://public.nexussays.com/code/nexuslib/index.html), or clone the repo and reference in your project.
 
-## API Docs
+### Dependencies
+
+blooddy-crypto (statically linked with nexuslib.swc)
+
+### API Docs
 
 http://docs.nexussays.com/nexuslib/index.html
 
-# Components
+## Components
 
-## `nexuslib.reflection`
+### Reflection
+
+`nexus.utils.reflection`
 
 Reflection & serialization library. Features deterministic JSON de/serialization, deserializing directly to typed AS objects, a structured reflection class heirarchy, and more. Full support for Application Domains and namespaces.
 
-See the [nexuslib.reflection wiki page](https://github.com/nexussays/nexuslib/wiki/nexuslib.reflection) for more information and examples.
+### Enigma
 
-## `nexuslib.git`
-
-see: https://github.com/nexussays/nexuslib-git
-
-## `nexuslib.enigma`
+`nexus.security.crypto`
 
 Crypto & security library. Currently only provides an HMAC class and some utilities.
 
-## `nexuslib.mercury`
+### Mercury
+
+`nexus.net`
 
 In development.
 
-# License
+### Git
 
-Copyright 2011 Malachi Griffie
+`nexus.vcs.git`
 
-This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+see: https://github.com/nexussays/git-as3
