@@ -2,7 +2,7 @@
 
 nexuslib is a collection of (in-development) Actionscript libraries.
 
-The reflection library is production ready (and in-use in production environments).
+The reflection library is production ready and is currently in-use in production environments.
 
 ## Getting Started
 
