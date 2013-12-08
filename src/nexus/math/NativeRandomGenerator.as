@@ -23,7 +23,6 @@ public final class NativeRandomGenerator implements IPRNG
 	[Inline]
 	public function get period():uint { return 2147483647 /*int.MAX_VALUE*/; }
 	
-	[Inline]
 	public final function get currentState():uint { return m_currentState; }
 	
 	public function next():uint

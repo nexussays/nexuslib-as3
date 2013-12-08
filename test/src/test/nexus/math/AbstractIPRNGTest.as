@@ -81,43 +81,23 @@ public class AbstractIPRNGTest extends TestCase
 	{
 		var rand : Random = new Random(m_generator);
 		var highHit : Boolean = false;
+		var midHit : Boolean = false;
 		var lowHit : Boolean = false;
 		const low : int = 1;
 		const high : int = 100;
+		const mid :int = low + high / 2;
 		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
 		{
 			var num : int = rand.integer(low, high);
-			assertTrue(num + " is not <= " + high,	num <= high);
+			assertTrue(num + " is not < " + high,	num < high);
 			assertTrue(num + " is not >= " + low,	num >= low);
 			if(!lowHit && num == low)
 			{
 				lowHit = true;
 			}
-			if(!highHit && num == high)
+			if(!midHit && num == mid)
 			{
-				highHit = true;
-			}
-		}
-		
-		assertTrue(high + " never generated", highHit);
-		assertTrue(low + " never generated", lowHit);
-	}
-	
-	public function test_randomFloat():void
-	{
-		var rand : Random = new Random(m_generator);
-		var highHit : Boolean = false;
-		var lowHit : Boolean = false;
-		const low : Number = 1.0;
-		const high : Number = 100.0;
-		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
-		{
-			var num : int = rand.float(low, high);
-			assertTrue(num + " is not <= " + high,	num <= high);
-			assertTrue(num + " is not >= " + low,	num >= low);
-			if(!lowHit && num == low)
-			{
-				lowHit = true;
+				midHit = true;
 			}
 			if(!highHit && num == high - 1)
 			{
@@ -125,8 +105,75 @@ public class AbstractIPRNGTest extends TestCase
 			}
 		}
 		
-		assertTrue((high - 1).toFixed(1) + " never generated", highHit);
+		assertTrue(low + " never generated", lowHit);
+		assertTrue(mid + " never generated", midHit);
+		assertTrue((high - 1) + " never generated", highHit);
+	}
+	
+	public function test_randomUnsignedInteger():void
+	{
+		var rand : Random = new Random(m_generator);
+		var highHit : Boolean = false;
+		var midHit : Boolean = false;
+		var lowHit : Boolean = false;
+		const low : int = 1;
+		const high : int = 100;
+		const mid :int = low + high / 2;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			var num : uint = rand.unsignedInteger(low, high);
+			assertTrue(num + " is not < " + high,	num < high);
+			assertTrue(num + " is not >= " + low,	num >= low);
+			if(!lowHit && num == low)
+			{
+				lowHit = true;
+			}
+			if(!midHit && num == mid)
+			{
+				midHit = true;
+			}
+			if(!highHit && num == high - 1)
+			{
+				highHit = true;
+			}
+		}
+		
+		assertTrue(low + " never generated", lowHit);
+		assertTrue(mid + " never generated", midHit);
+		assertTrue((high - 1) + " never generated", highHit);
+	}
+	
+	public function test_randomFloat():void
+	{
+		var rand : Random = new Random(m_generator);
+		var highHit : Boolean = false;
+		var midHit : Boolean = false;
+		var lowHit : Boolean = false;
+		const low : Number = 1.0;
+		const high : Number = 100.0;
+		const mid :Number = low + high / 2;
+		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
+		{
+			var num : int = rand.float(low, high);
+			assertTrue(num + " is not < " + high,	num < high);
+			assertTrue(num + " is not >= " + low,	num >= low);
+			if(!lowHit && num == low)
+			{
+				lowHit = true;
+			}
+			if(!midHit && num == mid)
+			{
+				midHit = true;
+			}
+			if(!highHit && num == high - 1)
+			{
+				highHit = true;
+			}
+		}
+		
 		assertTrue(low.toFixed(1) + " never generated", lowHit);
+		assertTrue(mid.toFixed(1) + " never generated", midHit);
+		assertTrue((high - 1).toFixed(1) + " never generated", highHit);
 	}
 	
 	public function test_boolean():void
@@ -146,11 +193,12 @@ public class AbstractIPRNGTest extends TestCase
 			}
 		}
 		var diff : int = Math.abs(trueCount - falseCount);
-		trace("test_boolean", m_generator, diff, trueCount, falseCount, diff / DISTRIBUTION_ITERATIONS * 100);
-		assertTrue((diff / DISTRIBUTION_ITERATIONS * 100) < 2.0);
+		//trace("test_boolean", m_generator, diff, trueCount, falseCount, diff / DISTRIBUTION_ITERATIONS * 100);
+		trace("test_boolean", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
+		assertTrue(diff / DISTRIBUTION_ITERATIONS < .02);
 	}
 	
-	public function test_round1():void
+	public function test_round():void
 	{
 		var rand : Random = new Random(m_generator);
 		var upCount : int = 0;
@@ -158,7 +206,9 @@ public class AbstractIPRNGTest extends TestCase
 		const num : Number = 4.5;
 		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
 		{
-			if(rand.weightedRound(num) == 4)
+			var result : int = rand.weightedRound(num);
+			assertTrue("weightedRound(" + num + ") returned " + result, result == 4 || result == 5);
+			if(result == 4)
 			{
 				downCount++;
 			}
@@ -168,8 +218,9 @@ public class AbstractIPRNGTest extends TestCase
 			}
 		}
 		var diff : int = Math.abs(upCount - downCount);
-		trace("test_round1", m_generator, diff, upCount, downCount, diff / DISTRIBUTION_ITERATIONS * 100);
-		assertTrue((diff / DISTRIBUTION_ITERATIONS * 100) < 2.0);
+		//trace("test_round", m_generator, diff, upCount, downCount, diff / DISTRIBUTION_ITERATIONS * 100);
+		trace("test_round", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
+		assertTrue("Variance > .02 => " + (diff / DISTRIBUTION_ITERATIONS), diff / DISTRIBUTION_ITERATIONS < .02);
 	}
 	
 	//--------------------------------------

@@ -29,6 +29,7 @@ public class MainTestSuite
 	public var json			: JsonSerializerTest;
 	
 	public var rngLehmer	: LehmerGeneratorTest;
+   public var rngTinymt	: TinyMTGeneratorTest;
 	public var rngNative	: NativeRandomGeneratorTest;
 	
 	public var hmac	: HMACTest;

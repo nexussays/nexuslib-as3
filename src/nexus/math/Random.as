@@ -18,7 +18,8 @@ public class Random
 	//	CLASS CONSTANTS
 	//--------------------------------------
 	
-	private static const s_random : Random = new Random(new NativeRandomGenerator());
+	private static const s_random:Random = new Random(new NativeRandomGenerator());
+	
 	public static function get instance():Random
 	{
 		return s_random;
@@ -28,7 +29,7 @@ public class Random
 	//	INSTANCE VARIABLES
 	//--------------------------------------
 	
-	private var m_generator : IPRNG;
+	private var m_generator:IPRNG;
 	
 	//--------------------------------------
 	//	CONSTRUCTOR
@@ -48,37 +49,51 @@ public class Random
 	//--------------------------------------
 	
 	/**
-	 * Generates a random floating point in the range [min, max).
+	 * Generates a random floating point in the range [min, max) which is [0, 1) if neither
+	 * argument is given.
+	 *
 	 * If max is NaN, Infinity, or -Infinity, a number in the range [min, 1) is returned
 	 * If min is NaN, Infinity, or -Infinity, a number in the range [0, max) is returned
 	 * @param	min		The lowest value to return, inclusive
 	 * @param	max		The highest value to return, exclusive
 	 * @return A number in the range [min, max)
 	 */
-	public function float( min : Number = NaN, max : Number = NaN ) : Number
+	public function float(min:Number = NaN, max:Number = NaN):Number
 	{
 		min = isNaN(min) || !isFinite(min) ? 0 : min;
 		max = isNaN(max) || !isFinite(max) ? 1 : max;
-		return ((m_generator.next() / m_generator.period) * (max - min)) + min;
+		var p:Number = m_generator.next() / m_generator.period;
+		return (p * (max - min)) + min;
 	}
 	
 	/**
-	 * Generates a random integer in the range [min, max]
+	 * Generates a random integer in the range [min, max)
 	 * @param	min		The lowest value to return, inclusive
-	 * @param	max		The highest value to return, inclusive
-	 * @return A number in the range [min, max]
+	 * @param	max		The highest value to return, exclusive
+	 * @return An int in the range [min, max)
 	 */
-	public function integer( min : int = 1, max : int = int.MAX_VALUE ) : int
+	public function integer(min:uint = 0, max:int = int.MAX_VALUE):int
 	{
-		return Math.floor((m_generator.next() / m_generator.period) * (max - min + 1)) + min;
+		return m_generator.next() % (max - min) + min;
+	}
+	
+	/**
+	 * Generates a random unsigned integer in the range [min, max)
+	 * @param	min		The lowest value to return, inclusive
+	 * @param	max		The highest value to return, exclusive
+	 * @return A uint in the range [min, max)
+	 */
+	public function unsignedInteger(min:uint = 0, max:uint = uint.MAX_VALUE):uint
+	{
+		return m_generator.next() % (max - min) + min;
 	}
 	
 	/**
 	 * Returns a random true/false value, with a 50% chance of either
 	 */
-	public function boolean() : Boolean
+	public function boolean():Boolean
 	{
-		return (m_generator.next() / m_generator.period) < 0.5;
+		return(m_generator.next() / m_generator.period) < 0.5;
 	}
 	
 	/**
@@ -88,10 +103,10 @@ public class Random
 	 * @example <code>randomRound(4.3)</code> should return 4 70% of the time
 	 * and 5 30% of the time.
 	 */
-	public function weightedRound( value : Number ) : int
+	public function weightedRound(value:Number):int
 	{
-		var floor : int = Math.floor(value);
-		return (m_generator.next() / m_generator.period) > (value - floor) ? floor : floor + 1;
+		var floor:int = Math.floor(value);
+		return(m_generator.next() / m_generator.period) > (value - floor) ? floor : floor + 1;
 	}
 	
 	/**
@@ -100,9 +115,9 @@ public class Random
 	 * is assumed to be a Vector or Array (or otherwise have a <code>length</code> property and
 	 * be able to be accessed with the index operators).
 	 */
-	public function choice(...items):Object
+	public function choice(... items):Object
 	{
-		var choice : int;
+		var choice:int;
 		if(items.length == 1)
 		{
 			choice = integer(0, items[0].length - 1);
@@ -115,11 +130,25 @@ public class Random
 		}
 	}
 	
-	public function toString(verbose:Boolean=false):String
+	/**
+	 * Destructively shuffles the container using the Fisher-Yates algorithm.
+	 */
+	public function shuffle(container:Object):void
+	{
+		for(var x:int = container.length - 1; x > 0; x--)
+		{
+			var j:int = integer(0, x + 1);
+			var tmp:* = container[x];
+			container[x] = container[j];
+			container[j] = tmp;
+		}
+	}
+	
+	public function toString(verbose:Boolean = false):String
 	{
 		return "[Random" + m_generator + "]";
 	}
-	
+
 	//--------------------------------------
 	//	PRIVATE & PROTECTED INSTANCE METHODS
 	//--------------------------------------
