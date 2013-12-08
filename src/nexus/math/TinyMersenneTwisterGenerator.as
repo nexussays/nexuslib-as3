@@ -24,9 +24,8 @@ import flash.utils.*;
 /**
  * Actionscript port of the TinyMT random number generator, a small-footprint
  * variant of the Mersenne Twister.
- *
- * <p> Original algorithm by Mutsuo Saito and Makoto Matsumoto.
- * http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/TINYMT/index.html
+ * Original algorithm by Mutsuo Saito and Makoto Matsumoto.
+ * @see http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/TINYMT/index.html
  */
 public class TinyMersenneTwisterGenerator implements ISeededPRNG
 {
