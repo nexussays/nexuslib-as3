@@ -1,5 +1,5 @@
 ﻿// Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -11,7 +11,7 @@ import flash.utils.Dictionary;
 
 /**
  * ...
- * 
+ *
  */
 public class Parse
 {
@@ -25,9 +25,9 @@ public class Parse
 	 * @param	defaultValue	The default value to use if the parsed Number is NaN or Infinity
 	 * @return
 	 */
-	public static function number(source:*, defaultValue:Number):Number
+	public static function number(source:Object, defaultValue:Number):Number
 	{
-		var result : Number = parseFloat(source);
+		var result:Number = parseFloat(source + "");
 		return isNaN(result) || !isFinite(result) ? defaultValue : result;
 	}
 	
@@ -37,21 +37,21 @@ public class Parse
 	 * @param	defaultValue
 	 * @return
 	 */
-	public static function integer(source:*, defaultValue:int, radix:int=10):int
+	public static function integer(source:Object, defaultValue:int, radix:int = 10):int
 	{
 		//malachi: parse int returns a number which we use to check for NaN before setting to default value, if
 		//result was of type int than NaN would result in 0 and we wouldn't be able to check and assign default value
-		var result : Number = parseInt(source, radix);
+		var result:Number = parseInt(source + "", radix);
 		return isNaN(result) || !isFinite(result) ? defaultValue : result;
 	}
 	
 	/**
-	 * Parses a string value, the default value is used if the source is null or undefined
+	 * Parses a string value, the default value is used if the source is null
 	 * @return
 	 */
-	public static function string(source:*, defaultValue:String):String
+	public static function string(source:Object, defaultValue:String):String
 	{
-		return (source !== null && source !== undefined ? String(source + "") : defaultValue);
+		return(source !== null ? String(source + "") : defaultValue);
 	}
 	
 	/**
@@ -61,9 +61,9 @@ public class Parse
 	 * @param	defaultY	The y value to use if the parsed value is NaN or Infinity
 	 * @return
 	 */
-	public static function point(source:*, defaultX:int, defaultY:int):Point
+	public static function point(source:Object, defaultX:int, defaultY:int):Point
 	{
-		var array : Array = String(source + "").split(",");
+		var array:Array = String(source + "").split(",");
 		return new Point(Parse.number(array[0], defaultX), Parse.number(array[1], defaultY));
 	}
 	
@@ -75,10 +75,10 @@ public class Parse
 	 * @param 	alsoMatch	If provided, will return true if the source matches this value (case-insensitive)
 	 * @return
 	 */
-	public static function boolean( source: *, defaultValue:Boolean, alsoMatch : String = null ): Boolean
+	public static function boolean(source:Object, defaultValue:Boolean, alsoMatch:String = null):Boolean
 	{
-		var match : String = alsoMatch != null ? (alsoMatch + "").toLowerCase() : null;
-		var check : String = (source + "").toLowerCase();
+		var match:String = alsoMatch != null ? (alsoMatch + "").toLowerCase() : null;
+		var check:String = (source + "").toLowerCase();
 		
 		if(defaultValue)
 		{
@@ -111,11 +111,11 @@ public class Parse
 	}
 	
 	/*
-	public static function enum(source:*, enumClass:Class, caseSensitive:Boolean=false):Enum
-	{
-		return Enum.fromString(enumClass, value, caseSensitive);
-	}
-	*/
+	   public static function enum(source:*, enumClass:Class, caseSensitive:Boolean=false):Enum
+	   {
+	   return Enum.fromString(enumClass, value, caseSensitive);
+	   }
+	 */
 	
 	/**
 	 * Parses the given value as a Dictionary using the provided delimiters to split entries and key/value pairs. If
@@ -131,14 +131,14 @@ public class Parse
 	 * var dict2 : Dictionary = Parse.dictionary(str2, " ", ",");
 	 * </listing>
 	 */
-	public static function dictionary(source:*, entryDelimiter:String, keyValueDelimiter:String):Dictionary
+	public static function dictionary(source:Object, entryDelimiter:String, keyValueDelimiter:String):Dictionary
 	{
-		var result : Dictionary = new Dictionary();
+		var result:Dictionary = new Dictionary();
 		//if nothing can be parsed from the source, then we return null instead of an empty dictionary
-		var valuesFound : Boolean = false;
+		var valuesFound:Boolean = false;
 		
-		var entries : Array = (source + "").split(entryDelimiter);
-		for(var x : int = 0; x < entries.length; ++x)
+		var entries:Array = (source + "").split(entryDelimiter);
+		for(var x:int = 0; x < entries.length; ++x)
 		{
 			entries[x] = String(entries[x]).split(keyValueDelimiter);
 			//make sure that upon splitting this entry into key/value that it has two fields and the key isn't null
@@ -157,21 +157,21 @@ public class Parse
 	 * @param	a_string	a string formatted in a valid W3C subset of ISO 8601
 	 * @return
 	 */
-	public static function iso8601Date( a_string : String, defaultValue:Date=null ) : Date
+	public static function iso8601Date(a_string:String, defaultValue:Date = null):Date
 	{
-		if (a_string == null || a_string == "")
+		if(a_string == null || a_string == "")
 		{
 			return defaultValue;
 		}
 		
-		var regexp : RegExp = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?((?:([+-])(\d{2})(?::(\d{2}))?)|Z)?$/;
-		var match : Array = a_string.match(regexp);
+		var regexp:RegExp = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?((?:([+-])(\d{2})(?::(\d{2}))?)|Z)?$/;
+		var match:Array = a_string.match(regexp);
 		
 		//trace(a_string);
 		
-		if (match == null)
+		if(match == null)
 		{
-			return new Date(0,0);
+			return new Date(0, 0);
 		}
 		
 		//remove full-match from resulting array
@@ -180,24 +180,24 @@ public class Parse
 		//trace(match);
 		
 		//months are 0-based in the Date constructor for some reason
-		if (match[1])
+		if(match[1])
 		{
 			match[1]--;
 		}
 		
-		var result : Date = new Date(match[0] || 1970, match[1] || 0, match[2] || 1, match[3] || 0, match[4] || 0, match[5] || 0, match[6] || 0);
+		var result:Date = new Date(match[0] || 1970, match[1] || 0, match[2] || 1, match[3] || 0, match[4] || 0, match[5] || 0, match[6] || 0);
 		
 		//account for timezone
-		var timezoneOffset : int = 0;
+		var timezoneOffset:int = 0;
 		//if there was something provided for timezone
-		if (match[7])
+		if(match[7])
 		{
-			if (match[7] != "Z")
+			if(match[7] != "Z")
 			{
-				var hours : int = parseInt(match[9]) || 0;
-				var minutes : int = parseInt(match[10]) || 0;
+				var hours:int = parseInt(match[9]) || 0;
+				var minutes:int = parseInt(match[10]) || 0;
 				timezoneOffset = (hours * 60) + minutes;
-				if (match[8] == '+')
+				if(match[8] == '+')
 				{
 					timezoneOffset *= -1;
 				}
@@ -208,7 +208,7 @@ public class Parse
 		
 		//BUG: This causes a problem the the US during the spring time change when clocks advance an hour. That hour of time has
 		//not actually elapsed, so any time-related functions (eg, time elapsed to change state of an object) will fail
-		if (timezoneOffset != 0)
+		if(timezoneOffset != 0)
 		{
 			result.setTime(result.getTime() + (timezoneOffset * 60 * 1000));
 		}
