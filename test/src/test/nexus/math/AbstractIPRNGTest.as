@@ -158,7 +158,7 @@ public class AbstractIPRNGTest extends TestCase
 		const num : Number = 4.5;
 		for(var x : int = 0; x < DISTRIBUTION_ITERATIONS; ++x)
 		{
-			if(rand.round(num) == 4)
+			if(rand.weightedRound(num) == 4)
 			{
 				downCount++;
 			}

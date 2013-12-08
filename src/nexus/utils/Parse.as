@@ -27,7 +27,7 @@ public class Parse
 	 */
 	public static function number(source:Object, defaultValue:Number):Number
 	{
-		var result:Number = parseFloat(source);
+		var result:Number = parseFloat(source + "");
 		return isNaN(result) || !isFinite(result) ? defaultValue : result;
 	}
 	
@@ -41,17 +41,17 @@ public class Parse
 	{
 		//malachi: parse int returns a number which we use to check for NaN before setting to default value, if
 		//result was of type int than NaN would result in 0 and we wouldn't be able to check and assign default value
-		var result:Number = parseInt(source, radix);
+		var result:Number = parseInt(source + "", radix);
 		return isNaN(result) || !isFinite(result) ? defaultValue : result;
 	}
 	
 	/**
-	 * Parses a string value, the default value is used if the source is null or undefined
+	 * Parses a string value, the default value is used if the source is null
 	 * @return
 	 */
 	public static function string(source:Object, defaultValue:String):String
 	{
-		return(source !== null && source !== undefined ? String(source + "") : defaultValue);
+		return(source !== null ? String(source + "") : defaultValue);
 	}
 	
 	/**
