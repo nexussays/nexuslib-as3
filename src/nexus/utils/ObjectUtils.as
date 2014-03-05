@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -13,7 +13,7 @@ import nexus.utils.reflection.*;
 
 /**
  * ...
- * 
+ *
  */
 public class ObjectUtils
 {
@@ -66,7 +66,14 @@ public class ObjectUtils
 				&& methodInfo.parameters.length == 1
 				&& methodInfo.parameters[0].type == Object)
 			{
-				result = methodInfo.invoke(type, source);
+            try
+            {
+               result = methodInfo.invoke(type, source);
+            }
+            catch(e:Error)
+            {
+               trace(e);
+            }
 			}
 			else
 			{
@@ -78,6 +85,7 @@ public class ObjectUtils
 				catch(e:Error)
 				{
 					//probably because ctor requires arguments, if we add support for that then this can catch more interesting errors
+               trace(e);
 				}
 			}
 			
@@ -160,6 +168,7 @@ public class ObjectUtils
 							catch(e:Error)
 							{
 								//TODO: is a catch-all here ok?
+                        trace(e);
 							}
 						}
 						else
