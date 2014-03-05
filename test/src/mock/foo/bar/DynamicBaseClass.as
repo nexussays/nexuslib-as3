@@ -2,7 +2,9 @@ package mock.foo.bar
 {
 
 import mock.foo.SubObject;
+import mock.MockEnum;
 import mock.testing_namespace;
+import nexus.Enum;
 import nexus.errors.NotImplementedError;
 
 [ClassMetadata(on="DynamicBaseClass")]

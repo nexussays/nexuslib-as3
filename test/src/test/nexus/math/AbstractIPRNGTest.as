@@ -73,7 +73,7 @@ public class AbstractIPRNGTest extends TestCase
 			m_generator.next();
 		}
 		var end:int = getTimer() - start;
-		trace("test_performance", m_generator, STRESS_ITERATIONS + " iterations: " + end + "ms");
+		//trace("test_performance", m_generator, STRESS_ITERATIONS + " iterations: " + end + "ms");
 		assertTrue(end < 800);
 	}
 	
@@ -194,7 +194,7 @@ public class AbstractIPRNGTest extends TestCase
 		}
 		var diff : int = Math.abs(trueCount - falseCount);
 		//trace("test_boolean", m_generator, diff, trueCount, falseCount, diff / DISTRIBUTION_ITERATIONS * 100);
-		trace("test_boolean", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
+		//trace("test_boolean", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
 		assertTrue(diff / DISTRIBUTION_ITERATIONS < .02);
 	}
 	
@@ -219,7 +219,7 @@ public class AbstractIPRNGTest extends TestCase
 		}
 		var diff : int = Math.abs(upCount - downCount);
 		//trace("test_round", m_generator, diff, upCount, downCount, diff / DISTRIBUTION_ITERATIONS * 100);
-		trace("test_round", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
+		//trace("test_round", m_generator, "variance", diff / DISTRIBUTION_ITERATIONS);
 		assertTrue("Variance > .02 => " + (diff / DISTRIBUTION_ITERATIONS), diff / DISTRIBUTION_ITERATIONS < .02);
 	}
 	

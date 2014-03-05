@@ -1,5 +1,5 @@
 // Copyright 2011 Malachi Griffie <malachi@nexussays.com>
-// 
+//
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,6 +7,7 @@ package test.nexus.utils.serialization.json
 {
 
 import asunit.framework.TestCase;
+import mock.MockEnum;
 import mock.testing_namespace;
 import nexus.utils.ObjectUtils;
 
@@ -56,6 +57,7 @@ public class JsonSerializerTest extends TestCase
 		m_base1 = new BaseClass();
 		m_base2 = new BaseClass();
 		m_base1.baseVar = m_base2.baseVar = 100;
+		m_base1.mockEnum = m_base2.mockEnum = MockEnum.Value2;
 		m_base1.testing_namespace::baseVar = "test_serialization3";
 		
 		m_serializer1 = new JsonSerializer();

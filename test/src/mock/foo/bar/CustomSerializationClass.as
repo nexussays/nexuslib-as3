@@ -5,8 +5,12 @@ import nexus.utils.serialization.json.IJsonSerializable;
 
 public class CustomSerializationClass extends BaseClass implements IJsonSerializable
 {
-	private static var s_id : int = 1;
-	static public function get id():int { return s_id; }
+	private static var s_id:int = 1;
+	
+	static public function get id():int
+	{
+		return s_id;
+	}
 	
 	public function CustomSerializationClass()
 	{
@@ -25,7 +29,7 @@ public class CustomSerializationClass extends BaseClass implements IJsonSerializ
 	
 	public static function fromNative(data:Object):Object
 	{
-		var result : CustomSerializationClass = new CustomSerializationClass();
+		var result:CustomSerializationClass = new CustomSerializationClass();
 		result.baseString = data + "";
 		return result;
 	}

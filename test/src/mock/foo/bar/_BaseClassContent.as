@@ -1,3 +1,4 @@
+
 private var m_baseString : String;
 private var m_baseVector : Vector.<String>;
 private var m_subObj1 : SubObject;
@@ -5,6 +6,7 @@ private var m_subObj2 : SubObject;
 
 public var baseVar : int;
 testing_namespace var baseVar : String = "";
+private var m_enum : MockEnum;
 
 [MethodMetadata(on="BaseClass")]
 public function baseMethod(arg1:String, arg2:String="", arg3:Array=null):Object
@@ -21,6 +23,9 @@ public function set subObj1(value:SubObject):void
 {
 	m_subObj1 = value;
 }
+
+public function get mockEnum():MockEnum { return m_enum; }
+public function set mockEnum(value:MockEnum):void { m_enum = value; }
 
 [PropertyMetadata(on="BaseClass")]
 public function get subObj2():SubObject { return m_subObj2; }
