@@ -72,7 +72,7 @@ public class EnumSet implements IEnum
 	
 	/**
 	 * Internal create method that doesn't check or filter values
-	 * @return
+	 * @private
 	 */
 	static internal function fromArrayInternal(array:Array):EnumSet
 	{
@@ -80,6 +80,12 @@ public class EnumSet implements IEnum
 		result.m_values = array;
 		return result;
 	}
+
+   /**
+    * Return array directly for internal use where we're not worried about mutation
+    * @private
+    */
+   internal function get values():Array { return m_values; }
 	
 	//--------------------------------------
 	//	PUBLIC METHODS
