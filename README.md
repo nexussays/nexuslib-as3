@@ -6,7 +6,7 @@ The reflection library is production ready and is currently in-use in production
 
 ## Getting Started
 
-Download one of the [compiled swcs](http://public.nexussays.com/code/nexuslib/index.html), or clone the repo and reference in your project.
+Download the [latest release](https://github.com/nexussays/nexuslib-as3/releases), or clone the repo and reference in your project.
 
 ### Dependencies
 
