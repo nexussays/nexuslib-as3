@@ -32,6 +32,9 @@ public class JsonSerializerTest extends TestCase
 	
 	private var m_base1 : BaseClass;
 	private var m_base2 : BaseClass;
+
+   private var m_sub1 : TestClass;
+   private var m_sub2 : TestClass;
 	
 	private var m_serializer1 : JsonSerializer;
 	private var m_serializer2 : JsonSerializer;
@@ -59,7 +62,10 @@ public class JsonSerializerTest extends TestCase
 		m_base1.baseVar = m_base2.baseVar = 100;
 		m_base1.mockEnum = m_base2.mockEnum = MockEnum.Value2;
 		m_base1.testing_namespace::baseVar = "test_serialization3";
-		
+
+      m_sub1 = new TestClass();
+      m_sub2 = new TestClass();
+
 		m_serializer1 = new JsonSerializer();
 		m_serializer2 = new JsonSerializer();
 	}
@@ -71,7 +77,7 @@ public class JsonSerializerTest extends TestCase
 		
 		m_serializer1 = null;
 		m_serializer2 = null;
-		
+
 		m_json1 = null;
 		m_json2 = null;
 	}
@@ -203,6 +209,13 @@ public class JsonSerializerTest extends TestCase
 		custom = m_serializer1.deserialize(m_json1, CustomSerializationClass) as CustomSerializationClass;
 		assertEquals("CustomSerializationClass" + id, custom.baseString);
 	}
+
+   public function test_circular():void
+   {
+      m_sub1.circular = m_sub1;
+
+      m_json1 = m_serializer1.serialize(m_sub1);
+   }
 	
 	//--------------------------------------
 	//	PRIVATE INSTANCE METHODS

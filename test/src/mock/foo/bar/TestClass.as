@@ -33,6 +33,8 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	private var m_privateVar:int;
 	protected var m_protectedVar: int;
 	testing_namespace var m_namespacedVar : int;
+
+   private var m_circular:TestClass;
 	
 	[Embed(source="test.xml", mimeType="application/octet-stream")]
 	public const instanceEmbed:Class;
@@ -64,6 +66,12 @@ public dynamic class TestClass extends BaseClass implements IFoo
 	}
 	
 	public static function get staticProperty():String { return protectedStaticVar; }
+
+   public function get circular():TestClass { return m_circular;}
+   public function set circular(value:TestClass):void
+   {
+      m_circular = value;
+   }
 	
 	//--------------------------------------
 	//	PUBLIC INSTANCE METHODS
