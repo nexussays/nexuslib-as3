@@ -72,7 +72,7 @@ public class Random
 	 * @param	max		The highest value to return, exclusive
 	 * @return An int in the range [min, max)
 	 */
-	public function integer(min:uint = 0, max:int = int.MAX_VALUE):int
+	public function integer(min:int = 0, max:int = int.MAX_VALUE):int
 	{
 		return m_generator.next() % (max - min) + min;
 	}
@@ -120,12 +120,12 @@ public class Random
 		var choice:int;
 		if(items.length == 1)
 		{
-			choice = integer(0, items[0].length - 1);
+			choice = integer(0, items[0].length);
 			return items[0][choice];
 		}
 		else
 		{
-			choice = integer(0, items.length - 1);
+			choice = integer(0, items.length);
 			return items[choice];
 		}
 	}
