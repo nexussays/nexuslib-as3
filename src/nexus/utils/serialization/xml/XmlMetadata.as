@@ -17,41 +17,41 @@ import nexus.utils.reflection.MetadataInfo;
  */
 public class XmlMetadata extends MetadataInfo
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	public var nodeName : String;
-	public var isAttribute : Boolean;
-	public var flattenArray : Boolean;
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function XmlMetadata(name:String, keyValueCollection:Dictionary)
-	{
-		super(name, keyValueCollection);
-		this.nodeName = this.getValue("nodeName");
-		this.isAttribute = Parse.boolean(this.getValue("isAttribute"), false);
-		this.flattenArray = Parse.boolean(this.getValue("flattenArray"), false);
-	}
-	
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   INSTANCE VARIABLES
+   //--------------------------------------
+   
+   public var nodeName : String;
+   public var isAttribute : Boolean;
+   public var flattenArray : Boolean;
+   
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function XmlMetadata(name:String, keyValueCollection:Dictionary)
+   {
+      super(name, keyValueCollection);
+      this.nodeName = this.getValue("nodeName");
+      this.isAttribute = Parse.boolean(this.getValue("isAttribute"), false);
+      this.flattenArray = Parse.boolean(this.getValue("flattenArray"), false);
+   }
+   
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   PUBLIC INSTANCE METHODS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
 }
 
 }

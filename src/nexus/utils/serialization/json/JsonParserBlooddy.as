@@ -15,19 +15,19 @@ import by.blooddy.crypto.serialization.JSON;
  */
 internal class JsonParserBlooddy
 {
-	//--------------------------------------
-	//	INTERNAL CLASS METHODS
-	//--------------------------------------
-	
-	/**
-	 * @private
-	 */
-	internal static const encode : Function = by.blooddy.crypto.serialization.JSON.encode;
-	
-	/**
-	 * @private
-	 */
-	internal static const decode : Function = by.blooddy.crypto.serialization.JSON.decode;
+   //--------------------------------------
+   //   INTERNAL CLASS METHODS
+   //--------------------------------------
+   
+   /**
+    * @private
+    */
+   internal static const encode : Function = by.blooddy.crypto.serialization.JSON.encode;
+   
+   /**
+    * @private
+    */
+   internal static const decode : Function = by.blooddy.crypto.serialization.JSON.decode;
 }
 
 }

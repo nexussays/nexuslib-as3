@@ -11,41 +11,41 @@ package nexus.utils.reflection
  */
 public final class FieldInfo extends AbstractFieldInfo
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function FieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, write:Boolean)
-	{
-		super(name, isStatic, type, declaringType, reflectedTypeInfo, true, write);
-	}
-	
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
-	
-	public function get isConstant():Boolean { return !m_canWrite; }
-	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	override public function toString():String
-	{
-		if(m_typeName == null)
-		{
-			m_typeName = Reflection.getUnqualifiedClassName(m_type);
-		}
-		return "[" + (m_isStatic ? "Static" : "") + (m_canWrite ? "Variable" : "Constant") + "|" + m_name + ":" + m_typeName + "]";
-	}
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   INSTANCE VARIABLES
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function FieldInfo(name:String, isStatic:Boolean, type:Class, declaringType:Class, reflectedTypeInfo:TypeInfo, write:Boolean)
+   {
+      super(name, isStatic, type, declaringType, reflectedTypeInfo, true, write);
+   }
+   
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
+   
+   public function get isConstant():Boolean { return !m_canWrite; }
+   
+   //--------------------------------------
+   //   PUBLIC INSTANCE METHODS
+   //--------------------------------------
+   
+   override public function toString():String
+   {
+      if(m_typeName == null)
+      {
+         m_typeName = Reflection.getUnqualifiedClassName(m_type);
+      }
+      return "[" + (m_isStatic ? "Static" : "") + (m_canWrite ? "Variable" : "Constant") + "|" + m_name + ":" + m_typeName + "]";
+   }
 }
 
 }

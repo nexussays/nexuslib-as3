@@ -16,7 +16,7 @@ import test.nexus.utils.serialization.json.*;
 [Suite]
 public class PerformanceTestSuite
 {
-	public var reflection : ReflectionPerfTest;
+   public var reflection : ReflectionPerfTest;
 }
 
 }

@@ -13,8 +13,8 @@ import nexus.Enum;
  */
 public class BadEnum3 extends Enum
 {
-	public static var Value1:BadEnum3 = new BadEnum3();
-	public static var Value2:BadEnum3 = new BadEnum3();
+   public static var Value1:BadEnum3 = new BadEnum3();
+   public static var Value2:BadEnum3 = new BadEnum3();
 }
 
 }

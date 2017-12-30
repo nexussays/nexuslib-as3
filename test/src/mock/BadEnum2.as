@@ -13,10 +13,10 @@ import nexus.Enum;
  */
 public class BadEnum2 extends Enum
 {
-	{Enum.initialize(BadEnum2); }
-	
-	public static var Value1:BadEnum2 = new BadEnum2();
-	public static var Value2:BadEnum2 = new BadEnum2();
+   {Enum.initialize(BadEnum2); }
+   
+   public static var Value1:BadEnum2 = new BadEnum2();
+   public static var Value2:BadEnum2 = new BadEnum2();
 }
 
 }

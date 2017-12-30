@@ -20,54 +20,54 @@ import flash.utils.*;
  */
 public class MetadataInfo
 {
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	/**
-	 * @private
-	 */
-	protected var m_metadataName : String;
-	/**
-	 * @private
-	 */
-	protected var m_metadataKeyValuePairs : Dictionary;
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function MetadataInfo(name:String, keyValueCollection:Dictionary)
-	{
-		m_metadataName = name;
-		m_metadataKeyValuePairs = keyValueCollection;
-	}
+   //--------------------------------------
+   //   INSTANCE VARIABLES
+   //--------------------------------------
+   
+   /**
+    * @private
+    */
+   protected var m_metadataName : String;
+   /**
+    * @private
+    */
+   protected var m_metadataKeyValuePairs : Dictionary;
+   
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function MetadataInfo(name:String, keyValueCollection:Dictionary)
+   {
+      m_metadataName = name;
+      m_metadataKeyValuePairs = keyValueCollection;
+   }
 
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
-	
-	public final function get metadataName():String { return m_metadataName; }
-	
-	public final function get metadataKeyValuePairs():Dictionary { return m_metadataKeyValuePairs; }
-	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	public final function getValue(key:String):String
-	{
-		return m_metadataKeyValuePairs[key];
-	}
-	
-	public function toString():String
-	{
-		return "[Metadata|" + m_metadataName + "]";
-	}
-	
-	//--------------------------------------
-	//	INTERNAL INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
+   
+   public final function get metadataName():String { return m_metadataName; }
+   
+   public final function get metadataKeyValuePairs():Dictionary { return m_metadataKeyValuePairs; }
+   
+   //--------------------------------------
+   //   PUBLIC INSTANCE METHODS
+   //--------------------------------------
+   
+   public final function getValue(key:String):String
+   {
+      return m_metadataKeyValuePairs[key];
+   }
+   
+   public function toString():String
+   {
+      return "[Metadata|" + m_metadataName + "]";
+   }
+   
+   //--------------------------------------
+   //   INTERNAL INSTANCE METHODS
+   //--------------------------------------
 }
 
 }

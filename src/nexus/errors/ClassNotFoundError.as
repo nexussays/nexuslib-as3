@@ -13,41 +13,41 @@ import flash.utils.*;
  */
 public class ClassNotFoundError extends Error
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	private var m_qualifiedClassName : String;
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function ClassNotFoundError(qualifiedName : String)
-	{
-		super("Cannot find definition for " + qualifiedName + ". Be sure the class is present in the registered application domains and is public.");
-		
-		m_qualifiedClassName = qualifiedName;
-		this.name = "ClassNotFoundError";
-	}
-	
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
-	
-	public function get qualifiedClassName():String { return m_qualifiedClassName; }
-	
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   INSTANCE VARIABLES
+   //--------------------------------------
+   
+   private var m_qualifiedClassName : String;
+   
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function ClassNotFoundError(qualifiedName : String)
+   {
+      super("Cannot find definition for " + qualifiedName + ". Be sure the class is present in the registered application domains and is public.");
+      
+      m_qualifiedClassName = qualifiedName;
+      this.name = "ClassNotFoundError";
+   }
+   
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
+   
+   public function get qualifiedClassName():String { return m_qualifiedClassName; }
+   
+   //--------------------------------------
+   //   PUBLIC INSTANCE METHODS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
 }
 
 }

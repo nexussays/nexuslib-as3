@@ -13,7 +13,7 @@ import nexus.Enum;
  */
 public class BadEnum extends Enum
 {
-	public static const Value1:MockEnum = new MockEnum();
+   public static const Value1:MockEnum = new MockEnum();
 }
 
 }

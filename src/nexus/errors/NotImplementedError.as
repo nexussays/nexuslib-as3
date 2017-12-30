@@ -15,14 +15,14 @@ import flash.utils.*;
  */
 public class NotImplementedError extends IllegalOperationError
 {
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function NotImplementedError(id:int=0)
-	{
-		super("Not Implemented", id);
-	}
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function NotImplementedError(id:int=0)
+   {
+      super("Not Implemented", id);
+   }
 
 }
 

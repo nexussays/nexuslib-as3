@@ -17,22 +17,22 @@ import test.nexus.utils.serialization.json.*;
 [Suite]
 public class MainTestSuite
 {
-	public var basic	: BasicTest;
-	
-	public var enum		: EnumTest;
-	public var enumSet	: EnumSetTest;
-	
-	public var reflection			: ReflectionTest;
-	public var reflection_typeInfo	: TypeInfoTest;
-	
-	public var objectUtils	: ObjectUtilsTest;
-	public var json			: JsonSerializerTest;
-	
-	public var rngLehmer	: LehmerGeneratorTest;
-   public var rngTinymt	: TinyMTGeneratorTest;
-	public var rngNative	: NativeRandomGeneratorTest;
-	
-	public var hmac	: HMACTest;
+   public var basic   : BasicTest;
+   
+   public var enum      : EnumTest;
+   public var enumSet   : EnumSetTest;
+   
+   public var reflection         : ReflectionTest;
+   public var reflection_typeInfo   : TypeInfoTest;
+   
+   public var objectUtils   : ObjectUtilsTest;
+   public var json         : JsonSerializerTest;
+   
+   public var rngLehmer   : LehmerGeneratorTest;
+   public var rngTinymt   : TinyMTGeneratorTest;
+   public var rngNative   : NativeRandomGeneratorTest;
+   
+   public var hmac   : HMACTest;
 }
 
 }

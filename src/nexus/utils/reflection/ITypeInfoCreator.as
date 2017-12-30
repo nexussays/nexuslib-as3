@@ -7,14 +7,14 @@ package nexus.utils.reflection
 {
 
 import flash.system.ApplicationDomain;
-	
+   
 /**
  * An internal interface used for XML and JSON TypeInfo creators
  * @private
  */
 public interface ITypeInfoCreator
 {
-	function create(type:Class, applicationDomain:ApplicationDomain):TypeInfo;
+   function create(type:Class, applicationDomain:ApplicationDomain):TypeInfo;
 }
 
 }

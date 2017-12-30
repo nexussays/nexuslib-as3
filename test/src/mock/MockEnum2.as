@@ -10,9 +10,9 @@ import nexus.Enum;
 
 public class MockEnum2 extends Enum
 {
-	public static const Value1:MockEnum2 = new MockEnum2();
-	public static const Value2:MockEnum2 = new MockEnum2();
-	public static const Value3:MockEnum2 = new MockEnum2();
+   public static const Value1:MockEnum2 = new MockEnum2();
+   public static const Value2:MockEnum2 = new MockEnum2();
+   public static const Value3:MockEnum2 = new MockEnum2();
 }
 
 }

@@ -18,48 +18,48 @@ import mock.foo.IFoo;
  */
 public class AbstractReflectionTest extends TestCase
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
-	
-	//--------------------------------------
-	//	INSTANCE VARIABLES
-	//--------------------------------------
-	
-	protected var m_finalTypeInfo:TypeInfo;
-	protected var m_testTypeInfo:TypeInfo;
-	protected var m_baseTypeInfo:TypeInfo;
-	protected var m_test:TestClass;
-	
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
-	
-	public function AbstractReflectionTest(testMethod:String = null)
-	{
-		super(testMethod);
-	}
-	
-	//--------------------------------------
-	//	SETUP & TEARDOWN
-	//--------------------------------------
-	
-	override protected function setUp():void
-	{
-		m_test = new TestClass();
-		var finalClass : FinalClass = new FinalClass(false);
-		m_finalTypeInfo = Reflection.getTypeInfo(finalClass);
-		m_testTypeInfo = Reflection.getTypeInfo(m_finalTypeInfo.extendedClasses[0]);
-		m_baseTypeInfo = Reflection.getTypeInfo(BaseClass);
-	}
-	
-	override protected function tearDown():void
-	{
-		m_testTypeInfo = null;
-		m_finalTypeInfo = null;
-		m_baseTypeInfo = null;
-		m_test = null;
-	}
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
+   
+   //--------------------------------------
+   //   INSTANCE VARIABLES
+   //--------------------------------------
+   
+   protected var m_finalTypeInfo:TypeInfo;
+   protected var m_testTypeInfo:TypeInfo;
+   protected var m_baseTypeInfo:TypeInfo;
+   protected var m_test:TestClass;
+   
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
+   
+   public function AbstractReflectionTest(testMethod:String = null)
+   {
+      super(testMethod);
+   }
+   
+   //--------------------------------------
+   //   SETUP & TEARDOWN
+   //--------------------------------------
+   
+   override protected function setUp():void
+   {
+      m_test = new TestClass();
+      var finalClass : FinalClass = new FinalClass(false);
+      m_finalTypeInfo = Reflection.getTypeInfo(finalClass);
+      m_testTypeInfo = Reflection.getTypeInfo(m_finalTypeInfo.extendedClasses[0]);
+      m_baseTypeInfo = Reflection.getTypeInfo(BaseClass);
+   }
+   
+   override protected function tearDown():void
+   {
+      m_testTypeInfo = null;
+      m_finalTypeInfo = null;
+      m_baseTypeInfo = null;
+      m_test = null;
+   }
 }
 
 }

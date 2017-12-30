@@ -17,25 +17,25 @@ import nexus.utils.ByteUtils;
  */
 public class SHA256HashFunction implements IHashFunction
 {
-	//--------------------------------------
-	//	PUBLIC INSTANCE METHODS
-	//--------------------------------------
-	
-	/**
-	 * Hash the provided bytes and returned the hashed value
-	 * @param	bytes	The bytes to hash
-	 * @return	The hashed bytes
-	 */
-	public function hash(bytes:ByteArray):ByteArray
-	{
-		//would be really nice if the blooddy lib just returned a damn byte array
-		return ByteUtils.hexToBytes(SHA256.hashBytes(bytes));
-	}
-	
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
-	
+   //--------------------------------------
+   //   PUBLIC INSTANCE METHODS
+   //--------------------------------------
+   
+   /**
+    * Hash the provided bytes and returned the hashed value
+    * @param   bytes   The bytes to hash
+    * @return   The hashed bytes
+    */
+   public function hash(bytes:ByteArray):ByteArray
+   {
+      //would be really nice if the blooddy lib just returned a damn byte array
+      return ByteUtils.hexToBytes(SHA256.hashBytes(bytes));
+   }
+   
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
+   
 }
 
 }

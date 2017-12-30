@@ -13,41 +13,41 @@ package nexus.utils.serialization.json
  */
 internal class JsonParser
 {
-	//--------------------------------------
-	//	CLASS VARIABLES
-	//--------------------------------------
-	
-	/**
-	 * Signature => public static function encode(object:Object):String
-	 * @private
-	 */
-	internal static var encode : Function;
-	
-	/**
-	 * Signature => public static function decode(json:String):Object
-	 * @private
-	 */
-	internal static var decode : Function;
-	
-	//--------------------------------------
-	//	STATIC INITIALIZER
-	//--------------------------------------
-	
-	{
-		try
-		{
-			encode = JSON.stringify;
-			decode = JSON.parse;
-			trace("Using native JSON");
-		}
-		catch(e:Error)
-		{
-			encode = JsonParserBlooddy.encode;
-			decode = JsonParserBlooddy.decode;
-			trace("Using blooddy JSON");
-		}
-	}
-	
+   //--------------------------------------
+   //   CLASS VARIABLES
+   //--------------------------------------
+   
+   /**
+    * Signature => public static function encode(object:Object):String
+    * @private
+    */
+   internal static var encode : Function;
+   
+   /**
+    * Signature => public static function decode(json:String):Object
+    * @private
+    */
+   internal static var decode : Function;
+   
+   //--------------------------------------
+   //   STATIC INITIALIZER
+   //--------------------------------------
+   
+   {
+      try
+      {
+         encode = JSON.stringify;
+         decode = JSON.parse;
+         trace("Using native JSON");
+      }
+      catch(e:Error)
+      {
+         encode = JsonParserBlooddy.encode;
+         decode = JsonParserBlooddy.decode;
+         trace("Using blooddy JSON");
+      }
+   }
+   
 }
 
 }

@@ -5,14 +5,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 package nexus.utils.serialization.xml
 {
-	
+   
 /**
  * Implement on objects that want to override their serialization to XML
  * 
  */
 public interface IXmlSerializable
 {
-	function toXML():XML;
+   function toXML():XML;
 }
 
 }
