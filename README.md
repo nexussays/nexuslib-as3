@@ -1,6 +1,6 @@
 # Overview
 
-nexuslib is a collection of Actionscript libraries. Enums, Random, Reflection, Serialization, Crypto.
+nexuslib is a collection of Actionscript libraries. Enums, Random, Reflection, Serialization, Crypto, Audio system, HTTP requests.
 
 The reflection library specifically is production ready and is currently in-use in production environments.
 
@@ -40,11 +40,17 @@ For more examples of correct and incorrect Enum usage, see the [mocks in the tes
 
 Reflection & serialization library. Features deterministic JSON de/serialization, deserializing directly to typed AS objects, a structured reflection class heirarchy, and more. Full support for Application Domains and namespaces.
 
+### Audio
+
+`nexus.audio`
+
+Manage playing sounds one or in loops, controlling volume and sound effects (e.g., fading, panning). Sounds can be loaded from embedded resources, remote mp3s, and local files. Separate sound channels and volume controls for music, ambient sounds, voices, ui effects, and sound effects.
+
 ### Crypto & security
 
 `nexus.security.crypto`
 
-Currently only provides an HMAC class and some utilities.
+Currently provides an HMAC class and some utilities.
 
 ### Version control (Git)
 
