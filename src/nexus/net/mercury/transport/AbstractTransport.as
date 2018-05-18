@@ -22,131 +22,131 @@ import flash.utils.*;
  */
 public class AbstractTransport implements IMessengerTransport
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
 
-	public static const DEFAULT_LOADED_APPLICATIONDOMAIN : ApplicationDomainType = ApplicationDomainType.Child;
+   public static const DEFAULT_LOADED_APPLICATIONDOMAIN : ApplicationDomainType = ApplicationDomainType.Child;
 
-	private static var s_id : int = 0;
+   private static var s_id : int = 0;
 
-	//--------------------------------------
-	//	PRIVATE VARIABLES
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE VARIABLES
+   //--------------------------------------
 
-	protected const m_id : int = (++s_id);
+   protected const m_id : int = (++s_id);
 
-	protected var m_onComplete : Function;
-	protected var m_onProgress : Function;
-	protected var m_onError : Function;
+   protected var m_onComplete : Function;
+   protected var m_onProgress : Function;
+   protected var m_onError : Function;
 
-	protected var m_httpStatus : int;
-	protected var m_statusMessage : String;
+   protected var m_httpStatus : int;
+   protected var m_statusMessage : String;
 
-	protected var m_bytesLoaded : int;
-	protected var m_bytesTotal : int;
+   protected var m_bytesLoaded : int;
+   protected var m_bytesTotal : int;
 
-	protected var m_supportsRetry : Boolean;
+   protected var m_supportsRetry : Boolean;
 
-	protected var m_destinationApplicationDomain : ApplicationDomainType;
+   protected var m_destinationApplicationDomain : ApplicationDomainType;
 
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
 
-	public function AbstractTransport(onComplete:Function, onProgress:Function, onError:Function)
-	{
-		if(onComplete == null || onProgress == null || onError == null)
-		{
-			throw new ArgumentError("Transport cannot be initialized without valid complete, error, and progress callbacks");
-		}
+   public function AbstractTransport(onComplete:Function, onProgress:Function, onError:Function)
+   {
+      if(onComplete == null || onProgress == null || onError == null)
+      {
+         throw new ArgumentError("Transport cannot be initialized without valid complete, error, and progress callbacks");
+      }
 
-		m_bytesLoaded = 0;
-		m_bytesTotal = 1;
+      m_bytesLoaded = 0;
+      m_bytesTotal = 1;
 
-		m_statusMessage = "";
+      m_statusMessage = "";
 
-		m_onComplete = onComplete;
-		m_onProgress = onProgress;
-		m_onError = onError;
+      m_onComplete = onComplete;
+      m_onProgress = onProgress;
+      m_onError = onError;
 
-		m_supportsRetry = true;
+      m_supportsRetry = true;
 
-		m_httpStatus = -1;
+      m_httpStatus = -1;
 
-		destinationApplicationDomain = DEFAULT_LOADED_APPLICATIONDOMAIN;
-	}
+      destinationApplicationDomain = DEFAULT_LOADED_APPLICATIONDOMAIN;
+   }
 
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
 
-	public function get id():int { return m_id; }
+   public function get id():int { return m_id; }
 
-	public function get httpStatus():int { return m_httpStatus; }
+   public function get httpStatus():int { return m_httpStatus; }
 
-	public function get statusMessage():String { return m_statusMessage; }
+   public function get statusMessage():String { return m_statusMessage; }
 
-	public function get bytesLoaded():int { return m_bytesLoaded; }
+   public function get bytesLoaded():int { return m_bytesLoaded; }
 
-	public function get bytesTotal():int { return m_bytesTotal; }
+   public function get bytesTotal():int { return m_bytesTotal; }
 
-	public function get supportsRetry():Boolean { return m_supportsRetry; }
+   public function get supportsRetry():Boolean { return m_supportsRetry; }
 
-	public function get data():*
-	{
-		throw new IllegalOperationError("This method must be overridden in a subclass");
-	}
+   public function get data():*
+   {
+      throw new IllegalOperationError("This method must be overridden in a subclass");
+   }
 
-	public function get destinationApplicationDomain():ApplicationDomainType { return m_destinationApplicationDomain; }
-	public function set destinationApplicationDomain(value:ApplicationDomainType):void
-	{
-		m_destinationApplicationDomain = value;
-		if(m_destinationApplicationDomain == null)
-		{
-			m_destinationApplicationDomain = DEFAULT_LOADED_APPLICATIONDOMAIN;
-		}
-	}
+   public function get destinationApplicationDomain():ApplicationDomainType { return m_destinationApplicationDomain; }
+   public function set destinationApplicationDomain(value:ApplicationDomainType):void
+   {
+      m_destinationApplicationDomain = value;
+      if(m_destinationApplicationDomain == null)
+      {
+         m_destinationApplicationDomain = DEFAULT_LOADED_APPLICATIONDOMAIN;
+      }
+   }
 
-	//--------------------------------------
-	//	PUBLIC METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PUBLIC METHODS
+   //--------------------------------------
 
-	public function initialize():void
-	{
-		throw new IllegalOperationError("This method must be overridden in a subclass");
-	}
+   public function initialize():void
+   {
+      throw new IllegalOperationError("This method must be overridden in a subclass");
+   }
 
-	public function load(request:URLRequest):void
-	{
-		throw new IllegalOperationError("This method must be overridden in a subclass");
-	}
+   public function load(request:URLRequest):void
+   {
+      throw new IllegalOperationError("This method must be overridden in a subclass");
+   }
 
-	public function close():void
-	{
-		throw new IllegalOperationError("This method must be overridden in a subclass");
-	}
+   public function close():void
+   {
+      throw new IllegalOperationError("This method must be overridden in a subclass");
+   }
 
-	public function dispose():void
-	{
-		m_onComplete = null;
-		m_onError = null;
-		m_onProgress = null;
-		close();
-	}
+   public function dispose():void
+   {
+      m_onComplete = null;
+      m_onError = null;
+      m_onProgress = null;
+      close();
+   }
 
-	//--------------------------------------
-	//	EVENT HANDLERS
-	//--------------------------------------
+   //--------------------------------------
+   //   EVENT HANDLERS
+   //--------------------------------------
 
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
 
-	private final function trace(...params): void
-	{
-		Debug.debug(AbstractTransport, params);
-	}
+   private final function trace(...params): void
+   {
+      Debug.debug(AbstractTransport, params);
+   }
 }
 
 }

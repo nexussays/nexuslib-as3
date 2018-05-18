@@ -112,7 +112,7 @@ public class SoundTransport extends AbstractTransport
       checkDisposed();
 
       //FIXME: Need to be able to cancel
-      //nexus: don't close because the sound is essentially dead after that
+      //note: don't close because the sound is essentially dead after that
       //close will throw if there is no load in progress
       if(m_bytesLoaded < m_bytesTotal)
       {

@@ -18,28 +18,28 @@ import flash.utils.*;
 public class ResourceType extends Enum
 {
 
-	{initEnum(ResourceType);}
+   {initEnum(ResourceType);}
 
-	public static const Audio : ResourceType = new ResourceType();
-	public static const Bitmap : ResourceType = new ResourceType();
-	public static const Bytes : ResourceType = new ResourceType();
-	public static const SWF : ResourceType = new ResourceType();
-	public static const Text : ResourceType = new ResourceType();
+   public static const Audio : ResourceType = new ResourceType();
+   public static const Bitmap : ResourceType = new ResourceType();
+   public static const Bytes : ResourceType = new ResourceType();
+   public static const SWF : ResourceType = new ResourceType();
+   public static const Text : ResourceType = new ResourceType();
 
-	public static function get All():EnumSet
-	{
-		return Enum.valuesAsEnumSet(ResourceType);
-	}
+   public static function get All():EnumSet
+   {
+      return Enum.valuesAsEnumSet(ResourceType);
+   }
 
-	public static function fromString(value:*):ResourceType
-	{
-		var enum : ResourceType = Enum.fromString(ResourceType, value, false) as ResourceType;
-		if(enum == null)
-		{
-			throw new ArgumentError("Cannot convert \"" + value + "\" into a ResourceType");
-		}
-		return enum;
-	}
+   public static function fromString(value:*):ResourceType
+   {
+      var enum : ResourceType = Enum.fromString(ResourceType, value, false) as ResourceType;
+      if(enum == null)
+      {
+         throw new ArgumentError("Cannot convert \"" + value + "\" into a ResourceType");
+      }
+      return enum;
+   }
 }
 
 }

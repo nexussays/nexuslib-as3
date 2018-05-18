@@ -14,21 +14,21 @@ import nexus.net.HttpRequestMethod;
  */
 public interface IMessengerRequest
 {
-	function get method() : HttpRequestMethod;
-	function set method(value:HttpRequestMethod) : void;
+   function get method() : HttpRequestMethod;
+   function set method(value:HttpRequestMethod) : void;
 
-	/**
-	 * The content of the request. When the request method is HttpRequestMethod.GET this is appended to the URL, otherwise
-	 * it is sent in the request body.
-	 */
-	function get content() : *;
-	function set content(value:*) : void;
+   /**
+    * The content of the request. When the request method is HttpRequestMethod.GET this is appended to the URL, otherwise
+    * it is sent in the request body.
+    */
+   function get content() : *;
+   function set content(value:*) : void;
 
-	function get gzipContent() : Boolean;
-	function set gzipContent(value:Boolean) : void;
+   function get gzipContent() : Boolean;
+   function set gzipContent(value:Boolean) : void;
 
-	function get setNoCacheHeaders() : Boolean;
-	function set setNoCacheHeaders(value:Boolean) : void;
+   function get setNoCacheHeaders() : Boolean;
+   function set setNoCacheHeaders(value:Boolean) : void;
 }
 
 }

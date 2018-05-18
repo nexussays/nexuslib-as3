@@ -16,24 +16,24 @@ import flash.net.URLRequest;
  */
 public interface IMessengerTransport extends IDisposable
 {
-	function get id():int;
+   function get id():int;
 
-	function initialize():void;
-	function load(request:URLRequest):void;
-	function close():void;
+   function initialize():void;
+   function load(request:URLRequest):void;
+   function close():void;
 
-	function get supportsRetry():Boolean;
+   function get supportsRetry():Boolean;
 
-	function get httpStatus():int;
-	function get statusMessage():String;
+   function get httpStatus():int;
+   function get statusMessage():String;
 
-	function get bytesLoaded():int;
-	function get bytesTotal():int;
+   function get bytesLoaded():int;
+   function get bytesTotal():int;
 
-	function get data():*;
+   function get data():*;
 
-	function get destinationApplicationDomain():ApplicationDomainType;
-	function set destinationApplicationDomain(value:ApplicationDomainType):void;
+   function get destinationApplicationDomain():ApplicationDomainType;
+   function set destinationApplicationDomain(value:ApplicationDomainType):void;
 }
 
 }

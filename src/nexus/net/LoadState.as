@@ -12,42 +12,42 @@ import nexus.Enum;
  */
 public class LoadState extends Enum
 {
-	{initEnum(LoadState);}
+   {initEnum(LoadState);}
 
-	/**
-	 * The load has been setup but has not started
-	 */
-	public static const Pending : LoadState = new LoadState();
+   /**
+    * The load has been setup but has not started
+    */
+   public static const Pending : LoadState = new LoadState();
 
-	/**
-	 * The load is in progress
-	 */
-	public static const Loading : LoadState = new LoadState();
+   /**
+    * The load is in progress
+    */
+   public static const Loading : LoadState = new LoadState();
 
-	/**
-	 * The load has completed successfully
-	 */
-	public static const Success : LoadState = new LoadState();
+   /**
+    * The load has completed successfully
+    */
+   public static const Success : LoadState = new LoadState();
 
-	/**
-	 * The load has completed unsuccessfully
-	 */
-	public static const Failure : LoadState = new LoadState();
+   /**
+    * The load has completed unsuccessfully
+    */
+   public static const Failure : LoadState = new LoadState();
 
-	public static function get All():EnumSet
-	{
-		return Enum.valuesAsEnumSet(LoadState);
-	}
+   public static function get All():EnumSet
+   {
+      return Enum.valuesAsEnumSet(LoadState);
+   }
 
-	public static function fromString(value:*):LoadState
-	{
-		var enum : LoadState = Enum.fromString(LoadState, value, false) as LoadState;
-		if(enum == null)
-		{
-			throw new ArgumentError("Cannot convert \"" + value + "\" into a LoadState");
-		}
-		return enum;
-	}
+   public static function fromString(value:*):LoadState
+   {
+      var enum : LoadState = Enum.fromString(LoadState, value, false) as LoadState;
+      if(enum == null)
+      {
+         throw new ArgumentError("Cannot convert \"" + value + "\" into a LoadState");
+      }
+      return enum;
+   }
 }
 
 }

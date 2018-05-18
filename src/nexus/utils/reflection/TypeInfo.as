@@ -158,7 +158,7 @@ public final class TypeInfo extends AbstractMetadataRecipient
     */
    public function sortMembersByDeclaringType():void
    {
-      //nexus: really need to figure out a way to streamline this method
+      //note: really need to figure out a way to streamline this method
       var superTypes : Vector.<TypeInfo> = new Vector.<TypeInfo>();
       for each(var superClass : Class in m_extendedClasses)
       {

@@ -39,7 +39,7 @@ public class Parse
     */
    public static function integer(source:Object, defaultValue:int, radix:int = 10):int
    {
-      //nexus: parse int returns a number which we use to check for NaN before setting to default value, if
+      //note: parse int returns a number which we use to check for NaN before setting to default value, if
       //result was of type int than NaN would result in 0 and we wouldn't be able to check and assign default value
       var result:Number = parseInt(source + "", radix);
       return isNaN(result) || !isFinite(result) ? defaultValue : result;
