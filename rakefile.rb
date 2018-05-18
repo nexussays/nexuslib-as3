@@ -25,8 +25,8 @@ CLEAN.add(nexuslib)
 # create task to package into a zip file
 zip = ASRake::Package.new "#{nexuslib.output_dir}/#{project_name}-#{version}.zip"
 zip.files = {
-	"license.txt" => "LICENSE",
-	"#{project_name}-#{version}.swc" => nexuslib.output
+   "license.txt" => "LICENSE",
+   "#{project_name}-#{version}.swc" => nexuslib.output
 }
 CLOBBER.add(zip.output)
 
@@ -41,7 +41,7 @@ CLEAN.add(asdoc)
 #
 
 task :default do
-	system "rake --tasks"
+   system "rake --tasks"
 end
 
 desc "Build #{project_name}"
@@ -57,25 +57,25 @@ task :doc => asdoc
 
 desc "Deploy zip & docs to S3"
 task :deploy, [:key, :secret_key] => [:package, :doc] do |t, args|
-	s3 = RightAws::S3.new(args[:key], args[:secret_key])
+   s3 = RightAws::S3.new(args[:key], args[:secret_key])
 
-	# documentation
-	docs_bucket = s3.bucket('docs.nexussays.com')
-	#docs_bucket.delete_folder('nexuslib')
-	Dir.chdir(asdoc.output) do
-		Dir.glob("**/*") do |file|
-			if !File.directory?(file)
-				key = File.join(project_name, file)
-				puts "#{docs_bucket.name}/#{key}"
-				# TODO: Only put if source is newer than destination
-				docs_bucket.put(key, File.open(file), {}, 'public-read')
-			end
-		end
-	end
+   # documentation
+   docs_bucket = s3.bucket('docs.nexussays.com')
+   #docs_bucket.delete_folder('nexuslib')
+   Dir.chdir(asdoc.output) do
+      Dir.glob("**/*") do |file|
+         if !File.directory?(file)
+            key = File.join(project_name, file)
+            puts "#{docs_bucket.name}/#{key}"
+            # TODO: Only put if source is newer than destination
+            docs_bucket.put(key, File.open(file), {}, 'public-read')
+         end
+      end
+   end
 
-	# zip
-	pkg_bucket = s3.bucket('public.nexussays.com')
-	key = File.join("code", project_name, zip.output_file)
-	puts "#{pkg_bucket.name}/#{key}"
-	pkg_bucket.put(key, File.open(zip.output), {}, 'public-read')
+   # zip
+   pkg_bucket = s3.bucket('public.nexussays.com')
+   key = File.join("code", project_name, zip.output_file)
+   puts "#{pkg_bucket.name}/#{key}"
+   pkg_bucket.put(key, File.open(zip.output), {}, 'public-read')
 end

@@ -18,7 +18,7 @@ public class Parse
    //--------------------------------------
    //   PUBLIC CLASS METHODS
    //--------------------------------------
-   
+
    /**
     * Parse the given value as a Number. If the parsed Number is NaN or Infinity then defaultValue is returned instead.
     * @param   source
@@ -30,7 +30,7 @@ public class Parse
       var result:Number = parseFloat(source + "");
       return isNaN(result) || !isFinite(result) ? defaultValue : result;
    }
-   
+
    /**
     * Parse the given value as an int. If the parsed value is NaN or Infinity then defaultValue is returned instead.
     * @param   source
@@ -39,12 +39,12 @@ public class Parse
     */
    public static function integer(source:Object, defaultValue:int, radix:int = 10):int
    {
-      //malachi: parse int returns a number which we use to check for NaN before setting to default value, if
+      //nexus: parse int returns a number which we use to check for NaN before setting to default value, if
       //result was of type int than NaN would result in 0 and we wouldn't be able to check and assign default value
       var result:Number = parseInt(source + "", radix);
       return isNaN(result) || !isFinite(result) ? defaultValue : result;
    }
-   
+
    /**
     * Parses a string value, the default value is used if the source is null
     * @return
@@ -53,7 +53,7 @@ public class Parse
    {
       return(source !== null ? String(source + "") : defaultValue);
    }
-   
+
    /**
     * Parses the given value as a Point, assuming a string input in the format "x,y"
     * @param   source
@@ -66,7 +66,7 @@ public class Parse
       var array:Array = String(source + "").split(",");
       return new Point(Parse.number(array[0], defaultX), Parse.number(array[1], defaultY));
    }
-   
+
    /**
     * Case-insensitive. If defaultValue is false, this converts "true", "t", "1", "yes", and "y" to a true boolean and all
     * other values return false. If defaultValue is true, this converts "false", "f", "0", "no", and "n" to a false boolean
@@ -79,7 +79,7 @@ public class Parse
    {
       var match:String = alsoMatch != null ? (alsoMatch + "").toLowerCase() : null;
       var check:String = (source + "").toLowerCase();
-      
+
       if(defaultValue)
       {
          switch(check)
@@ -95,7 +95,7 @@ public class Parse
                return true;
          }
       }
-      
+
       switch(check)
       {
          case "true":
@@ -109,14 +109,14 @@ public class Parse
             return false;
       }
    }
-   
+
    /*
       public static function enum(source:*, enumClass:Class, caseSensitive:Boolean=false):Enum
       {
       return Enum.fromString(enumClass, value, caseSensitive);
       }
     */
-   
+
    /**
     * Parses the given value as a Dictionary using the provided delimiters to split entries and key/value pairs. If
     * there are errors in the parsing or the source object cannot be parsed correctly, null is returned
@@ -136,7 +136,7 @@ public class Parse
       var result:Dictionary = new Dictionary();
       //if nothing can be parsed from the source, then we return null instead of an empty dictionary
       var valuesFound:Boolean = false;
-      
+
       var entries:Array = (source + "").split(entryDelimiter);
       for(var x:int = 0; x < entries.length; ++x)
       {
@@ -148,10 +148,10 @@ public class Parse
             valuesFound = true;
          }
       }
-      
+
       return valuesFound ? result : null;
    }
-   
+
    /**
     * Parses a string in ISO 8601 format and returns a Date object with the corresponding date
     * @param   a_string   a string formatted in a valid W3C subset of ISO 8601
@@ -163,30 +163,30 @@ public class Parse
       {
          return defaultValue;
       }
-      
+
       var regexp:RegExp = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?((?:([+-])(\d{2})(?::(\d{2}))?)|Z)?$/;
       var match:Array = a_string.match(regexp);
-      
+
       //trace(a_string);
-      
+
       if(match == null)
       {
          return new Date(0, 0);
       }
-      
+
       //remove full-match from resulting array
       match.shift();
-      
+
       //trace(match);
-      
+
       //months are 0-based in the Date constructor for some reason
       if(match[1])
       {
          match[1]--;
       }
-      
+
       var result:Date = new Date(match[0] || 1970, match[1] || 0, match[2] || 1, match[3] || 0, match[4] || 0, match[5] || 0, match[6] || 0);
-      
+
       //account for timezone
       var timezoneOffset:int = 0;
       //if there was something provided for timezone
@@ -205,14 +205,14 @@ public class Parse
          //cancel out this system's timezone offset
          timezoneOffset -= result.getTimezoneOffset();
       }
-      
+
       //BUG: This causes a problem the the US during the spring time change when clocks advance an hour. That hour of time has
       //not actually elapsed, so any time-related functions (eg, time elapsed to change state of an object) will fail
       if(timezoneOffset != 0)
       {
          result.setTime(result.getTime() + (timezoneOffset * 60 * 1000));
       }
-      
+
       //trace(DateUtil.toISOString(result));
       return result;
    }

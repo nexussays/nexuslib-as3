@@ -23,169 +23,169 @@ import flash.utils.*;
  */
 public class SoundTransport extends AbstractTransport
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
 
-	//--------------------------------------
-	//	PRIVATE VARIABLES
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE VARIABLES
+   //--------------------------------------
 
-	private var m_sound : Sound;
+   private var m_sound : Sound;
 
-	private var m_isInitialized : Boolean;
-	private var m_isDisposed : Boolean;
+   private var m_isInitialized : Boolean;
+   private var m_isDisposed : Boolean;
 
-	private var m_bufferTime : int;
+   private var m_bufferTime : int;
 
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
 
-	public function SoundTransport(onComplete:Function, onProgress:Function, onError:Function, buffer:int=4000)
-	{
-		super(onComplete, onProgress, onError);
+   public function SoundTransport(onComplete:Function, onProgress:Function, onError:Function, buffer:int=4000)
+   {
+      super(onComplete, onProgress, onError);
 
-		m_sound = new Sound();
+      m_sound = new Sound();
 
-		m_isInitialized = false;
-		m_isDisposed = false;
+      m_isInitialized = false;
+      m_isDisposed = false;
 
-		m_bufferTime = buffer;
+      m_bufferTime = buffer;
 
-		m_supportsRetry = false;
-	}
+      m_supportsRetry = false;
+   }
 
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
 
-	override public function get data():* { return m_sound; }
+   override public function get data():* { return m_sound; }
 
-	public function get bufferTime():int { return m_bufferTime; }
-	public function set bufferTime(value:int):void
-	{
-		m_bufferTime = value;
-	}
+   public function get bufferTime():int { return m_bufferTime; }
+   public function set bufferTime(value:int):void
+   {
+      m_bufferTime = value;
+   }
 
-	//--------------------------------------
-	//	PUBLIC METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PUBLIC METHODS
+   //--------------------------------------
 
-	override public function initialize():void
-	{
-		checkDisposed();
+   override public function initialize():void
+   {
+      checkDisposed();
 
-		if(!m_isInitialized)
-		{
-			//Dispatched when a load operation starts.
-			m_sound.addEventListener(Event.OPEN, loaderOpenHandler);
+      if(!m_isInitialized)
+      {
+         //Dispatched when a load operation starts.
+         m_sound.addEventListener(Event.OPEN, loaderOpenHandler);
 
-			//Dispatched when data has loaded successfully.
-			m_sound.addEventListener(Event.COMPLETE, loaderCompleteHandler);
+         //Dispatched when data has loaded successfully.
+         m_sound.addEventListener(Event.COMPLETE, loaderCompleteHandler);
 
-			//Dispatched when data is received as a load operation progresses.
-			m_sound.addEventListener(ProgressEvent.PROGRESS, loaderProgressHandler);
+         //Dispatched when data is received as a load operation progresses.
+         m_sound.addEventListener(ProgressEvent.PROGRESS, loaderProgressHandler);
 
-			//Dispatched when an input/output error occurs that causes a load operation to fail.
-			m_sound.addEventListener(IOErrorEvent.IO_ERROR, loaderIOErrorHandler);
+         //Dispatched when an input/output error occurs that causes a load operation to fail.
+         m_sound.addEventListener(IOErrorEvent.IO_ERROR, loaderIOErrorHandler);
 
-			m_isInitialized = true;
-		}
-	}
+         m_isInitialized = true;
+      }
+   }
 
-	override public function load(request:URLRequest):void
-	{
-		checkDisposed();
+   override public function load(request:URLRequest):void
+   {
+      checkDisposed();
 
-		if(!m_isInitialized)
-		{
-			throw new IllegalOperationError("Cannot load SoundTransport before initialization");
-		}
+      if(!m_isInitialized)
+      {
+         throw new IllegalOperationError("Cannot load SoundTransport before initialization");
+      }
 
-		//TODO: policy file should be provided as an argument, not hardcoded
-		m_sound.load(request, new SoundLoaderContext(m_bufferTime, false));
-	}
+      //TODO: policy file should be provided as an argument, not hardcoded
+      m_sound.load(request, new SoundLoaderContext(m_bufferTime, false));
+   }
 
-	override public function close():void
-	{
-		checkDisposed();
+   override public function close():void
+   {
+      checkDisposed();
 
-		//FIXME: Need to be able to cancel
-		//malachi: don't close because the sound is essentially dead after that
-		//close will throw if there is no load in progress
-		if(m_bytesLoaded < m_bytesTotal)
-		{
-			//m_sound.close();
-		}
+      //FIXME: Need to be able to cancel
+      //nexus: don't close because the sound is essentially dead after that
+      //close will throw if there is no load in progress
+      if(m_bytesLoaded < m_bytesTotal)
+      {
+         //m_sound.close();
+      }
 
-		m_isInitialized = false;
+      m_isInitialized = false;
 
-		m_sound.removeEventListener(Event.OPEN, loaderOpenHandler);
-		m_sound.removeEventListener(Event.COMPLETE, loaderCompleteHandler);
-		m_sound.removeEventListener(ProgressEvent.PROGRESS, loaderProgressHandler);
-		m_sound.removeEventListener(IOErrorEvent.IO_ERROR, loaderIOErrorHandler);
-	}
+      m_sound.removeEventListener(Event.OPEN, loaderOpenHandler);
+      m_sound.removeEventListener(Event.COMPLETE, loaderCompleteHandler);
+      m_sound.removeEventListener(ProgressEvent.PROGRESS, loaderProgressHandler);
+      m_sound.removeEventListener(IOErrorEvent.IO_ERROR, loaderIOErrorHandler);
+   }
 
-	override public function dispose():void
-	{
-		if(!m_isDisposed)
-		{
-			//calls close()
-			super.dispose();
+   override public function dispose():void
+   {
+      if(!m_isDisposed)
+      {
+         //calls close()
+         super.dispose();
 
-			m_sound = null;
+         m_sound = null;
 
-			m_isDisposed = true;
-		}
-	}
+         m_isDisposed = true;
+      }
+   }
 
-	//--------------------------------------
-	//	EVENT HANDLERS
-	//--------------------------------------
+   //--------------------------------------
+   //   EVENT HANDLERS
+   //--------------------------------------
 
-	private function loaderProgressHandler(e:ProgressEvent):void
-	{
-		m_bytesLoaded = e.bytesLoaded;
-		m_bytesTotal = e.bytesTotal;
-		m_onProgress();
-	}
+   private function loaderProgressHandler(e:ProgressEvent):void
+   {
+      m_bytesLoaded = e.bytesLoaded;
+      m_bytesTotal = e.bytesTotal;
+      m_onProgress();
+   }
 
-	private function loaderOpenHandler(e:Event):void
-	{
-		m_statusMessage = e.type;
-	}
+   private function loaderOpenHandler(e:Event):void
+   {
+      m_statusMessage = e.type;
+   }
 
-	private function loaderIOErrorHandler(e:IOErrorEvent):void
-	{
-		m_statusMessage = e.text;
-		m_onError();
-	}
+   private function loaderIOErrorHandler(e:IOErrorEvent):void
+   {
+      m_statusMessage = e.text;
+      m_onError();
+   }
 
-	private function loaderCompleteHandler(e:Event):void
-	{
-		m_statusMessage = e.type;
-		m_bytesLoaded = m_sound.bytesLoaded;
-		m_bytesTotal = m_sound.bytesTotal;
-		m_onComplete();
-	}
+   private function loaderCompleteHandler(e:Event):void
+   {
+      m_statusMessage = e.type;
+      m_bytesLoaded = m_sound.bytesLoaded;
+      m_bytesTotal = m_sound.bytesTotal;
+      m_onComplete();
+   }
 
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
 
-	private function checkDisposed():void
-	{
-		if(m_isDisposed)
-		{
-			throw new ObjectDisposedError("SoundTransport");
-		}
-	}
+   private function checkDisposed():void
+   {
+      if(m_isDisposed)
+      {
+         throw new ObjectDisposedError("SoundTransport");
+      }
+   }
 
-	private final function trace(...params): void
-	{
-		Debug.debug(SoundTransport, params);
-	}
+   private final function trace(...params): void
+   {
+      Debug.debug(SoundTransport, params);
+   }
 }
 
 }

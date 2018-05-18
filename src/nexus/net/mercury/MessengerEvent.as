@@ -17,79 +17,79 @@ import flash.utils.*;
  */
 public class MessengerEvent extends Event
 {
-	//--------------------------------------
-	//	CLASS CONSTANTS
-	//--------------------------------------
+   //--------------------------------------
+   //   CLASS CONSTANTS
+   //--------------------------------------
 
-	public static const LOAD_PROGRESS : String = "dna.net.mercury.LOAD_PROGRESS";
-	public static const LOAD_ERROR : String = "dna.net.mercury.LOAD_ERROR";
-	public static const LOAD_COMPLETE : String = "dna.net.mercury.LOAD_COMPLETE";
+   public static const LOAD_PROGRESS : String = " nexus.net.mercury.LOAD_PROGRESS";
+   public static const LOAD_ERROR : String = " nexus.net.mercury.LOAD_ERROR";
+   public static const LOAD_COMPLETE : String = " nexus.net.mercury.LOAD_COMPLETE";
 
-	//--------------------------------------
-	//	PRIVATE VARIABLES
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE VARIABLES
+   //--------------------------------------
 
-	private var m_message : String;
+   private var m_message : String;
 
-	//--------------------------------------
-	//	CONSTRUCTOR
-	//--------------------------------------
+   //--------------------------------------
+   //   CONSTRUCTOR
+   //--------------------------------------
 
-	public function MessengerEvent(type:String, messageOverride:String=null)
-	{
-		super(type, false, false);
+   public function MessengerEvent(type:String, messageOverride:String=null)
+   {
+      super(type, false, false);
 
-		//if(!(super.target is Messenger))
-		//{
-			//throw new Error("Error dispatching MessengerEvent, target is not an instance of dna.net.mercury.Messenger: " + super.target);
-		//}
+      //if(!(super.target is Messenger))
+      //{
+         //throw new Error("Error dispatching MessengerEvent, target is not an instance of  nexus.net.mercury.Messenger: " + super.target);
+      //}
 
-		switch(type)
-		{
-			case LOAD_PROGRESS:
-			case LOAD_ERROR:
-			case LOAD_COMPLETE:
-				//all good
-				break;
-			default:
-				throw new Error("Error dispatching MessengerEvent, type is invalid value \"" + type + "\"");
-		}
+      switch(type)
+      {
+         case LOAD_PROGRESS:
+         case LOAD_ERROR:
+         case LOAD_COMPLETE:
+            //all good
+            break;
+         default:
+            throw new Error("Error dispatching MessengerEvent, type is invalid value \"" + type + "\"");
+      }
 
-		m_message = messageOverride;
-	}
+      m_message = messageOverride;
+   }
 
-	//--------------------------------------
-	//	GETTER/SETTERS
-	//--------------------------------------
+   //--------------------------------------
+   //   GETTER/SETTERS
+   //--------------------------------------
 
-	public function get messenger():Messenger { return Messenger(super.target); }
+   public function get messenger():Messenger { return Messenger(super.target); }
 
-	//--------------------------------------
-	//	PUBLIC METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PUBLIC METHODS
+   //--------------------------------------
 
-	public override function clone():Event
-	{
-		return new MessengerEvent(type);
-	}
+   public override function clone():Event
+   {
+      return new MessengerEvent(type);
+   }
 
-	public override function toString():String
-	{
-		return "[MessengerEvent:HTTP" + messenger.httpStatus + ", " + (m_message || messenger.statusMessage) + "]";
-	}
+   public override function toString():String
+   {
+      return "[MessengerEvent:HTTP" + messenger.httpStatus + ", " + (m_message || messenger.statusMessage) + "]";
+   }
 
-	//--------------------------------------
-	//	EVENT HANDLERS
-	//--------------------------------------
+   //--------------------------------------
+   //   EVENT HANDLERS
+   //--------------------------------------
 
-	//--------------------------------------
-	//	PRIVATE & PROTECTED INSTANCE METHODS
-	//--------------------------------------
+   //--------------------------------------
+   //   PRIVATE & PROTECTED INSTANCE METHODS
+   //--------------------------------------
 
-	private final function trace(...params): void
-	{
-		Debug.debug(MessengerEvent, params);
-	}
+   private final function trace(...params): void
+   {
+      Debug.debug(MessengerEvent, params);
+   }
 }
 
 }
